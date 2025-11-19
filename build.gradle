@@ -18,6 +18,11 @@ repositories {
 	mavenCentral()
 }
 
+ext {
+	set('springCloudVersion', "2025.0.0")
+	set('testContainersVersion', "2.0.0")
+}
+
 dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
@@ -41,6 +46,33 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 }
 
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+		mavenBom "org.testcontainers:testcontainers-bom:${testContainersVersion}"
+	}
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+bootBuildImage {
+	imageName = "${project.name}"
+	environment = ["BP_JVM_VERSION" : "21.*"]
+
+	if (System.getProperty( "os.arch" ).toLowerCase().startsWith('aarch')) {
+		builder = "paketobuildpacks/builder-jammy-buildpackless-tiny"
+		buildpacks = [ "docker.io/paketobuildpacks/java" ]
+	} else {
+		builder = "docker.io/paketobuildpacks/builder-jammy-tiny"
+	}
+
+	docker {
+		publishRegistry {
+			username = project.findProperty("registryUsername")
+			password = project.findProperty("registryToken")
+			url = project.findProperty("registryUrl")
+		}
+	}
 }
