@@ -12,6 +12,10 @@ public class OpdService {
         this.opdRepository = opdRepository;
     }
 
+    public Iterable<Opd> findAll() {
+        return opdRepository.findAll();
+    }
+
     public Opd detailOpdByKodeOpd(String kodeOpd) {
         return opdRepository.findByKodeOpd(kodeOpd)
                 .orElseThrow(() -> new OpdNotFoundException(kodeOpd));

@@ -31,6 +31,14 @@ public class OpdController {
     }
 
     /**
+     * Ambil semua data opd
+     */
+    @GetMapping("detail/findall")
+    public Iterable<Opd> findAll() {
+        return opdService.findAll();
+    }
+
+    /**
      * Ubah data opd berdasarkan kode opd
      * @param kodeOpd
      */

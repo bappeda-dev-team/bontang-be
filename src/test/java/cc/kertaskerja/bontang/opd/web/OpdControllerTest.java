@@ -37,6 +37,21 @@ public class OpdControllerTest {
     }
 
     @Test
+    void findAll_returnsAllOpdFromService() {
+        Iterable<Opd> opdList = java.util.List.of(
+                new Opd(1L, "OPD-001", "BAPPEDA", Instant.now(), Instant.now()),
+                new Opd(2L, "OPD-002", "BPKAD", Instant.now(), Instant.now())
+        );
+
+        when(opdService.findAll()).thenReturn(opdList);
+
+        Iterable<Opd> result = opdController.findAll();
+
+        assertEquals(opdList, result);
+        verify(opdService).findAll();
+    }
+
+    @Test
     void getByKodeOpd_returnsOpdFromService() {
         String kodeOpd = "OPD-001";
         Opd opd = new Opd(1L, kodeOpd, "BAPPEDA", Instant.now(), Instant.now());

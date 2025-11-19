@@ -9,6 +9,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,6 +29,20 @@ public class OpdServiceTest {
     @BeforeEach
     void setUp() {
         opdService = new OpdService(opdRepository);
+    }
+
+    @Test
+    void findAll_returnsAllOpd() {
+        Opd opd1 = new Opd(1L, "OPD-001", "BAPPEDA", Instant.now(), Instant.now());
+        Opd opd2 = new Opd(2L, "OPD-002", "BPKAD", Instant.now(), Instant.now());
+        List<Opd> opdList = Arrays.asList(opd1, opd2);
+
+        when(opdRepository.findAll()).thenReturn(opdList);
+
+        Iterable<Opd> result = opdService.findAll();
+
+        assertEquals(opdList, result);
+        verify(opdRepository).findAll();
     }
 
     @Test
