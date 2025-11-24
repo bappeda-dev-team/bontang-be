@@ -1,7 +1,6 @@
 package cc.kertaskerja.bontang.opd.web;
 
 import cc.kertaskerja.bontang.opd.domain.exception.OpdAlreadyExistException;
-import cc.kertaskerja.bontang.opd.domain.exception.OpdDeleteForbiddenException;
 import cc.kertaskerja.bontang.opd.domain.exception.OpdNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
@@ -24,12 +23,6 @@ public class OpdControllerAdvice {
     @ExceptionHandler(OpdAlreadyExistException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     String opdAlreadyExistException(OpdAlreadyExistException ex) {
-        return ex.getMessage();
-    }
-
-    @ExceptionHandler(OpdDeleteForbiddenException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    String opdDeleteForbiddenException(OpdDeleteForbiddenException ex) {
         return ex.getMessage();
     }
 
