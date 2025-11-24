@@ -3,6 +3,7 @@ package cc.kertaskerja.bontang.opd.domain;
 import org.springframework.data.jdbc.repository.query.Modifying;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,5 +21,5 @@ public interface OpdRepository extends CrudRepository<Opd, Long> {
     @Modifying
     @Transactional
     @Query("DELETE FROM opd WHERE kode_opd = :kodeOpd")
-    void deleteByKodeOpd(@NonNull String kodeOpd);
+    void deleteByKodeOpd(@NonNull @Param("kodeOpd") String kodeOpd);
 }

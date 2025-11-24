@@ -2,9 +2,6 @@ package cc.kertaskerja.bontang.kegiatan.web;
 
 import cc.kertaskerja.bontang.kegiatan.domain.Kegiatan;
 import cc.kertaskerja.bontang.kegiatan.domain.KegiatanService;
-import cc.kertaskerja.bontang.opd.domain.Opd;
-import cc.kertaskerja.bontang.opd.domain.OpdService;
-import cc.kertaskerja.bontang.opd.web.OpdRequest;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

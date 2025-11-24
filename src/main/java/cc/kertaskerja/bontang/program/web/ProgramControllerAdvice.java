@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import cc.kertaskerja.bontang.program.domain.exception.ProgramAlreadyExistException;
+import cc.kertaskerja.bontang.program.domain.exception.ProgramDeleteForbiddenException;
 import cc.kertaskerja.bontang.program.domain.exception.ProgramNotFoundException;
 
 @RestControllerAdvice
@@ -24,6 +25,12 @@ public class ProgramControllerAdvice {
     @ExceptionHandler(ProgramAlreadyExistException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     String programAlreadyExistException(ProgramAlreadyExistException ex) {
+        return ex.getMessage();
+    }
+
+    @ExceptionHandler(ProgramDeleteForbiddenException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    String programDeleteForbiddenException(ProgramDeleteForbiddenException ex) {
         return ex.getMessage();
     }
 

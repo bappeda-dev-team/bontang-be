@@ -2,6 +2,7 @@ package cc.kertaskerja.bontang.opd.web;
 
 import cc.kertaskerja.bontang.opd.domain.Opd;
 import cc.kertaskerja.bontang.opd.domain.OpdService;
+import cc.kertaskerja.bontang.opd.domain.exception.OpdDeleteForbiddenException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +18,7 @@ import java.net.URI;
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -124,6 +126,16 @@ public class OpdControllerTest {
 
         opdController.delete(kodeOpd);
 
+        verify(opdService).hapusOpd(kodeOpd);
+    }
+
+    @Test
+    void delete_throwsDeleteForbidden_whenServiceMenolak() {
+        String kodeOpd = "OPD-001";
+        OpdDeleteForbiddenException ex = new OpdDeleteForbiddenException(kodeOpd);
+        org.mockito.Mockito.doThrow(ex).when(opdService).hapusOpd(kodeOpd);
+
+        assertThrows(OpdDeleteForbiddenException.class, () -> opdController.delete(kodeOpd));
         verify(opdService).hapusOpd(kodeOpd);
     }
 }

@@ -2,14 +2,18 @@ package cc.kertaskerja.bontang.program.domain;
 
 import org.springframework.stereotype.Service;
 
+import cc.kertaskerja.bontang.kegiatan.domain.KegiatanRepository;
 import cc.kertaskerja.bontang.program.domain.exception.ProgramNotFoundException;
+import cc.kertaskerja.bontang.program.domain.exception.ProgramDeleteForbiddenException;
 
 @Service
 public class ProgramService {
     private ProgramRepository programRepository;
+    private KegiatanRepository kegiatanRepository;
 
-    public ProgramService(ProgramRepository programRepository) {
+    public ProgramService(ProgramRepository programRepository, KegiatanRepository kegiatanRepository) {
         this.programRepository = programRepository;
+        this.kegiatanRepository = kegiatanRepository;
     }
 
     public Iterable<Program> findAll() {
@@ -37,6 +41,11 @@ public class ProgramService {
     public void hapusProgram(String kodeProgram) {
         if (!programRepository.existsByKodeProgram(kodeProgram)) {
             throw new ProgramNotFoundException(kodeProgram);
+        }
+
+        boolean programDigunakanPadaKegiatan = kegiatanRepository.existsByKodeProgram(kodeProgram);
+        if (programDigunakanPadaKegiatan) {
+            throw new ProgramDeleteForbiddenException(kodeProgram);
         }
 
         programRepository.deleteByKodeProgram(kodeProgram);
