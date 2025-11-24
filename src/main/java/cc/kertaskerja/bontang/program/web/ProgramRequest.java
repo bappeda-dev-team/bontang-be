@@ -14,10 +14,6 @@ public record ProgramRequest(
 
         @NotNull(message = "Nama Program tidak boleh kosong")
         @NotEmpty(message = "Nama Program tidak boleh kosong")
-        String namaProgram,
-
-        @NotNull(message = "Kode Opd tidak boleh kosong")
-        @NotEmpty(message = "Kode Opd tidak boleh kosong")
-        String kodeOpd
+        String namaProgram
 ) {
 }

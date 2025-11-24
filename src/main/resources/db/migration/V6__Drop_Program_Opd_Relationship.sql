@@ -1,0 +1,2 @@
+ALTER TABLE program DROP CONSTRAINT IF EXISTS fk_program_opd;
+ALTER TABLE program DROP COLUMN IF EXISTS kode_opd;

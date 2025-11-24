@@ -15,8 +15,6 @@ public interface ProgramRepository extends CrudRepository<Program, Long> {
 
     boolean existsByKodeProgram(@NonNull String kodeProgram);
 
-    boolean existsByKodeOpd(@NonNull String kodeOpd);
-
     @NonNull
     Optional<Program> findByKodeProgram(@NonNull String kodeProgram);
 

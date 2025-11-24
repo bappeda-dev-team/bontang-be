@@ -17,9 +17,6 @@ public record Program(
         @Column("nama_program")
         String namaProgram,
 
-        @Column("kode_opd")
-        String kodeOpd,
-
         @CreatedDate
         Instant createdDate,
 
@@ -28,14 +25,12 @@ public record Program(
 ) {
     public static Program of (
             String kodeProgram,
-            String namaProgram,
-            String kodeOpd
+            String namaProgram
     ) {
         return new Program(
                 null,
                 kodeProgram,
                 namaProgram,
-                kodeOpd,
                 null,
                 null
         );

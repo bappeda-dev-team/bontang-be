@@ -59,7 +59,6 @@ public class ProgramController {
                 existingProgram.id(),
                 request.kodeProgram(),
                 request.namaProgram(),
-                request.kodeOpd(),
                 existingProgram.createdDate(),
                 null
         );
@@ -75,8 +74,7 @@ public class ProgramController {
     public ResponseEntity<Program> post(@Valid @RequestBody ProgramRequest request) {
         Program program = Program.of(
                 request.kodeProgram(),
-                request.namaProgram(),
-                request.kodeOpd()
+                request.namaProgram()
         );
         Program saved = programService.tambahProgram(program);
         URI location = ServletUriComponentsBuilder
