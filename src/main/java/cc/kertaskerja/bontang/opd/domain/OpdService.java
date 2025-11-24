@@ -1,6 +1,5 @@
 package cc.kertaskerja.bontang.opd.domain;
 
-import cc.kertaskerja.bontang.kegiatan.domain.KegiatanRepository;
 import cc.kertaskerja.bontang.opd.domain.exception.OpdAlreadyExistException;
 import cc.kertaskerja.bontang.opd.domain.exception.OpdDeleteForbiddenException;
 import cc.kertaskerja.bontang.opd.domain.exception.OpdNotFoundException;
@@ -11,12 +10,10 @@ import org.springframework.stereotype.Service;
 public class OpdService {
     private OpdRepository opdRepository;
     private ProgramRepository programRepository;
-    private KegiatanRepository kegiatanRepository;
 
-    public OpdService(OpdRepository opdRepository, ProgramRepository programRepository, KegiatanRepository kegiatanRepository) {
+    public OpdService(OpdRepository opdRepository, ProgramRepository programRepository) {
         this.opdRepository = opdRepository;
         this.programRepository = programRepository;
-        this.kegiatanRepository = kegiatanRepository;
     }
 
     public Iterable<Opd> findAll() {
@@ -52,11 +49,6 @@ public class OpdService {
 
         boolean opdDigunakanPadaProgram = programRepository.existsByKodeOpd(kodeOpd);
         if (opdDigunakanPadaProgram) {
-            throw new OpdDeleteForbiddenException(kodeOpd);
-        }
-
-        boolean opdDigunakanPadaKegiatan = kegiatanRepository.existsByKodeOpd(kodeOpd);
-        if (opdDigunakanPadaKegiatan) {
             throw new OpdDeleteForbiddenException(kodeOpd);
         }
 

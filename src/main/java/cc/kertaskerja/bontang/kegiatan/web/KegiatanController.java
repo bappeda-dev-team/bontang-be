@@ -50,7 +50,6 @@ public class KegiatanController {
                 existingKegiatan.id(),
                 request.kodeKegiatan(),
                 request.namaKegiatan(),
-                request.kodeOpd(),
                 request.kodeProgram(),
                 existingKegiatan.createdDate(),
                 null
@@ -68,7 +67,6 @@ public class KegiatanController {
         Kegiatan kegiatan = Kegiatan.of(
                 request.kodeKegiatan(),
                 request.namaKegiatan(),
-                request.kodeOpd(),
                 request.kodeProgram()
         );
         Kegiatan saved = kegiatanService.tambahKegiatan(kegiatan);

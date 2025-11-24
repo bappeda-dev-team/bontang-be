@@ -17,9 +17,6 @@ public record Kegiatan(
         @Column("nama_kegiatan")
         String namaKegiatan,
 
-        @Column("kode_opd")
-        String kodeOpd,
-
         @Column("kode_program")
         String kodeProgram,
 
@@ -32,14 +29,12 @@ public record Kegiatan(
     public static Kegiatan of (
             String kodeKegiatan,
             String namaKegiatan,
-            String kodeOpd,
             String kodeProgram
     ) {
         return new Kegiatan(
                 null,
                 kodeKegiatan,
                 namaKegiatan,
-                kodeOpd,
                 kodeProgram,
                 null,
                 null
