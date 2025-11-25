@@ -1,4 +1,4 @@
-﻿package cc.kertaskerja.bontang.kegiatan.web;
+package cc.kertaskerja.bontang.kegiatan.web;
 
 import cc.kertaskerja.bontang.kegiatan.domain.Kegiatan;
 import cc.kertaskerja.bontang.kegiatan.domain.KegiatanService;

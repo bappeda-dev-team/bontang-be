@@ -1,4 +1,4 @@
-﻿package cc.kertaskerja.bontang.kegiatan.domain;
+package cc.kertaskerja.bontang.kegiatan.domain;
 
 import cc.kertaskerja.bontang.kegiatan.domain.exception.KegiatanAlreadyExistException;
 import cc.kertaskerja.bontang.kegiatan.domain.exception.KegiatanNotFoundException;
