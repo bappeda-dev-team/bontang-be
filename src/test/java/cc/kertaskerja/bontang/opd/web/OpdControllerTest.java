@@ -1,5 +1,9 @@
 package cc.kertaskerja.bontang.opd.web;
 
+import cc.kertaskerja.bontang.bidangurusan.domain.BidangUrusan;
+import cc.kertaskerja.bontang.bidangurusan.domain.BidangUrusanDto;
+import cc.kertaskerja.bontang.bidangurusan.domain.BidangUrusanService;
+import cc.kertaskerja.bontang.bidangurusan.web.BidangUrusanRequest;
 import cc.kertaskerja.bontang.opd.domain.Opd;
 import cc.kertaskerja.bontang.opd.domain.OpdService;
 import cc.kertaskerja.bontang.opd.domain.exception.OpdDeleteForbiddenException;
@@ -16,6 +20,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.net.URI;
 import java.time.Instant;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -31,11 +36,14 @@ public class OpdControllerTest {
     @Mock
     private OpdService opdService;
 
+    @Mock
+    private BidangUrusanService bidangUrusanService;
+
     private OpdController opdController;
 
     @BeforeEach
     void setUp() {
-        opdController = new OpdController(opdService);
+        opdController = new OpdController(opdService, bidangUrusanService);
     }
 
     @Test
@@ -64,6 +72,25 @@ public class OpdControllerTest {
 
         assertEquals(opd, result);
         verify(opdService).detailOpdByKodeOpd(kodeOpd);
+    }
+
+    @Test
+    void bidangUrusanFindAll_returnsNamaBidangUrusanAfterValidatingOpd() {
+        String kodeOpd = "OPD-001";
+        Opd opd = new Opd(1L, kodeOpd, "BAPPEDA", Instant.now(), Instant.now());
+        List<BidangUrusanDto> options = java.util.List.of(
+                new BidangUrusanDto(1L, "BID-01", "Urusan A"),
+                new BidangUrusanDto(2L, "BID-02", "Urusan B")
+        );
+
+        when(opdService.detailOpdByKodeOpd(kodeOpd)).thenReturn(opd);
+        when(bidangUrusanService.findAll()).thenReturn(options);
+
+        Iterable<String> result = opdController.bidangUrusanFindAll(kodeOpd);
+
+        assertEquals(java.util.List.of("Urusan A", "Urusan B"), result);
+        verify(opdService).detailOpdByKodeOpd(kodeOpd);
+        verify(bidangUrusanService).findAll();
     }
 
     @Test
@@ -118,6 +145,51 @@ public class OpdControllerTest {
 
         URI location = response.getHeaders().getLocation();
         assertEquals("/opd/" + savedOpd.id(), location != null ? location.getPath() : null);
+    }
+
+    @Test
+    void bidangUrusanSaved_returnsNamaBidangUrusanYangSudahDisimpan() {
+        String kodeOpd = "OPD-001";
+        Opd opd = new Opd(1L, kodeOpd, "BAPPEDA", Instant.now(), Instant.now());
+        Iterable<BidangUrusan> saved = List.of(
+                new BidangUrusan(1L, kodeOpd, "BID-01", "Urusan A", Instant.parse("2024-01-01T00:00:00Z"), Instant.parse("2024-01-02T00:00:00Z")),
+                new BidangUrusan(2L, kodeOpd, "BID-02", "Urusan B", Instant.parse("2024-02-01T00:00:00Z"), Instant.parse("2024-02-02T00:00:00Z"))
+        );
+
+        when(opdService.detailOpdByKodeOpd(kodeOpd)).thenReturn(opd);
+        when(bidangUrusanService.findByKodeOpd(kodeOpd)).thenReturn(saved);
+
+        Iterable<String> result = opdController.bidangUrusanSaved(kodeOpd);
+
+        assertEquals(List.of("Urusan A", "Urusan B"), result);
+        verify(opdService).detailOpdByKodeOpd(kodeOpd);
+        verify(bidangUrusanService).findByKodeOpd(kodeOpd);
+    }
+
+    @Test
+    void pilihBidangUrusan_menambahkanBidangUrusanKeOpd() {
+        String kodeOpd = "OPD-001";
+        BidangUrusanRequest request = new BidangUrusanRequest("Urusan A");
+        Opd opd = new Opd(1L, kodeOpd, "BAPPEDA", Instant.now(), Instant.now());
+        BidangUrusan saved = new BidangUrusan(10L, kodeOpd, "BID-01", request.namaBidangUrusan(), Instant.parse("2024-03-01T00:00:00Z"), Instant.parse("2024-03-02T00:00:00Z"));
+
+        when(opdService.detailOpdByKodeOpd(kodeOpd)).thenReturn(opd);
+        when(bidangUrusanService.simpanBidangUrusan(kodeOpd, request)).thenReturn(saved);
+
+        MockHttpServletRequest servletRequest = new MockHttpServletRequest();
+        servletRequest.setRequestURI("/opd/" + kodeOpd + "/bidang-urusan");
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(servletRequest));
+
+        ResponseEntity<BidangUrusan> response = opdController.pilihBidangUrusan(kodeOpd, request);
+
+        verify(opdService).detailOpdByKodeOpd(kodeOpd);
+        verify(bidangUrusanService).simpanBidangUrusan(kodeOpd, request);
+
+        assertEquals(201, response.getStatusCodeValue());
+        assertEquals(saved, response.getBody());
+
+        URI location = response.getHeaders().getLocation();
+        assertEquals("/opd/" + kodeOpd + "/bidang-urusan/" + saved.id(), location != null ? location.getPath() : null);
     }
 
     @Test

@@ -1,5 +1,9 @@
 package cc.kertaskerja.bontang.opd.web;
 
+import cc.kertaskerja.bontang.bidangurusan.domain.BidangUrusan;
+import cc.kertaskerja.bontang.bidangurusan.domain.BidangUrusanDto;
+import cc.kertaskerja.bontang.bidangurusan.domain.BidangUrusanService;
+import cc.kertaskerja.bontang.bidangurusan.web.BidangUrusanRequest;
 import cc.kertaskerja.bontang.opd.domain.Opd;
 import cc.kertaskerja.bontang.opd.domain.OpdService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,15 +14,19 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
+import java.util.stream.StreamSupport;
 
 @RestController
 @Tag(name = "opd")
 @RequestMapping("opd")
 public class OpdController {
     private final OpdService opdService;
+    private final BidangUrusanService bidangUrusanService;
 
-    public OpdController(OpdService opdService) {
+    public OpdController(OpdService opdService, BidangUrusanService bidangUrusanService) {
         this.opdService = opdService;
+        this.bidangUrusanService = bidangUrusanService;
     }
 
     /**
@@ -36,6 +44,51 @@ public class OpdController {
     @GetMapping("detail/findall")
     public Iterable<Opd> findAll() {
         return opdService.findAll();
+    }
+
+    /**
+     * Ambil dropdown bidang urusan untuk suatu opd
+     * @param kodeOpd
+     */
+    @GetMapping("detail/{kodeOpd}/bidang-urusan-findall")
+    public Iterable<String> bidangUrusanFindAll(@PathVariable("kodeOpd") String kodeOpd) {
+        opdService.detailOpdByKodeOpd(kodeOpd);
+        List<BidangUrusanDto> all = bidangUrusanService.findAll();
+        return all.stream()
+                .map(BidangUrusanDto::namaBidangUrusan)
+                .toList();
+    }
+
+    /**
+     * Ambil semua bidang urusan yang sudah disimpan untuk suatu opd
+     * @param kodeOpd
+     */
+    @GetMapping("detail/{kodeOpd}/list-bidang-urusan-saved")
+    public Iterable<String> bidangUrusanSaved(@PathVariable("kodeOpd") String kodeOpd) {
+        opdService.detailOpdByKodeOpd(kodeOpd);
+        Iterable<BidangUrusan> saved = bidangUrusanService.findByKodeOpd(kodeOpd);
+        return StreamSupport.stream(saved.spliterator(), false)
+                .map(BidangUrusan::namaBidangUrusan)
+                .toList();
+    }
+
+    /**
+     * Simpan bidang urusan terpilih untuk suatu opd
+     * @param kodeOpd
+     */
+    @PostMapping("{kodeOpd}/bidang-urusan")
+    public ResponseEntity<BidangUrusan> pilihBidangUrusan(
+            @PathVariable("kodeOpd") String kodeOpd,
+            @Valid @RequestBody BidangUrusanRequest request
+    ) {
+        opdService.detailOpdByKodeOpd(kodeOpd);
+        var saved = bidangUrusanService.simpanBidangUrusan(kodeOpd, request);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(saved.id())
+                .toUri();
+        return ResponseEntity.created(location).body(saved);
     }
 
     /**
