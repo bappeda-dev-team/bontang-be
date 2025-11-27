@@ -50,11 +50,12 @@ public class SubKegiatanController {
                 existingSubKegiatan.id(),
                 request.kodeSubKegiatan(),
                 request.namaSubKegiatan(),
+                existingSubKegiatan.kegiatanId(),
                 existingSubKegiatan.createdDate(),
                 null
         );
 
-        return subKegiatanService.ubahSubKegiatan(kodeSubKegiatan, subKegiatan);
+        return subKegiatanService.ubahSubKegiatan(kodeSubKegiatan, subKegiatan, request.kodeKegiatan());
     }
 
     /**
@@ -65,9 +66,10 @@ public class SubKegiatanController {
     public ResponseEntity<SubKegiatan> post(@Valid @RequestBody SubKegiatanRequest request) {
         SubKegiatan subKegiatan = SubKegiatan.of(
                 request.kodeSubKegiatan(),
-                request.namaSubKegiatan()
+                request.namaSubKegiatan(),
+                null
         );
-        SubKegiatan saved = subKegiatanService.tambahSubKegiatan(subKegiatan);
+        SubKegiatan saved = subKegiatanService.tambahSubKegiatan(subKegiatan, request.kodeKegiatan());
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")

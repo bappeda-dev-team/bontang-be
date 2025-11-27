@@ -50,11 +50,12 @@ public class KegiatanController {
                 existingKegiatan.id(),
                 request.kodeKegiatan(),
                 request.namaKegiatan(),
+                existingKegiatan.programId(),
                 existingKegiatan.createdDate(),
                 null
         );
 
-        return kegiatanService.ubahKegiatan(kodeKegiatan, kegiatan);
+        return kegiatanService.ubahKegiatan(kodeKegiatan, kegiatan, request.kodeProgram());
     }
 
     /**
@@ -65,9 +66,10 @@ public class KegiatanController {
     public ResponseEntity<Kegiatan> post(@Valid @RequestBody KegiatanRequest request) {
         Kegiatan kegiatan = Kegiatan.of(
                 request.kodeKegiatan(),
-                request.namaKegiatan()
+                request.namaKegiatan(),
+                null
         );
-        Kegiatan saved = kegiatanService.tambahKegiatan(kegiatan);
+        Kegiatan saved = kegiatanService.tambahKegiatan(kegiatan, request.kodeProgram());
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")

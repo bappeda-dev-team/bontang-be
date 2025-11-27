@@ -1,6 +1,7 @@
 package cc.kertaskerja.bontang.bidangurusan.web;
 
 import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanAlreadyExistException;
+import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanDeleteForbiddenException;
 import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -18,6 +19,12 @@ public class BidangUrusanControllerAdvice {
     @ExceptionHandler(BidangUrusanNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     String bidangUrusanNotFoundHandler(BidangUrusanNotFoundException ex) {
+        return ex.getMessage();
+    }
+
+    @ExceptionHandler(BidangUrusanDeleteForbiddenException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    String bidangUrusanDeleteForbiddenHandler(BidangUrusanDeleteForbiddenException ex) {
         return ex.getMessage();
     }
 }

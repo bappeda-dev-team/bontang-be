@@ -14,6 +14,10 @@ public record KegiatanRequest(
 
         @NotNull(message = "Nama kegiatan tidak boleh kosong")
         @NotEmpty(message = "Nama kegiatan tidak boleh kosong")
-        String namaKegiatan
+        String namaKegiatan,
+
+        @NotNull(message = "Kode program tidak boleh kosong")
+        @NotEmpty(message = "Kode program tidak boleh kosong")
+        String kodeProgram
 ) {
 }

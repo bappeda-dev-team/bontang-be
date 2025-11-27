@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import cc.kertaskerja.bontang.kegiatan.domain.exception.KegiatanAlreadyExistException;
+import cc.kertaskerja.bontang.kegiatan.domain.exception.KegiatanDeleteForbiddenException;
 import cc.kertaskerja.bontang.kegiatan.domain.exception.KegiatanNotFoundException;
 
 @RestControllerAdvice
@@ -24,6 +25,12 @@ public class KegiatanControllerAdvice {
     @ExceptionHandler(KegiatanAlreadyExistException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     String kegiatanAlreadyExistException(KegiatanAlreadyExistException ex) {
+        return ex.getMessage();
+    }
+
+    @ExceptionHandler(KegiatanDeleteForbiddenException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    String kegiatanDeleteForbiddenException(KegiatanDeleteForbiddenException ex) {
         return ex.getMessage();
     }
 

@@ -59,11 +59,12 @@ public class ProgramController {
                 existingProgram.id(),
                 request.kodeProgram(),
                 request.namaProgram(),
+                existingProgram.bidangUrusanId(),
                 existingProgram.createdDate(),
                 null
         );
 
-        return programService.ubahProgram(kodeProgram, program);
+        return programService.ubahProgram(kodeProgram, program, request.kodeBidangUrusan());
     }
 
     /**
@@ -74,9 +75,10 @@ public class ProgramController {
     public ResponseEntity<Program> post(@Valid @RequestBody ProgramRequest request) {
         Program program = Program.of(
                 request.kodeProgram(),
-                request.namaProgram()
+                request.namaProgram(),
+                null
         );
-        Program saved = programService.tambahProgram(program);
+        Program saved = programService.tambahProgram(program, request.kodeBidangUrusan());
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")

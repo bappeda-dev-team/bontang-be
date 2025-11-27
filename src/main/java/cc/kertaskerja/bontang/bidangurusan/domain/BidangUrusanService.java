@@ -1,7 +1,9 @@
 package cc.kertaskerja.bontang.bidangurusan.domain;
 
 import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanAlreadyExistException;
+import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanDeleteForbiddenException;
 import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanNotFoundException;
+import cc.kertaskerja.bontang.program.domain.ProgramRepository;
 import cc.kertaskerja.bontang.bidangurusan.web.BidangUrusanRequest;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
@@ -15,13 +17,16 @@ import java.util.Optional;
 public class BidangUrusanService {
     private final WebClient towerDataWebClient;
     private final BidangUrusanRepository bidangUrusanRepository;
+    private final ProgramRepository programRepository;
 
     public BidangUrusanService(
             @Qualifier("towerDataWebClient") WebClient towerDataWebClient,
-            BidangUrusanRepository bidangUrusanRepository
+            BidangUrusanRepository bidangUrusanRepository,
+            ProgramRepository programRepository
     ) {
         this.towerDataWebClient = towerDataWebClient;
         this.bidangUrusanRepository = bidangUrusanRepository;
+        this.programRepository = programRepository;
     }
 
     public List<BidangUrusanDto> findAll() {
@@ -65,5 +70,16 @@ public class BidangUrusanService {
                 .stream()
                 .filter(item -> namaBidangUrusan.equalsIgnoreCase(item.namaBidangUrusan()))
                 .findFirst();
+    }
+
+    public void hapusBidangUrusan(String kodeBidangUrusan) {
+        BidangUrusan bidangUrusan = bidangUrusanRepository.findByKodeBidangUrusan(kodeBidangUrusan)
+                .orElseThrow(() -> new BidangUrusanNotFoundException(kodeBidangUrusan));
+
+        if (programRepository.existsByBidangUrusanId(bidangUrusan.id())) {
+            throw new BidangUrusanDeleteForbiddenException(kodeBidangUrusan);
+        }
+
+        bidangUrusanRepository.deleteById(bidangUrusan.id());
     }
 }

@@ -15,6 +15,8 @@ public interface KegiatanRepository extends CrudRepository<Kegiatan, Long> {
 
     boolean existsByKodeKegiatan(@NonNull String kodeKegiatan);
 
+    boolean existsByProgramId(@NonNull Long programId);
+
     @NonNull
     Optional<Kegiatan> findByKodeKegiatan(@NonNull String kodeKegiatan);
 

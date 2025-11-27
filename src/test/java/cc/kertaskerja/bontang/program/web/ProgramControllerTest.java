@@ -40,8 +40,8 @@ public class ProgramControllerTest {
     @Test
     void findAll_returnsAllProgramsFromService() {
         Iterable<Program> programs = List.of(
-                new Program(1L, "PR-001", "Program 1", Instant.now(), Instant.now()),
-                new Program(2L, "PR-002", "Program 2", Instant.now(), Instant.now())
+                new Program(1L, "PR-001", "Program 1", 10L, Instant.now(), Instant.now()),
+                new Program(2L, "PR-002", "Program 2", 11L, Instant.now(), Instant.now())
         );
 
         when(programService.findAll()).thenReturn(programs);
@@ -55,7 +55,7 @@ public class ProgramControllerTest {
     @Test
     void getByKodeProgram_returnsProgramFromService() {
         String kodeProgram = "PR-001";
-        Program program = new Program(1L, kodeProgram, "Program 1", Instant.now(), Instant.now());
+        Program program = new Program(1L, kodeProgram, "Program 1", 10L, Instant.now(), Instant.now());
 
         when(programService.detailProgramByKodeProgram(kodeProgram)).thenReturn(program);
 
@@ -68,23 +68,25 @@ public class ProgramControllerTest {
     @Test
     void put_updatesProgramUsingService() {
         String kodeProgram = "PR-001";
-        Program existingProgram = new Program(1L, kodeProgram, "Program 1", Instant.parse("2024-01-01T00:00:00Z"), Instant.parse("2024-01-02T00:00:00Z"));
-        ProgramRequest request = new ProgramRequest(null, "PR-002", "Program Updated");
-        Program updatedProgram = new Program(1L, request.kodeProgram(), request.namaProgram(), existingProgram.createdDate(), Instant.parse("2024-01-03T00:00:00Z"));
+        String kodeBidangUrusan = "BU-01";
+        Program existingProgram = new Program(1L, kodeProgram, "Program 1", 20L, Instant.parse("2024-01-01T00:00:00Z"), Instant.parse("2024-01-02T00:00:00Z"));
+        ProgramRequest request = new ProgramRequest(null, "PR-002", "Program Updated", kodeBidangUrusan);
+        Program updatedProgram = new Program(1L, request.kodeProgram(), request.namaProgram(), 30L, existingProgram.createdDate(), Instant.parse("2024-01-03T00:00:00Z"));
 
         when(programService.detailProgramByKodeProgram(kodeProgram)).thenReturn(existingProgram);
-        when(programService.ubahProgram(eq(kodeProgram), any(Program.class))).thenReturn(updatedProgram);
+        when(programService.ubahProgram(eq(kodeProgram), any(Program.class), eq(kodeBidangUrusan))).thenReturn(updatedProgram);
 
         Program result = programController.put(kodeProgram, request);
 
         ArgumentCaptor<Program> programCaptor = ArgumentCaptor.forClass(Program.class);
         verify(programService).detailProgramByKodeProgram(kodeProgram);
-        verify(programService).ubahProgram(eq(kodeProgram), programCaptor.capture());
+        verify(programService).ubahProgram(eq(kodeProgram), programCaptor.capture(), eq(kodeBidangUrusan));
 
         Program programPassed = programCaptor.getValue();
         assertEquals(existingProgram.id(), programPassed.id());
         assertEquals(request.kodeProgram(), programPassed.kodeProgram());
         assertEquals(request.namaProgram(), programPassed.namaProgram());
+        assertEquals(existingProgram.bidangUrusanId(), programPassed.bidangUrusanId());
         assertEquals(existingProgram.createdDate(), programPassed.createdDate());
         assertNull(programPassed.lastModifiedDate());
 
@@ -93,10 +95,11 @@ public class ProgramControllerTest {
 
     @Test
     void post_createsProgramAndReturnsCreatedResponse() {
-        ProgramRequest request = new ProgramRequest(null, "PR-001", "Program 1");
-        Program savedProgram = new Program(1L, request.kodeProgram(), request.namaProgram(), Instant.parse("2024-01-01T00:00:00Z"), Instant.parse("2024-01-01T00:00:00Z"));
+        String kodeBidangUrusan = "BU-01";
+        ProgramRequest request = new ProgramRequest(null, "PR-001", "Program 1", kodeBidangUrusan);
+        Program savedProgram = new Program(1L, request.kodeProgram(), request.namaProgram(), 10L, Instant.parse("2024-01-01T00:00:00Z"), Instant.parse("2024-01-01T00:00:00Z"));
 
-        when(programService.tambahProgram(any(Program.class))).thenReturn(savedProgram);
+        when(programService.tambahProgram(any(Program.class), eq(kodeBidangUrusan))).thenReturn(savedProgram);
 
         MockHttpServletRequest servletRequest = new MockHttpServletRequest();
         servletRequest.setRequestURI("/program");
@@ -105,12 +108,13 @@ public class ProgramControllerTest {
         ResponseEntity<Program> response = programController.post(request);
 
         ArgumentCaptor<Program> programCaptor = ArgumentCaptor.forClass(Program.class);
-        verify(programService).tambahProgram(programCaptor.capture());
+        verify(programService).tambahProgram(programCaptor.capture(), eq(kodeBidangUrusan));
 
         Program programPassed = programCaptor.getValue();
         assertNull(programPassed.id());
         assertEquals(request.kodeProgram(), programPassed.kodeProgram());
         assertEquals(request.namaProgram(), programPassed.namaProgram());
+        assertNull(programPassed.bidangUrusanId());
 
         assertEquals(201, response.getStatusCodeValue());
         assertEquals(savedProgram, response.getBody());

@@ -1,9 +1,12 @@
 package cc.kertaskerja.bontang.subkegiatan.domain;
 
+import cc.kertaskerja.bontang.kegiatan.domain.Kegiatan;
+import cc.kertaskerja.bontang.kegiatan.domain.KegiatanRepository;
 import cc.kertaskerja.bontang.subkegiatan.domain.exception.SubKegiatanNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -22,18 +25,20 @@ public class SubKegiatanServiceTest {
 
     @Mock
     private SubKegiatanRepository subKegiatanRepository;
+    @Mock
+    private KegiatanRepository kegiatanRepository;
 
     private SubKegiatanService subKegiatanService;
 
     @BeforeEach
     void setUp() {
-        subKegiatanService = new SubKegiatanService(subKegiatanRepository);
+        subKegiatanService = new SubKegiatanService(subKegiatanRepository, kegiatanRepository);
     }
 
     @Test
     void findAll_returnsAllSubKegiatan() {
-        SubKegiatan subKegiatan1 = new SubKegiatan(1L, "SK-001", "Sub Kegiatan 1", Instant.now(), Instant.now());
-        SubKegiatan subKegiatan2 = new SubKegiatan(2L, "SK-002", "Sub Kegiatan 2", Instant.now(), Instant.now());
+        SubKegiatan subKegiatan1 = new SubKegiatan(1L, "SK-001", "Sub Kegiatan 1", 10L, Instant.now(), Instant.now());
+        SubKegiatan subKegiatan2 = new SubKegiatan(2L, "SK-002", "Sub Kegiatan 2", 20L, Instant.now(), Instant.now());
         List<SubKegiatan> subKegiatanList = Arrays.asList(subKegiatan1, subKegiatan2);
 
         when(subKegiatanRepository.findAll()).thenReturn(subKegiatanList);
@@ -47,7 +52,7 @@ public class SubKegiatanServiceTest {
     @Test
     void detailSubKegiatanByKodeSubKegiatan_returnsSubKegiatan_whenFound() {
         String kodeSubKegiatan = "SK-001";
-        SubKegiatan subKegiatan = new SubKegiatan(1L, kodeSubKegiatan, "Sub Kegiatan 1", Instant.now(), Instant.now());
+        SubKegiatan subKegiatan = new SubKegiatan(1L, kodeSubKegiatan, "Sub Kegiatan 1", 10L, Instant.now(), Instant.now());
         when(subKegiatanRepository.findByKodeSubKegiatan(kodeSubKegiatan)).thenReturn(Optional.of(subKegiatan));
 
         SubKegiatan result = subKegiatanService.detailSubKegiatanByKodeSubKegiatan(kodeSubKegiatan);
@@ -68,41 +73,51 @@ public class SubKegiatanServiceTest {
     @Test
     void tambahSubKegiatan_savesSubKegiatan() {
         String kodeSubKegiatan = "SK-001";
-        SubKegiatan subKegiatan = SubKegiatan.of(kodeSubKegiatan, "Sub Kegiatan 1");
-        SubKegiatan savedSubKegiatan = new SubKegiatan(1L, kodeSubKegiatan, "Sub Kegiatan 1", Instant.now(), Instant.now());
+        String kodeKegiatan = "KG-01";
+        Kegiatan kegiatan = new Kegiatan(11L, kodeKegiatan, "Kegiatan 1", 99L, Instant.now(), Instant.now());
+        SubKegiatan subKegiatan = SubKegiatan.of(kodeSubKegiatan, "Sub Kegiatan 1", null);
+        SubKegiatan savedSubKegiatan = new SubKegiatan(1L, kodeSubKegiatan, "Sub Kegiatan 1", kegiatan.id(), Instant.now(), Instant.now());
 
-        when(subKegiatanRepository.save(subKegiatan)).thenReturn(savedSubKegiatan);
+        when(kegiatanRepository.findByKodeKegiatan(kodeKegiatan)).thenReturn(Optional.of(kegiatan));
+        when(subKegiatanRepository.save(any(SubKegiatan.class))).thenReturn(savedSubKegiatan);
 
-        SubKegiatan result = subKegiatanService.tambahSubKegiatan(subKegiatan);
+        SubKegiatan result = subKegiatanService.tambahSubKegiatan(subKegiatan, kodeKegiatan);
 
         assertEquals(savedSubKegiatan, result);
-        verify(subKegiatanRepository).save(subKegiatan);
+        verify(kegiatanRepository).findByKodeKegiatan(kodeKegiatan);
+        ArgumentCaptor<SubKegiatan> subKegiatanCaptor = ArgumentCaptor.forClass(SubKegiatan.class);
+        verify(subKegiatanRepository).save(subKegiatanCaptor.capture());
+        assertEquals(kegiatan.id(), subKegiatanCaptor.getValue().kegiatanId());
     }
 
     @Test
     void ubahSubKegiatan_savesSubKegiatan_whenKodeSubKegiatanExists() {
         String kodeSubKegiatan = "SK-001";
-        SubKegiatan subKegiatan = SubKegiatan.of(kodeSubKegiatan, "Sub Kegiatan 1");
-        SubKegiatan updatedSubKegiatan = new SubKegiatan(1L, kodeSubKegiatan, "Sub Kegiatan 1 Updated", Instant.now(), Instant.now());
+        String kodeKegiatan = "KG-01";
+        Kegiatan kegiatan = new Kegiatan(12L, kodeKegiatan, "Kegiatan 1", 98L, Instant.now(), Instant.now());
+        SubKegiatan subKegiatan = SubKegiatan.of(kodeSubKegiatan, "Sub Kegiatan 1", null);
+        SubKegiatan updatedSubKegiatan = new SubKegiatan(1L, kodeSubKegiatan, "Sub Kegiatan 1 Updated", kegiatan.id(), Instant.now(), Instant.now());
 
         when(subKegiatanRepository.existsByKodeSubKegiatan(kodeSubKegiatan)).thenReturn(true);
-        when(subKegiatanRepository.save(subKegiatan)).thenReturn(updatedSubKegiatan);
+        when(kegiatanRepository.findByKodeKegiatan(kodeKegiatan)).thenReturn(Optional.of(kegiatan));
+        when(subKegiatanRepository.save(any(SubKegiatan.class))).thenReturn(updatedSubKegiatan);
 
-        SubKegiatan result = subKegiatanService.ubahSubKegiatan(kodeSubKegiatan, subKegiatan);
+        SubKegiatan result = subKegiatanService.ubahSubKegiatan(kodeSubKegiatan, subKegiatan, kodeKegiatan);
 
         assertEquals(updatedSubKegiatan, result);
         verify(subKegiatanRepository).existsByKodeSubKegiatan(kodeSubKegiatan);
-        verify(subKegiatanRepository).save(subKegiatan);
+        verify(kegiatanRepository).findByKodeKegiatan(kodeKegiatan);
+        verify(subKegiatanRepository).save(any(SubKegiatan.class));
     }
 
     @Test
     void ubahSubKegiatan_throwsException_whenKodeSubKegiatanNotExists() {
         String kodeSubKegiatan = "SK-404";
-        SubKegiatan subKegiatan = SubKegiatan.of(kodeSubKegiatan, "Sub Kegiatan 1");
+        SubKegiatan subKegiatan = SubKegiatan.of(kodeSubKegiatan, "Sub Kegiatan 1", null);
 
         when(subKegiatanRepository.existsByKodeSubKegiatan(kodeSubKegiatan)).thenReturn(false);
 
-        assertThrows(SubKegiatanNotFoundException.class, () -> subKegiatanService.ubahSubKegiatan(kodeSubKegiatan, subKegiatan));
+        assertThrows(SubKegiatanNotFoundException.class, () -> subKegiatanService.ubahSubKegiatan(kodeSubKegiatan, subKegiatan, "KG-01"));
         verify(subKegiatanRepository).existsByKodeSubKegiatan(kodeSubKegiatan);
         verify(subKegiatanRepository, never()).save(any());
     }

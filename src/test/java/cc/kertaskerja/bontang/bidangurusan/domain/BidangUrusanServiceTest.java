@@ -1,7 +1,9 @@
 package cc.kertaskerja.bontang.bidangurusan.domain;
 
 import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanAlreadyExistException;
+import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanDeleteForbiddenException;
 import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanNotFoundException;
+import cc.kertaskerja.bontang.program.domain.ProgramRepository;
 import cc.kertaskerja.bontang.bidangurusan.web.BidangUrusanRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,11 +43,14 @@ public class BidangUrusanServiceTest {
     @Mock
     private BidangUrusanRepository bidangUrusanRepository;
 
+    @Mock
+    private ProgramRepository programRepository;
+
     private BidangUrusanService bidangUrusanService;
 
     @BeforeEach
     void setUp() {
-        bidangUrusanService = new BidangUrusanService(towerDataWebClient, bidangUrusanRepository);
+        bidangUrusanService = new BidangUrusanService(towerDataWebClient, bidangUrusanRepository, programRepository);
 
         lenient().when(towerDataWebClient.get()).thenReturn(requestHeadersUriSpec);
         lenient().when(requestHeadersUriSpec.uri("/bidangurusan/detail/findall")).thenReturn(requestHeadersSpec);
@@ -141,6 +146,32 @@ public class BidangUrusanServiceTest {
         assertThrows(BidangUrusanAlreadyExistException.class, () -> bidangUrusanService.simpanBidangUrusan(kodeOpd, request));
 
         verify(bidangUrusanRepository, never()).save(any());
+    }
+
+    @Test
+    void hapusBidangUrusan_throwsForbidden_whenProgramExist() {
+        String kodeBidangUrusan = "BU-001";
+        BidangUrusan bidangUrusan = new BidangUrusan(1L, "OPD-01", kodeBidangUrusan, "Bidang Infrastruktur", Instant.now(), Instant.now());
+
+        when(bidangUrusanRepository.findByKodeBidangUrusan(kodeBidangUrusan)).thenReturn(java.util.Optional.of(bidangUrusan));
+        when(programRepository.existsByBidangUrusanId(bidangUrusan.id())).thenReturn(true);
+
+        assertThrows(BidangUrusanDeleteForbiddenException.class, () -> bidangUrusanService.hapusBidangUrusan(kodeBidangUrusan));
+
+        verify(bidangUrusanRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void hapusBidangUrusan_deletes_whenNoChildProgram() {
+        String kodeBidangUrusan = "BU-001";
+        BidangUrusan bidangUrusan = new BidangUrusan(1L, "OPD-01", kodeBidangUrusan, "Bidang Infrastruktur", Instant.now(), Instant.now());
+
+        when(bidangUrusanRepository.findByKodeBidangUrusan(kodeBidangUrusan)).thenReturn(java.util.Optional.of(bidangUrusan));
+        when(programRepository.existsByBidangUrusanId(bidangUrusan.id())).thenReturn(false);
+
+        bidangUrusanService.hapusBidangUrusan(kodeBidangUrusan);
+
+        verify(bidangUrusanRepository).deleteById(bidangUrusan.id());
     }
 
     @SuppressWarnings("unchecked")

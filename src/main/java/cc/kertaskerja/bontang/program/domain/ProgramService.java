@@ -1,19 +1,49 @@
 package cc.kertaskerja.bontang.program.domain;
 
+import cc.kertaskerja.bontang.bidangurusan.domain.BidangUrusan;
+import cc.kertaskerja.bontang.bidangurusan.domain.BidangUrusanRepository;
+import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanNotFoundException;
+import cc.kertaskerja.bontang.kegiatan.domain.KegiatanRepository;
+import cc.kertaskerja.bontang.program.domain.exception.ProgramDeleteForbiddenException;
 import org.springframework.stereotype.Service;
 
 import cc.kertaskerja.bontang.program.domain.exception.ProgramNotFoundException;
 
 @Service
 public class ProgramService {
-    private ProgramRepository programRepository;
+    private final ProgramRepository programRepository;
+    private final BidangUrusanRepository bidangUrusanRepository;
+    private final KegiatanRepository kegiatanRepository;
 
-    public ProgramService(ProgramRepository programRepository) {
+    public ProgramService(
+            ProgramRepository programRepository,
+            BidangUrusanRepository bidangUrusanRepository,
+            KegiatanRepository kegiatanRepository
+    ) {
         this.programRepository = programRepository;
+        this.bidangUrusanRepository = bidangUrusanRepository;
+        this.kegiatanRepository = kegiatanRepository;
     }
 
     public Iterable<Program> findAll() {
         return programRepository.findAll();
+    }
+
+    private Long getBidangUrusanId(String kodeBidangUrusan) {
+        return bidangUrusanRepository.findByKodeBidangUrusan(kodeBidangUrusan)
+                .map(BidangUrusan::id)
+                .orElseThrow(() -> new BidangUrusanNotFoundException(kodeBidangUrusan));
+    }
+
+    private Program attachBidangUrusan(Program program, Long bidangUrusanId) {
+        return new Program(
+                program.id(),
+                program.kodeProgram(),
+                program.namaProgram(),
+                bidangUrusanId,
+                program.createdDate(),
+                program.lastModifiedDate()
+        );
     }
 
     public Program detailProgramByKodeProgram(String kodeProgram) {
@@ -21,22 +51,30 @@ public class ProgramService {
                 .orElseThrow(() -> new ProgramNotFoundException(kodeProgram));
     }
 
-    public Program tambahProgram(Program program) {
+    public Program tambahProgram(Program program, String kodeBidangUrusan) {
+        Long bidangUrusanId = getBidangUrusanId(kodeBidangUrusan);
+        Program programWithBidang = attachBidangUrusan(program, bidangUrusanId);
 
-        return programRepository.save(program);
+        return programRepository.save(programWithBidang);
     }
 
-    public Program ubahProgram(String kodeProgram, Program program) {
+    public Program ubahProgram(String kodeProgram, Program program, String kodeBidangUrusan) {
         if (!programRepository.existsByKodeProgram(kodeProgram)) {
             throw new ProgramNotFoundException(kodeProgram);
         }
 
-        return programRepository.save(program);
+        Long bidangUrusanId = getBidangUrusanId(kodeBidangUrusan);
+        Program programWithBidang = attachBidangUrusan(program, bidangUrusanId);
+
+        return programRepository.save(programWithBidang);
     }
 
     public void hapusProgram(String kodeProgram) {
-        if (!programRepository.existsByKodeProgram(kodeProgram)) {
-            throw new ProgramNotFoundException(kodeProgram);
+        Program program = programRepository.findByKodeProgram(kodeProgram)
+                .orElseThrow(() -> new ProgramNotFoundException(kodeProgram));
+
+        if (kegiatanRepository.existsByProgramId(program.id())) {
+            throw new ProgramDeleteForbiddenException(kodeProgram);
         }
 
         programRepository.deleteByKodeProgram(kodeProgram);
