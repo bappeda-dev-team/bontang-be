@@ -30,6 +30,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 public class OpdControllerTest {
@@ -91,40 +92,43 @@ public class OpdControllerTest {
     }
 
     @Test
-    void bidangUrusanFindAll_returnsNamaBidangUrusanAfterValidatingOpd() {
-        String kodeOpd = "OPD-001";
-        Opd opd = new Opd(1L, kodeOpd, "BAPPEDA", Instant.now(), Instant.now());
+    void bidangUrusanFindAll_returnsNamaBidangUrusan() {
         List<BidangUrusanDto> options = java.util.List.of(
                 new BidangUrusanDto(1L, "BID-01", "Urusan A"),
                 new BidangUrusanDto(2L, "BID-02", "Urusan B")
         );
 
-        when(opdService.detailOpdByKodeOpd(kodeOpd)).thenReturn(opd);
         when(bidangUrusanService.findAll()).thenReturn(options);
 
-        Iterable<String> result = opdController.bidangUrusanFindAll(kodeOpd);
+        Iterable<String> result = opdController.bidangUrusanFindAll();
 
         assertEquals(java.util.List.of("Urusan A", "Urusan B"), result);
-        verify(opdService).detailOpdByKodeOpd(kodeOpd);
         verify(bidangUrusanService).findAll();
+        verifyNoInteractions(opdService);
     }
 
     @Test
     void put_updatesOpdUsingService() {
         String kodeOpd = "OPD-001";
         Opd existingOpd = new Opd(1L, kodeOpd, "BAPPEDA", Instant.parse("2024-01-01T00:00:00Z"), Instant.parse("2024-01-02T00:00:00Z"));
-        OpdRequest request = new OpdRequest(null, "OPD-002", "BAPPEDA UPDATED");
+        OpdRequest request = new OpdRequest(null, "OPD-002", "BAPPEDA UPDATED", "Bidang Diperbarui");
 
-        Opd updatedOpd = new Opd(1L, request.kodeOpd(), request.namaOpd(), existingOpd.createdDate(), Instant.parse("2024-01-03T00:00:00Z"));
+        Instant updatedAt = Instant.parse("2024-01-03T00:00:00Z");
+        Opd updatedOpd = new Opd(1L, request.kodeOpd(), request.namaOpd(), existingOpd.createdDate(), updatedAt);
 
         when(opdService.detailOpdByKodeOpd(kodeOpd)).thenReturn(existingOpd);
         when(opdService.ubahOpd(eq(kodeOpd), any(Opd.class))).thenReturn(updatedOpd);
+        when(bidangUrusanService.findByKodeOpd(request.kodeOpd())).thenReturn(List.of(
+                new BidangUrusan(5L, request.kodeOpd(), "BID-01", request.namaBidangUrusan(), existingOpd.createdDate(), updatedAt)
+        ));
 
-        Opd result = opdController.put(kodeOpd, request);
+        OpdResponse result = opdController.put(kodeOpd, request);
 
         ArgumentCaptor<Opd> opdCaptor = ArgumentCaptor.forClass(Opd.class);
         verify(opdService).detailOpdByKodeOpd(kodeOpd);
         verify(opdService).ubahOpd(eq(kodeOpd), opdCaptor.capture());
+        verify(bidangUrusanService).updateNamaBidangUrusan(kodeOpd, request.namaBidangUrusan());
+        verify(bidangUrusanService).findByKodeOpd(request.kodeOpd());
 
         Opd opdPassed = opdCaptor.getValue();
         assertEquals(existingOpd.id(), opdPassed.id());
@@ -133,12 +137,21 @@ public class OpdControllerTest {
         assertEquals(existingOpd.createdDate(), opdPassed.createdDate());
         assertNull(opdPassed.lastModifiedDate());
 
-        assertEquals(updatedOpd, result);
+        OpdResponse expected = new OpdResponse(
+                updatedOpd.id(),
+                updatedOpd.kodeOpd(),
+                updatedOpd.namaOpd(),
+                updatedOpd.createdDate(),
+                updatedOpd.lastModifiedDate(),
+                List.of(new OpdBidangUrusanResponse("BID-01", request.namaBidangUrusan()))
+        );
+
+        assertEquals(expected, result);
     }
 
     @Test
     void post_createsOpdAndReturnsCreatedResponse() {
-        OpdRequest request = new OpdRequest(null, "OPD-001", "BAPPEDA");
+        OpdRequest request = new OpdRequest(null, "OPD-001", "BAPPEDA", null);
         Opd savedOpd = new Opd(1L, request.kodeOpd(), request.namaOpd(), Instant.parse("2024-01-01T00:00:00Z"), Instant.parse("2024-01-01T00:00:00Z"));
 
         when(opdService.tambahOpd(any(Opd.class))).thenReturn(savedOpd);
