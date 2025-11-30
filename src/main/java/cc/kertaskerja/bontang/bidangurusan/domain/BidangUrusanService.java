@@ -54,6 +54,28 @@ public class BidangUrusanService {
         return bidangUrusanRepository.save(bidangUrusan);
     }
 
+    public void updateNamaBidangUrusan(String kodeOpd, String namaBidangUrusan) {
+        Iterable<BidangUrusan> bidangUrusans = bidangUrusanRepository.findByKodeOpd(kodeOpd);
+        boolean hasData = false;
+
+        for (BidangUrusan bidangUrusan : bidangUrusans) {
+            hasData = true;
+            BidangUrusan updated = new BidangUrusan(
+                    bidangUrusan.id(),
+                    bidangUrusan.kodeOpd(),
+                    bidangUrusan.kodeBidangUrusan(),
+                    namaBidangUrusan,
+                    bidangUrusan.createdDate(),
+                    null
+            );
+            bidangUrusanRepository.save(updated);
+        }
+
+        if (!hasData) {
+            throw new BidangUrusanNotFoundException("Kode OPD " + kodeOpd);
+        }
+    }
+
     private List<BidangUrusanDto> fetchAllFromTower() {
         List<BidangUrusanDto> response = towerDataWebClient.get()
                 .uri("/bidangurusan/detail/findall")

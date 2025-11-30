@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -50,12 +51,10 @@ public class OpdController {
     }
 
     /**
-     * Ambil dropdown bidang urusan untuk suatu opd
-     * @param kodeOpd
+     * Ambil dropdown semua bidang urusan tanpa perlu kode opd
      */
-    @GetMapping("detail/{kodeOpd}/bidang-urusan-findall")
-    public Iterable<String> bidangUrusanFindAll(@PathVariable("kodeOpd") String kodeOpd) {
-        opdService.detailOpdByKodeOpd(kodeOpd);
+    @GetMapping("detail/bidang-urusan-findall")
+    public Iterable<String> bidangUrusanFindAll() {
         List<BidangUrusanDto> all = bidangUrusanService.findAll();
         return all.stream()
                 .map(BidangUrusanDto::namaBidangUrusan)
@@ -99,7 +98,7 @@ public class OpdController {
      * @param kodeOpd
      */
     @PutMapping("update/{kodeOpd}")
-    public Opd put(@PathVariable("kodeOpd") String kodeOpd, @Valid @RequestBody OpdRequest request) {
+    public OpdResponse put(@PathVariable("kodeOpd") String kodeOpd, @Valid @RequestBody OpdRequest request) {
         Opd existingOpd = opdService.detailOpdByKodeOpd(kodeOpd);
 
         Opd opd = new Opd(
@@ -110,7 +109,13 @@ public class OpdController {
                 null
         );
 
-        return opdService.ubahOpd(kodeOpd, opd);
+        Opd updated = opdService.ubahOpd(kodeOpd, opd);
+
+        if (StringUtils.hasText(request.namaBidangUrusan())) {
+            bidangUrusanService.updateNamaBidangUrusan(kodeOpd, request.namaBidangUrusan());
+        }
+
+        return mapToResponse(updated);
     }
 
     /**

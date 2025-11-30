@@ -14,6 +14,9 @@ public record OpdRequest(
 
         @NotNull(message = "Nama Opd tidak boleh kosong")
         @NotEmpty(message = "Nama Opd tidak boleh kosong")
-        String namaOpd
+        String namaOpd,
+
+        @Nullable
+        String namaBidangUrusan
 ) {
 }
