@@ -123,6 +123,23 @@ public class BidangUrusanServiceTest {
     }
 
     @Test
+    void simpanBidangUrusan_usesTowerKodeBidangUrusan_withCaseInsensitiveNama() {
+        String kodeOpd = "OPD-02";
+        BidangUrusanRequest request = new BidangUrusanRequest("bidang infrastruktur");
+        BidangUrusanDto towerData = new BidangUrusanDto(20L, "BU-020", "Bidang Infrastruktur");
+        BidangUrusan savedBidangUrusan = new BidangUrusan(2L, kodeOpd, towerData.kodeBidangUrusan(), towerData.namaBidangUrusan(), Instant.now(), Instant.now());
+
+        mockTowerDataResponse(Mono.just(List.of(towerData)));
+        when(bidangUrusanRepository.existsByKodeOpdAndKodeBidangUrusan(kodeOpd, towerData.kodeBidangUrusan())).thenReturn(false);
+        when(bidangUrusanRepository.save(any(BidangUrusan.class))).thenReturn(savedBidangUrusan);
+
+        BidangUrusan result = bidangUrusanService.simpanBidangUrusan(kodeOpd, request);
+
+        assertEquals(towerData.kodeBidangUrusan(), result.kodeBidangUrusan());
+        verify(bidangUrusanRepository).existsByKodeOpdAndKodeBidangUrusan(kodeOpd, towerData.kodeBidangUrusan());
+    }
+
+    @Test
     void simpanBidangUrusan_throwsException_whenTowerDataNotFound() {
         String kodeOpd = "OPD-01";
         BidangUrusanRequest request = new BidangUrusanRequest("Bidang Tidak Ada");

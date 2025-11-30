@@ -91,4 +91,13 @@ public class BidangUrusanControllerTest {
         URI location = response.getHeaders().getLocation();
         assertEquals("/bidangurusan/" + kodeOpd + "/" + saved.id(), location != null ? location.getPath() : null);
     }
+
+    @Test
+    void delete_menghapusBidangUrusan() {
+        String kodeBidangUrusan = "BU-001";
+
+        bidangUrusanController.delete(kodeBidangUrusan);
+
+        verify(bidangUrusanService).hapusBidangUrusan(kodeBidangUrusan);
+    }
 }

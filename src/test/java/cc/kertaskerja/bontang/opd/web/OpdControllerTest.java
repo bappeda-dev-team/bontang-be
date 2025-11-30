@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,17 +49,32 @@ public class OpdControllerTest {
 
     @Test
     void findAll_returnsAllOpdFromService() {
+        Instant created = Instant.parse("2024-01-01T00:00:00Z");
+        Instant modified = Instant.parse("2024-01-02T00:00:00Z");
         Iterable<Opd> opdList = java.util.List.of(
-                new Opd(1L, "OPD-001", "BAPPEDA", Instant.now(), Instant.now()),
-                new Opd(2L, "OPD-002", "BPKAD", Instant.now(), Instant.now())
+                new Opd(1L, "OPD-001", "BAPPEDA", created, modified),
+                new Opd(2L, "OPD-002", "BPKAD", created, modified)
         );
 
         when(opdService.findAll()).thenReturn(opdList);
+        when(bidangUrusanService.findByKodeOpd("OPD-001")).thenReturn(List.of(
+                new BidangUrusan(1L, "OPD-001", "BID-01", "Urusan A", created, modified)
+        ));
+        when(bidangUrusanService.findByKodeOpd("OPD-002")).thenReturn(List.of());
 
-        Iterable<Opd> result = opdController.findAll();
+        List<OpdResponse> result = opdController.findAll();
 
-        assertEquals(opdList, result);
+        List<OpdResponse> expected = List.of(
+                new OpdResponse(1L, "OPD-001", "BAPPEDA", created, modified, List.of(
+                        new OpdBidangUrusanResponse("BID-01", "Urusan A")
+                )),
+                new OpdResponse(2L, "OPD-002", "BPKAD", created, modified, List.of())
+        );
+
+        assertEquals(expected, result);
         verify(opdService).findAll();
+        verify(bidangUrusanService, times(1)).findByKodeOpd("OPD-001");
+        verify(bidangUrusanService, times(1)).findByKodeOpd("OPD-002");
     }
 
     @Test

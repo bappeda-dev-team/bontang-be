@@ -42,8 +42,11 @@ public class OpdController {
      * Ambil semua data opd
      */
     @GetMapping("detail/findall")
-    public Iterable<Opd> findAll() {
-        return opdService.findAll();
+    public List<OpdResponse> findAll() {
+        Iterable<Opd> opds = opdService.findAll();
+        return StreamSupport.stream(opds.spliterator(), false)
+                .map(this::mapToResponse)
+                .toList();
     }
 
     /**
@@ -138,5 +141,30 @@ public class OpdController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("kodeOpd") String kodeOpd) {
         opdService.hapusOpd(kodeOpd);
+    }
+
+    private OpdResponse mapToResponse(Opd opd) {
+        List<OpdBidangUrusanResponse> bidangUrusan = StreamSupport.stream(
+                bidangUrusanService.findByKodeOpd(opd.kodeOpd()).spliterator(),
+                false
+        )
+                .map(this::mapBidangUrusan)
+                .toList();
+
+        return new OpdResponse(
+                opd.id(),
+                opd.kodeOpd(),
+                opd.namaOpd(),
+                opd.createdDate(),
+                opd.lastModifiedDate(),
+                bidangUrusan
+        );
+    }
+
+    private OpdBidangUrusanResponse mapBidangUrusan(BidangUrusan bidangUrusan) {
+        return new OpdBidangUrusanResponse(
+                bidangUrusan.kodeBidangUrusan(),
+                bidangUrusan.namaBidangUrusan()
+        );
     }
 }
