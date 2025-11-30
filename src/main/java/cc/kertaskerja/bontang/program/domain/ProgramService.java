@@ -9,6 +9,10 @@ import org.springframework.stereotype.Service;
 
 import cc.kertaskerja.bontang.program.domain.exception.ProgramNotFoundException;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Service
 public class ProgramService {
     private final ProgramRepository programRepository;
@@ -49,6 +53,26 @@ public class ProgramService {
     public Program detailProgramByKodeProgram(String kodeProgram) {
         return programRepository.findByKodeProgram(kodeProgram)
                 .orElseThrow(() -> new ProgramNotFoundException(kodeProgram));
+    }
+
+    public List<Program> detailProgramByKodeProgramIn(List<String> kodePrograms) {
+        List<Program> programs = programRepository.findAllByKodeProgramIn(kodePrograms);
+        if (programs.size() != kodePrograms.size()) {
+            Set<String> foundKode = programs.stream()
+                    .map(Program::kodeProgram)
+                    .collect(Collectors.toSet());
+
+            String missingKode = kodePrograms.stream()
+                    .filter(kode -> !foundKode.contains(kode))
+                    .findFirst()
+                    .orElse(null);
+
+            if (missingKode != null) {
+                throw new ProgramNotFoundException(missingKode);
+            }
+        }
+
+        return programs;
     }
 
     public Program tambahProgram(Program program, String kodeBidangUrusan) {

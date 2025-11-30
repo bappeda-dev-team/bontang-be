@@ -9,6 +9,10 @@ import cc.kertaskerja.bontang.program.domain.exception.ProgramNotFoundException;
 import cc.kertaskerja.bontang.subkegiatan.domain.SubKegiatanRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Service
 public class KegiatanService{
     private final KegiatanRepository kegiatanRepository;
@@ -32,6 +36,26 @@ public class KegiatanService{
     public Kegiatan detailKegiatanByKodeKegiatan(String kodeKegiatan) {
         return kegiatanRepository.findByKodeKegiatan(kodeKegiatan)
                 .orElseThrow(() -> new KegiatanNotFoundException(kodeKegiatan));
+    }
+
+    public List<Kegiatan> detailKegiatanByKodeKegiatanIn(List<String> kodeKegiatan) {
+        List<Kegiatan> kegiatans = kegiatanRepository.findAllByKodeKegiatanIn(kodeKegiatan);
+        if (kegiatans.size() != kodeKegiatan.size()) {
+            Set<String> foundKode = kegiatans.stream()
+                    .map(Kegiatan::kodeKegiatan)
+                    .collect(Collectors.toSet());
+
+            String missingKode = kodeKegiatan.stream()
+                    .filter(kode -> !foundKode.contains(kode))
+                    .findFirst()
+                    .orElse(null);
+
+            if (missingKode != null) {
+                throw new KegiatanNotFoundException(missingKode);
+            }
+        }
+
+        return kegiatans;
     }
 
     public Kegiatan tambahKegiatan(Kegiatan kegiatan, String kodeProgram) {

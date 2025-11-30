@@ -66,6 +66,22 @@ public class KegiatanControllerTest {
     }
 
     @Test
+    void findBatch_returnsKegiatanFromService() {
+        KegiatanBatchRequest request = new KegiatanBatchRequest(List.of("KG-001", "KG-002"));
+        List<Kegiatan> kegiatans = List.of(
+                new Kegiatan(1L, "KG-001", "Kegiatan 1", 10L, Instant.now(), Instant.now()),
+                new Kegiatan(2L, "KG-002", "Kegiatan 2", 11L, Instant.now(), Instant.now())
+        );
+
+        when(kegiatanService.detailKegiatanByKodeKegiatanIn(request.kodeKegiatan())).thenReturn(kegiatans);
+
+        List<Kegiatan> result = kegiatanController.findBatch(request);
+
+        assertEquals(kegiatans, result);
+        verify(kegiatanService).detailKegiatanByKodeKegiatanIn(request.kodeKegiatan());
+    }
+
+    @Test
     void put_updatesKegiatanUsingService() {
         String kodeKegiatan = "KG-001";
         String kodeProgram = "PR-01";

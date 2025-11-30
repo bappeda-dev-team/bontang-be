@@ -66,6 +66,22 @@ public class SubKegiatanControllerTest {
     }
 
     @Test
+    void findBatch_returnsSubKegiatanListFromService() {
+        List<String> kodeSubKegiatanList = List.of("SK-001", "SK-002");
+        List<SubKegiatan> subKegiatanList = List.of(
+                new SubKegiatan(1L, "SK-001", "Sub Kegiatan 1", 10L, Instant.now(), Instant.now()),
+                new SubKegiatan(2L, "SK-002", "Sub Kegiatan 2", 20L, Instant.now(), Instant.now())
+        );
+
+        when(subKegiatanService.detailSubKegiatanByKodeSubKegiatanIn(kodeSubKegiatanList)).thenReturn(subKegiatanList);
+
+        List<SubKegiatan> result = subKegiatanController.findBatch(new SubKegiatanBatchRequest(kodeSubKegiatanList));
+
+        assertEquals(subKegiatanList, result);
+        verify(subKegiatanService).detailSubKegiatanByKodeSubKegiatanIn(kodeSubKegiatanList);
+    }
+
+    @Test
     void put_updatesSubKegiatanUsingService() {
         String kodeSubKegiatan = "SK-001";
         String kodeKegiatan = "KG-01";

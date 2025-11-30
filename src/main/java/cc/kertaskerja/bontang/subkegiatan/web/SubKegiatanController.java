@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @Tag(name = "subkegiatan")
@@ -36,6 +37,14 @@ public class SubKegiatanController {
     @GetMapping("detail/findall")
     public Iterable<SubKegiatan> findAll() {
         return subKegiatanService.findAll();
+    }
+
+    /**
+     * Ambil data sub kegiatan berdasarkan kumpulan kode sub kegiatan
+     */
+    @PostMapping("find/batch")
+    public List<SubKegiatan> findBatch(@Valid @RequestBody SubKegiatanBatchRequest request) {
+        return subKegiatanService.detailSubKegiatanByKodeSubKegiatanIn(request.kodeSubKegiatan());
     }
 
     /**

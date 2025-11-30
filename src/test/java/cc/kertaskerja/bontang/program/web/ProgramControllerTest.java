@@ -66,6 +66,22 @@ public class ProgramControllerTest {
     }
 
     @Test
+    void findBatch_returnsProgramsFromService() {
+        ProgramBatchRequest request = new ProgramBatchRequest(List.of("PR-001", "PR-002"));
+        List<Program> programs = List.of(
+                new Program(1L, "PR-001", "Program 1", 10L, Instant.now(), Instant.now()),
+                new Program(2L, "PR-002", "Program 2", 11L, Instant.now(), Instant.now())
+        );
+
+        when(programService.detailProgramByKodeProgramIn(request.kodeProgram())).thenReturn(programs);
+
+        List<Program> result = programController.findBatch(request);
+
+        assertEquals(programs, result);
+        verify(programService).detailProgramByKodeProgramIn(request.kodeProgram());
+    }
+
+    @Test
     void put_updatesProgramUsingService() {
         String kodeProgram = "PR-001";
         String kodeBidangUrusan = "BU-01";

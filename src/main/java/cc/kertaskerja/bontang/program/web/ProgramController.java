@@ -20,6 +20,8 @@ import cc.kertaskerja.bontang.program.domain.ProgramService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+import java.util.List;
+
 @RestController
 @Tag(name = "program")
 @RequestMapping("program")
@@ -45,6 +47,14 @@ public class ProgramController {
     @GetMapping("detail/findall")
     public Iterable<Program> findAll() {
         return programService.findAll();
+    }
+
+    /**
+     * Ambil data program berdasarkan kumpulan kode program
+     */
+    @PostMapping("find/batch")
+    public List<Program> findBatch(@Valid @RequestBody ProgramBatchRequest request) {
+        return programService.detailProgramByKodeProgramIn(request.kodeProgram());
     }
 
     /**

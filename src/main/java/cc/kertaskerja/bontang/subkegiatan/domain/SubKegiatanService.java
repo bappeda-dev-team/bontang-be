@@ -6,6 +6,10 @@ import cc.kertaskerja.bontang.kegiatan.domain.exception.KegiatanNotFoundExceptio
 import cc.kertaskerja.bontang.subkegiatan.domain.exception.SubKegiatanNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Service
 public class SubKegiatanService {
     private final SubKegiatanRepository subKegiatanRepository;
@@ -51,6 +55,26 @@ public class SubKegiatanService {
         }
 
         subKegiatanRepository.deleteByKodeSubKegiatan(kodeSubKegiatan);
+    }
+
+    public List<SubKegiatan> detailSubKegiatanByKodeSubKegiatanIn(List<String> kodeSubKegiatans) {
+        List<SubKegiatan> subKegiatans = subKegiatanRepository.findAllByKodeSubKegiatanIn(kodeSubKegiatans);
+        if (subKegiatans.size() != kodeSubKegiatans.size()) {
+            Set<String> foundKode = subKegiatans.stream()
+                    .map(SubKegiatan::kodeSubKegiatan)
+                    .collect(Collectors.toSet());
+
+            String missingKode = kodeSubKegiatans.stream()
+                    .filter(kode -> !foundKode.contains(kode))
+                    .findFirst()
+                    .orElse(null);
+
+            if (missingKode != null) {
+                throw new SubKegiatanNotFoundException(missingKode);
+            }
+        }
+
+        return subKegiatans;
     }
 
     private Long getKegiatanId(String kodeKegiatan) {

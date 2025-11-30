@@ -7,6 +7,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface KegiatanRepository extends CrudRepository<Kegiatan, Long> {
@@ -19,6 +21,9 @@ public interface KegiatanRepository extends CrudRepository<Kegiatan, Long> {
 
     @NonNull
     Optional<Kegiatan> findByKodeKegiatan(@NonNull String kodeKegiatan);
+
+    @NonNull
+    List<Kegiatan> findAllByKodeKegiatanIn(@NonNull Collection<String> kodeKegiatans);
 
     @Modifying
     @Transactional

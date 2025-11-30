@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @Tag(name = "kegiatan")
@@ -36,6 +37,14 @@ public class KegiatanController {
     @GetMapping("detail/findall")
     public Iterable<Kegiatan> findAll() {
         return kegiatanService.findAll();
+    }
+
+    /**
+     * Ambil data kegiatan berdasarkan kumpulan kode kegiatan
+     */
+    @PostMapping("find/batch")
+    public List<Kegiatan> findBatch(@Valid @RequestBody KegiatanBatchRequest request) {
+        return kegiatanService.detailKegiatanByKodeKegiatanIn(request.kodeKegiatan());
     }
 
     /**
