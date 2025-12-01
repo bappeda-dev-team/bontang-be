@@ -4,7 +4,7 @@ import cc.kertaskerja.bontang.koderekening.domain.KodeRekening;
 import cc.kertaskerja.bontang.koderekening.domain.KodeRekeningService;
 import cc.kertaskerja.bontang.program.domain.Program;
 import cc.kertaskerja.bontang.program.domain.ProgramService;
-import cc.kertaskerja.bontang.program.web.ProgramRequest;
+import cc.kertaskerja.bontang.program.web.request.ProgramRequest;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

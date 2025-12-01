@@ -90,6 +90,12 @@ public class KegiatanService{
         kegiatanRepository.deleteByKodeKegiatan(kodeKegiatan);
     }
 
+    public String getKodeProgram(Long programId) {
+        return programRepository.findById(programId)
+                .map(Program::kodeProgram)
+                .orElseThrow(() -> new ProgramNotFoundException(String.valueOf(programId)));
+    }
+
     private Long getProgramId(String kodeProgram) {
         return programRepository.findByKodeProgram(kodeProgram)
                 .map(Program::id)

@@ -2,6 +2,9 @@ package cc.kertaskerja.bontang.kegiatan.web;
 
 import cc.kertaskerja.bontang.kegiatan.domain.Kegiatan;
 import cc.kertaskerja.bontang.kegiatan.domain.KegiatanService;
+import cc.kertaskerja.bontang.kegiatan.web.request.KegiatanBatchRequest;
+import cc.kertaskerja.bontang.kegiatan.web.request.KegiatanRequest;
+import cc.kertaskerja.bontang.kegiatan.web.response.KegiatanResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -11,6 +14,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 @RestController
 @Tag(name = "kegiatan")
@@ -35,8 +39,11 @@ public class KegiatanController {
      * Ambil semua data kegiatan
      */
     @GetMapping("detail/findall")
-    public Iterable<Kegiatan> findAll() {
-        return kegiatanService.findAll();
+    public List<KegiatanResponse> findAll() {
+        Iterable<Kegiatan> kegiatans = kegiatanService.findAll();
+        return StreamSupport.stream(kegiatans.spliterator(), false)
+                .map(this::mapToResponse)
+                .toList();
     }
 
     /**
@@ -96,5 +103,17 @@ public class KegiatanController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("kodeKegiatan") String kodeKegiatan) {
         kegiatanService.hapusKegiatan(kodeKegiatan);
+    }
+
+    private KegiatanResponse mapToResponse(Kegiatan kegiatan) {
+        String kodeProgram = kegiatanService.getKodeProgram(kegiatan.programId());
+        return new KegiatanResponse(
+                kegiatan.id(),
+                kegiatan.kodeKegiatan(),
+                kegiatan.namaKegiatan(),
+                kodeProgram,
+                kegiatan.createdDate(),
+                kegiatan.lastModifiedDate()
+        );
     }
 }

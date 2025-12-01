@@ -77,6 +77,12 @@ public class SubKegiatanService {
         return subKegiatans;
     }
 
+    public String getKodeKegiatan(Long kegiatanId) {
+        return kegiatanRepository.findById(kegiatanId)
+                .map(Kegiatan::kodeKegiatan)
+                .orElseThrow(() -> new KegiatanNotFoundException(String.valueOf(kegiatanId)));
+    }
+
     private Long getKegiatanId(String kodeKegiatan) {
         return kegiatanRepository.findByKodeKegiatan(kodeKegiatan)
                 .map(Kegiatan::id)

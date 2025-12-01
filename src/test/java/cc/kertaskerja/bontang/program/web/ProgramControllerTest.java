@@ -2,6 +2,10 @@ package cc.kertaskerja.bontang.program.web;
 
 import cc.kertaskerja.bontang.program.domain.Program;
 import cc.kertaskerja.bontang.program.domain.ProgramService;
+import cc.kertaskerja.bontang.program.web.request.ProgramBatchRequest;
+import cc.kertaskerja.bontang.program.web.request.ProgramRequest;
+import cc.kertaskerja.bontang.program.web.response.ProgramResponse;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,17 +43,38 @@ public class ProgramControllerTest {
 
     @Test
     void findAll_returnsAllProgramsFromService() {
-        Iterable<Program> programs = List.of(
-                new Program(1L, "PR-001", "Program 1", 10L, Instant.now(), Instant.now()),
-                new Program(2L, "PR-002", "Program 2", 11L, Instant.now(), Instant.now())
-        );
+        Instant program1Created = Instant.parse("2024-01-01T00:00:00Z");
+        Instant program1Updated = Instant.parse("2024-01-02T00:00:00Z");
+        Instant program2Created = Instant.parse("2024-02-01T00:00:00Z");
+        Instant program2Updated = Instant.parse("2024-02-02T00:00:00Z");
+        Program program1 = new Program(1L, "PR-001", "Program 1", 10L, program1Created, program1Updated);
+        Program program2 = new Program(2L, "PR-002", "Program 2", 11L, program2Created, program2Updated);
+        Iterable<Program> programs = List.of(program1, program2);
 
         when(programService.findAll()).thenReturn(programs);
+        when(programService.getKodeBidangUrusan(10L)).thenReturn("BU-10");
+        when(programService.getKodeBidangUrusan(11L)).thenReturn("BU-11");
 
-        Iterable<Program> result = programController.findAll();
+        List<ProgramResponse> result = programController.findAll();
 
-        assertEquals(programs, result);
+        assertEquals(2, result.size());
+        ProgramResponse firstResponse = result.get(0);
+        ProgramResponse secondResponse = result.get(1);
+        assertEquals(program1.id(), firstResponse.id());
+        assertEquals(program1.kodeProgram(), firstResponse.kodeProgram());
+        assertEquals(program1.namaProgram(), firstResponse.namaProgram());
+        assertEquals("BU-10", firstResponse.kodeBidangUrusan());
+        assertEquals(program1Created, firstResponse.createdDate());
+        assertEquals(program1Updated, firstResponse.lastModifiedDate());
+        assertEquals(program2.id(), secondResponse.id());
+        assertEquals(program2.kodeProgram(), secondResponse.kodeProgram());
+        assertEquals(program2.namaProgram(), secondResponse.namaProgram());
+        assertEquals("BU-11", secondResponse.kodeBidangUrusan());
+        assertEquals(program2Created, secondResponse.createdDate());
+        assertEquals(program2Updated, secondResponse.lastModifiedDate());
         verify(programService).findAll();
+        verify(programService).getKodeBidangUrusan(10L);
+        verify(programService).getKodeBidangUrusan(11L);
     }
 
     @Test

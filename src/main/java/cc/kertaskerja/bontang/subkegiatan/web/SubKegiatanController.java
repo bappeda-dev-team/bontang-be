@@ -2,6 +2,9 @@ package cc.kertaskerja.bontang.subkegiatan.web;
 
 import cc.kertaskerja.bontang.subkegiatan.domain.SubKegiatan;
 import cc.kertaskerja.bontang.subkegiatan.domain.SubKegiatanService;
+import cc.kertaskerja.bontang.subkegiatan.web.request.SubKegiatanBatchRequest;
+import cc.kertaskerja.bontang.subkegiatan.web.request.SubKegiatanRequest;
+import cc.kertaskerja.bontang.subkegiatan.web.response.SubKegiatanResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -11,6 +14,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 @RestController
 @Tag(name = "subkegiatan")
@@ -35,8 +39,12 @@ public class SubKegiatanController {
      * Ambil semua data sub kegiatan
      */
     @GetMapping("detail/findall")
-    public Iterable<SubKegiatan> findAll() {
-        return subKegiatanService.findAll();
+    public List<SubKegiatanResponse> findAll() {
+        Iterable<SubKegiatan> subKegiatans = subKegiatanService.findAll();
+
+        return StreamSupport.stream(subKegiatans.spliterator(), false)
+                .map(this::mapToResponse)
+                .toList();
     }
 
     /**
@@ -96,5 +104,18 @@ public class SubKegiatanController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("kodeSubKegiatan") String kodeSubKegiatan) {
         subKegiatanService.hapusSubKegiatan(kodeSubKegiatan);
+    }
+
+    private SubKegiatanResponse mapToResponse(SubKegiatan subKegiatan) {
+        String kodeKegiatan = subKegiatanService.getKodeKegiatan(subKegiatan.kegiatanId());
+
+        return new SubKegiatanResponse(
+                subKegiatan.id(),
+                subKegiatan.kodeSubKegiatan(),
+                subKegiatan.namaSubKegiatan(),
+                kodeKegiatan,
+                subKegiatan.createdDate(),
+                subKegiatan.lastModifiedDate()
+        );
     }
 }

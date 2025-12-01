@@ -167,6 +167,18 @@ public class ProgramServiceTest {
     }
 
     @Test
+    void getKodeBidangUrusan_returnsKode_whenIdExists() {
+        Long bidangUrusanId = 77L;
+        BidangUrusan bidangUrusan = new BidangUrusan(bidangUrusanId, "OPD-01", "BU-01", "Bidang Infrastruktur", Instant.now(), Instant.now());
+        when(bidangUrusanRepository.findById(bidangUrusanId)).thenReturn(Optional.of(bidangUrusan));
+
+        String result = programService.getKodeBidangUrusan(bidangUrusanId);
+
+        assertEquals(bidangUrusan.kodeBidangUrusan(), result);
+        verify(bidangUrusanRepository).findById(bidangUrusanId);
+    }
+
+    @Test
     void hapusProgram_throwsException_whenProgramHasKegiatan() {
         String kodeProgram = "PR-001";
         Program program = new Program(1L, kodeProgram, "Program 1", 10L, Instant.now(), Instant.now());

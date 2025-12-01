@@ -17,10 +17,14 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import cc.kertaskerja.bontang.program.domain.Program;
 import cc.kertaskerja.bontang.program.domain.ProgramService;
+import cc.kertaskerja.bontang.program.web.request.ProgramBatchRequest;
+import cc.kertaskerja.bontang.program.web.request.ProgramRequest;
+import cc.kertaskerja.bontang.program.web.response.ProgramResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 @RestController
 @Tag(name = "program")
@@ -45,8 +49,11 @@ public class ProgramController {
      * Ambil semua data program
      */
     @GetMapping("detail/findall")
-    public Iterable<Program> findAll() {
-        return programService.findAll();
+    public List<ProgramResponse> findAll() {
+        Iterable<Program> programs = programService.findAll();
+        return StreamSupport.stream(programs.spliterator(), false)
+                .map(this::mapToResponse)
+                .toList();
     }
 
     /**
@@ -106,5 +113,17 @@ public class ProgramController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("kodeProgram") String kodeProgram) {
         programService.hapusProgram(kodeProgram);
+    }
+
+    private ProgramResponse mapToResponse(Program program) {
+        String kodeBidangUrusan = programService.getKodeBidangUrusan(program.bidangUrusanId());
+        return new ProgramResponse(
+                program.id(),
+                program.kodeProgram(),
+                program.namaProgram(),
+                kodeBidangUrusan,
+                program.createdDate(),
+                program.lastModifiedDate()
+        );
     }
 }

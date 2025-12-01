@@ -33,6 +33,12 @@ public class ProgramService {
         return programRepository.findAll();
     }
 
+    public String getKodeBidangUrusan(Long bidangUrusanId) {
+        return bidangUrusanRepository.findById(bidangUrusanId)
+                .map(BidangUrusan::kodeBidangUrusan)
+                .orElseThrow(() -> new BidangUrusanNotFoundException(String.valueOf(bidangUrusanId)));
+    }
+
     private Long getBidangUrusanId(String kodeBidangUrusan) {
         return bidangUrusanRepository.findByKodeBidangUrusan(kodeBidangUrusan)
                 .map(BidangUrusan::id)

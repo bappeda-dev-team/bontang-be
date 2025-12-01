@@ -2,6 +2,10 @@ package cc.kertaskerja.bontang.kegiatan.web;
 
 import cc.kertaskerja.bontang.kegiatan.domain.Kegiatan;
 import cc.kertaskerja.bontang.kegiatan.domain.KegiatanService;
+import cc.kertaskerja.bontang.kegiatan.web.request.KegiatanBatchRequest;
+import cc.kertaskerja.bontang.kegiatan.web.request.KegiatanRequest;
+import cc.kertaskerja.bontang.kegiatan.web.response.KegiatanResponse;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,17 +43,30 @@ public class KegiatanControllerTest {
 
     @Test
     void findAll_returnsAllKegiatanFromService() {
+        Instant created1 = Instant.parse("2024-01-01T00:00:00Z");
+        Instant modified1 = Instant.parse("2024-01-02T00:00:00Z");
+        Instant created2 = Instant.parse("2024-02-01T00:00:00Z");
+        Instant modified2 = Instant.parse("2024-02-02T00:00:00Z");
         Iterable<Kegiatan> kegiatanList = List.of(
-                new Kegiatan(1L, "KG-001", "Kegiatan 1", 10L, Instant.now(), Instant.now()),
-                new Kegiatan(2L, "KG-002", "Kegiatan 2", 11L, Instant.now(), Instant.now())
+                new Kegiatan(1L, "KG-001", "Kegiatan 1", 10L, created1, modified1),
+                new Kegiatan(2L, "KG-002", "Kegiatan 2", 11L, created2, modified2)
         );
 
         when(kegiatanService.findAll()).thenReturn(kegiatanList);
+        when(kegiatanService.getKodeProgram(10L)).thenReturn("PR-10");
+        when(kegiatanService.getKodeProgram(11L)).thenReturn("PR-11");
 
-        Iterable<Kegiatan> result = kegiatanController.findAll();
+        List<KegiatanResponse> result = kegiatanController.findAll();
 
-        assertEquals(kegiatanList, result);
+        List<KegiatanResponse> expected = List.of(
+                new KegiatanResponse(1L, "KG-001", "Kegiatan 1", "PR-10", created1, modified1),
+                new KegiatanResponse(2L, "KG-002", "Kegiatan 2", "PR-11", created2, modified2)
+        );
+
+        assertEquals(expected, result);
         verify(kegiatanService).findAll();
+        verify(kegiatanService).getKodeProgram(10L);
+        verify(kegiatanService).getKodeProgram(11L);
     }
 
     @Test

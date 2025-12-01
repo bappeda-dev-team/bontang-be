@@ -2,6 +2,10 @@ package cc.kertaskerja.bontang.subkegiatan.web;
 
 import cc.kertaskerja.bontang.subkegiatan.domain.SubKegiatan;
 import cc.kertaskerja.bontang.subkegiatan.domain.SubKegiatanService;
+import cc.kertaskerja.bontang.subkegiatan.web.request.SubKegiatanBatchRequest;
+import cc.kertaskerja.bontang.subkegiatan.web.request.SubKegiatanRequest;
+import cc.kertaskerja.bontang.subkegiatan.web.response.SubKegiatanResponse;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,17 +43,28 @@ public class SubKegiatanControllerTest {
 
     @Test
     void findAll_returnsAllSubKegiatanFromService() {
+        Instant createdDate1 = Instant.parse("2024-01-01T00:00:00Z");
+        Instant createdDate2 = Instant.parse("2024-01-02T00:00:00Z");
         Iterable<SubKegiatan> subKegiatanList = List.of(
-                new SubKegiatan(1L, "SK-001", "Sub Kegiatan 1", 10L, Instant.now(), Instant.now()),
-                new SubKegiatan(2L, "SK-002", "Sub Kegiatan 2", 20L, Instant.now(), Instant.now())
+                new SubKegiatan(1L, "SK-001", "Sub Kegiatan 1", 10L, createdDate1, createdDate1),
+                new SubKegiatan(2L, "SK-002", "Sub Kegiatan 2", 20L, createdDate2, createdDate2)
         );
 
         when(subKegiatanService.findAll()).thenReturn(subKegiatanList);
+        when(subKegiatanService.getKodeKegiatan(10L)).thenReturn("KG-10");
+        when(subKegiatanService.getKodeKegiatan(20L)).thenReturn("KG-20");
 
-        Iterable<SubKegiatan> result = subKegiatanController.findAll();
+        List<SubKegiatanResponse> result = subKegiatanController.findAll();
 
-        assertEquals(subKegiatanList, result);
+        List<SubKegiatanResponse> expected = List.of(
+                new SubKegiatanResponse(1L, "SK-001", "Sub Kegiatan 1", "KG-10", createdDate1, createdDate1),
+                new SubKegiatanResponse(2L, "SK-002", "Sub Kegiatan 2", "KG-20", createdDate2, createdDate2)
+        );
+
+        assertEquals(expected, result);
         verify(subKegiatanService).findAll();
+        verify(subKegiatanService).getKodeKegiatan(10L);
+        verify(subKegiatanService).getKodeKegiatan(20L);
     }
 
     @Test

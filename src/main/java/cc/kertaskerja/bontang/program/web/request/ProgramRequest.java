@@ -1,4 +1,4 @@
-package cc.kertaskerja.bontang.program.web;
+package cc.kertaskerja.bontang.program.web.request;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotEmpty;
