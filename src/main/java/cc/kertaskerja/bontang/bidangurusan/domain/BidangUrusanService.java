@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
@@ -72,11 +73,11 @@ public class BidangUrusanService {
 
         String kodeOpd = StringUtils.hasText(targetKodeOpd) ? targetKodeOpd : existingKodeOpd;
 
-        Map<Long, BidangUrusan> existing = new LinkedHashMap<>();
+        Map<String, BidangUrusan> existingByKode = new LinkedHashMap<>();
         bidangUrusanRepository.findByKodeOpd(existingKodeOpd)
                 .forEach(item -> {
                     if (item.id() != null) {
-                        existing.put(item.id(), item);
+                        existingByKode.put(normalizeKode(item.kodeBidangUrusan()), item);
                     }
                 });
 
@@ -84,7 +85,7 @@ public class BidangUrusanService {
             bidangUrusanRepository.findByKodeOpd(targetKodeOpd)
                     .forEach(item -> {
                         if (item.id() != null) {
-                            existing.putIfAbsent(item.id(), item);
+                            existingByKode.putIfAbsent(normalizeKode(item.kodeBidangUrusan()), item);
                         }
                     });
         }
@@ -93,37 +94,39 @@ public class BidangUrusanService {
         Set<Long> retainedIds = new HashSet<>();
 
         for (OpdBidangUrusanRequest request : requests) {
-            BidangUrusan savedData = simpanAtauPerbaruiBidangUrusan(kodeOpd, request);
+            BidangUrusan matched = existingByKode.get(normalizeKode(request.kodeBidangUrusan()));
+
+            BidangUrusan savedData = (matched != null)
+                    ? perbaruiBidangUrusan(kodeOpd, request, matched)
+                    : simpanBidangUrusanBaru(kodeOpd, request);
             saved.add(savedData);
             if (savedData.id() != null) {
                 retainedIds.add(savedData.id());
             }
         }
 
-        existing.values().stream()
+        existingByKode.values().stream()
                 .filter(item -> item.id() != null && !retainedIds.contains(item.id()))
                 .forEach(this::hapusBidangUrusan);
 
         return saved;
     }
 
-    private BidangUrusan simpanAtauPerbaruiBidangUrusan(String kodeOpd, OpdBidangUrusanRequest request) {
-        if (request.id() != null) {
-            BidangUrusan existing = bidangUrusanRepository.findById(request.id())
-                    .orElseThrow(() -> new BidangUrusanNotFoundException("ID " + request.id()));
-            validateDuplicate(kodeOpd, request.kodeBidangUrusan(), request.id());
+    private BidangUrusan perbaruiBidangUrusan(String kodeOpd, OpdBidangUrusanRequest request, BidangUrusan existing) {
+        validateDuplicate(kodeOpd, request.kodeBidangUrusan(), existing.id());
 
-            BidangUrusan updated = new BidangUrusan(
-                    existing.id(),
-                    kodeOpd,
-                    request.kodeBidangUrusan(),
-                    request.namaBidangUrusan(),
-                    existing.createdDate(),
-                    null
-            );
-            return bidangUrusanRepository.save(updated);
-        }
+        BidangUrusan updated = new BidangUrusan(
+                existing.id(),
+                kodeOpd,
+                request.kodeBidangUrusan(),
+                request.namaBidangUrusan(),
+                existing.createdDate(),
+                null
+        );
+        return bidangUrusanRepository.save(updated);
+    }
 
+    private BidangUrusan simpanBidangUrusanBaru(String kodeOpd, OpdBidangUrusanRequest request) {
         if (bidangUrusanRepository.existsByKodeOpdAndKodeBidangUrusan(kodeOpd, request.kodeBidangUrusan())) {
             throw new BidangUrusanAlreadyExistException(request.kodeBidangUrusan(), kodeOpd);
         }
@@ -216,5 +219,9 @@ public class BidangUrusanService {
         }
 
         bidangUrusanRepository.deleteById(bidangUrusan.id());
+    }
+
+    private String normalizeKode(String kodeBidangUrusan) {
+        return kodeBidangUrusan == null ? "" : kodeBidangUrusan.trim().toLowerCase(Locale.ROOT);
     }
 }
