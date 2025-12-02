@@ -3,6 +3,7 @@ package cc.kertaskerja.bontang.opd.domain;
 import cc.kertaskerja.bontang.opd.domain.exception.OpdAlreadyExistException;
 import cc.kertaskerja.bontang.opd.domain.exception.OpdDeleteForbiddenException;
 import cc.kertaskerja.bontang.opd.domain.exception.OpdNotFoundException;
+import cc.kertaskerja.bontang.bidangurusan.domain.BidangUrusanRepository;
 import cc.kertaskerja.bontang.pegawai.domain.PegawaiRepository;
 import org.springframework.stereotype.Service;
 
@@ -10,10 +11,16 @@ import org.springframework.stereotype.Service;
 public class OpdService {
     private final OpdRepository opdRepository;
     private final PegawaiRepository pegawaiRepository;
+    private final BidangUrusanRepository bidangUrusanRepository;
 
-    public OpdService(OpdRepository opdRepository, PegawaiRepository pegawaiRepository) {
+    public OpdService(
+            OpdRepository opdRepository,
+            PegawaiRepository pegawaiRepository,
+            BidangUrusanRepository bidangUrusanRepository
+    ) {
         this.opdRepository = opdRepository;
         this.pegawaiRepository = pegawaiRepository;
+        this.bidangUrusanRepository = bidangUrusanRepository;
     }
 
     public Iterable<Opd> findAll() {
@@ -45,6 +52,10 @@ public class OpdService {
     public void hapusOpd(String kodeOpd) {
         Opd opd = opdRepository.findByKodeOpd(kodeOpd)
                 .orElseThrow(() -> new OpdNotFoundException(kodeOpd));
+
+        if (bidangUrusanRepository.existsByKodeOpd(kodeOpd)) {
+            throw new OpdDeleteForbiddenException(kodeOpd);
+        }
 
         if (pegawaiRepository.existsByOpdId(opd.id())) {
             throw new OpdDeleteForbiddenException(kodeOpd);

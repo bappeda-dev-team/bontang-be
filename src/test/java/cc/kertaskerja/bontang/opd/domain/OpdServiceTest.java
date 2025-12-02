@@ -3,6 +3,7 @@ package cc.kertaskerja.bontang.opd.domain;
 import cc.kertaskerja.bontang.opd.domain.exception.OpdAlreadyExistException;
 import cc.kertaskerja.bontang.opd.domain.exception.OpdDeleteForbiddenException;
 import cc.kertaskerja.bontang.opd.domain.exception.OpdNotFoundException;
+import cc.kertaskerja.bontang.bidangurusan.domain.BidangUrusanRepository;
 import cc.kertaskerja.bontang.pegawai.domain.PegawaiRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,11 +30,14 @@ public class OpdServiceTest {
     @Mock
     private PegawaiRepository pegawaiRepository;
 
+    @Mock
+    private BidangUrusanRepository bidangUrusanRepository;
+
     private OpdService opdService;
 
     @BeforeEach
     void setUp() {
-        opdService = new OpdService(opdRepository, pegawaiRepository);
+        opdService = new OpdService(opdRepository, pegawaiRepository, bidangUrusanRepository);
     }
 
     @Test
@@ -133,11 +137,13 @@ public class OpdServiceTest {
         Opd opd = new Opd(1L, kodeOpd, "BAPPEDA", Instant.now(), Instant.now());
 
         when(opdRepository.findByKodeOpd(kodeOpd)).thenReturn(Optional.of(opd));
+        when(bidangUrusanRepository.existsByKodeOpd(kodeOpd)).thenReturn(false);
         when(pegawaiRepository.existsByOpdId(opd.id())).thenReturn(false);
 
         opdService.hapusOpd(kodeOpd);
 
         verify(opdRepository).findByKodeOpd(kodeOpd);
+        verify(bidangUrusanRepository).existsByKodeOpd(kodeOpd);
         verify(pegawaiRepository).existsByOpdId(opd.id());
         verify(opdRepository).deleteByKodeOpd(kodeOpd);
     }
@@ -150,6 +156,7 @@ public class OpdServiceTest {
 
         assertThrows(OpdNotFoundException.class, () -> opdService.hapusOpd(kodeOpd));
         verify(opdRepository).findByKodeOpd(kodeOpd);
+        verify(bidangUrusanRepository, never()).existsByKodeOpd(any());
         verify(pegawaiRepository, never()).existsByOpdId(any());
         verify(opdRepository, never()).deleteByKodeOpd(any());
     }
@@ -160,11 +167,29 @@ public class OpdServiceTest {
         Opd opd = new Opd(1L, kodeOpd, "BAPPEDA", Instant.now(), Instant.now());
 
         when(opdRepository.findByKodeOpd(kodeOpd)).thenReturn(Optional.of(opd));
+        when(bidangUrusanRepository.existsByKodeOpd(kodeOpd)).thenReturn(false);
         when(pegawaiRepository.existsByOpdId(opd.id())).thenReturn(true);
 
         assertThrows(OpdDeleteForbiddenException.class, () -> opdService.hapusOpd(kodeOpd));
         verify(opdRepository).findByKodeOpd(kodeOpd);
+        verify(bidangUrusanRepository).existsByKodeOpd(kodeOpd);
         verify(pegawaiRepository).existsByOpdId(opd.id());
+        verify(opdRepository, never()).deleteByKodeOpd(any());
+    }
+
+    @Test
+    void hapusOpd_throwsException_whenBidangUrusanExists() {
+        String kodeOpd = "OPD-001";
+        Opd opd = new Opd(1L, kodeOpd, "BAPPEDA", Instant.now(), Instant.now());
+
+        when(opdRepository.findByKodeOpd(kodeOpd)).thenReturn(Optional.of(opd));
+        when(bidangUrusanRepository.existsByKodeOpd(kodeOpd)).thenReturn(true);
+
+        assertThrows(OpdDeleteForbiddenException.class, () -> opdService.hapusOpd(kodeOpd));
+
+        verify(opdRepository).findByKodeOpd(kodeOpd);
+        verify(bidangUrusanRepository).existsByKodeOpd(kodeOpd);
+        verify(pegawaiRepository, never()).existsByOpdId(any());
         verify(opdRepository, never()).deleteByKodeOpd(any());
     }
 }
