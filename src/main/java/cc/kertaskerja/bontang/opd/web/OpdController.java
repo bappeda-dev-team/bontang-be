@@ -109,6 +109,7 @@ public class OpdController {
         );
 
         Opd updated = opdService.ubahOpd(kodeOpd, opd);
+        boolean kodeOpdBerubah = !existingOpd.kodeOpd().equals(request.kodeOpd());
 
         if (request.bidangUrusan() != null) {
             bidangUrusanService.simpanAtauPerbaruiBidangUrusan(
@@ -116,6 +117,8 @@ public class OpdController {
                     request.kodeOpd(),
                     request.bidangUrusan()
             );
+        } else if (kodeOpdBerubah) {
+            bidangUrusanService.pindahBidangUrusanKeOpd(kodeOpd, request.kodeOpd());
         }
 
         return mapToResponse(updated);

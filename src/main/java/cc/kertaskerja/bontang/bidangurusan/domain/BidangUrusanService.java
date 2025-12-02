@@ -13,6 +13,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -223,5 +224,38 @@ public class BidangUrusanService {
 
     private String normalizeKode(String kodeBidangUrusan) {
         return kodeBidangUrusan == null ? "" : kodeBidangUrusan.trim().toLowerCase(Locale.ROOT);
+    }
+
+    public void pindahBidangUrusanKeOpd(String sumberKodeOpd, String targetKodeOpd) {
+        if (!StringUtils.hasText(targetKodeOpd) || sumberKodeOpd.equals(targetKodeOpd)) {
+            return;
+        }
+
+        Map<String, BidangUrusan> targetByKode = new HashMap<>();
+        bidangUrusanRepository.findByKodeOpd(targetKodeOpd)
+                .forEach(item -> {
+                    if (item.id() != null) {
+                        targetByKode.put(normalizeKode(item.kodeBidangUrusan()), item);
+                    }
+                });
+
+        bidangUrusanRepository.findByKodeOpd(sumberKodeOpd)
+                .forEach(item -> {
+                    String key = normalizeKode(item.kodeBidangUrusan());
+                    BidangUrusan duplicate = targetByKode.get(key);
+                    if (duplicate != null && !duplicate.id().equals(item.id())) {
+                        throw new BidangUrusanAlreadyExistException(item.kodeBidangUrusan(), targetKodeOpd);
+                    }
+
+                    BidangUrusan updated = new BidangUrusan(
+                            item.id(),
+                            targetKodeOpd,
+                            item.kodeBidangUrusan(),
+                            item.namaBidangUrusan(),
+                            item.createdDate(),
+                            null
+                    );
+                    bidangUrusanRepository.save(updated);
+                });
     }
 }
