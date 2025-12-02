@@ -27,6 +27,10 @@ public class SubKegiatanService {
         return subKegiatanRepository.findAll();
     }
 
+    public List<SubKegiatan> findAllByKodeOpd(String kodeOpd) {
+        return subKegiatanRepository.findAllByKodeOpd(kodeOpd);
+    }
+
     public SubKegiatan detailSubKegiatanByKodeSubKegiatan(String kodeSubKegiatan) {
         return subKegiatanRepository.findByKodeSubKegiatan(kodeSubKegiatan)
                 .orElseThrow(() -> new SubKegiatanNotFoundException(kodeSubKegiatan));
@@ -57,8 +61,42 @@ public class SubKegiatanService {
         subKegiatanRepository.deleteByKodeSubKegiatan(kodeSubKegiatan);
     }
 
+    public void hapusSubKegiatan(String kodeOpd, String kodeSubKegiatan) {
+        SubKegiatan subKegiatan = subKegiatanRepository.findByKodeSubKegiatanAndKodeOpd(kodeSubKegiatan, kodeOpd)
+                .orElseThrow(() -> new SubKegiatanNotFoundException(kodeSubKegiatan));
+
+        subKegiatanRepository.deleteById(subKegiatan.id());
+    }
+
     public List<SubKegiatan> detailSubKegiatanByKodeSubKegiatanIn(List<String> kodeSubKegiatans) {
         List<SubKegiatan> subKegiatans = subKegiatanRepository.findAllByKodeSubKegiatanIn(kodeSubKegiatans);
+        if (subKegiatans.size() != kodeSubKegiatans.size()) {
+            Set<String> foundKode = subKegiatans.stream()
+                    .map(SubKegiatan::kodeSubKegiatan)
+                    .collect(Collectors.toSet());
+
+            String missingKode = kodeSubKegiatans.stream()
+                    .filter(kode -> !foundKode.contains(kode))
+                    .findFirst()
+                    .orElse(null);
+
+            if (missingKode != null) {
+                throw new SubKegiatanNotFoundException(missingKode);
+            }
+        }
+
+        return subKegiatans;
+    }
+
+    public List<SubKegiatan> detailSubKegiatanByKodeOpdAndKodeSubKegiatanIn(
+            String kodeOpd,
+            List<String> kodeSubKegiatans
+    ) {
+        List<SubKegiatan> subKegiatans = subKegiatanRepository.findAllByKodeSubKegiatanInAndKodeOpd(
+                kodeSubKegiatans,
+                kodeOpd
+        );
+
         if (subKegiatans.size() != kodeSubKegiatans.size()) {
             Set<String> foundKode = subKegiatans.stream()
                     .map(SubKegiatan::kodeSubKegiatan)

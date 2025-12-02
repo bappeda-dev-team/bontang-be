@@ -93,17 +93,18 @@ public class ProgramControllerTest {
     @Test
     void findBatch_returnsProgramsFromService() {
         ProgramBatchRequest request = new ProgramBatchRequest(List.of("PR-001", "PR-002"));
+        String kodeOpd = "OPD-01";
         List<Program> programs = List.of(
                 new Program(1L, "PR-001", "Program 1", 10L, Instant.now(), Instant.now()),
                 new Program(2L, "PR-002", "Program 2", 11L, Instant.now(), Instant.now())
         );
 
-        when(programService.detailProgramByKodeProgramIn(request.kodeProgram())).thenReturn(programs);
+        when(programService.detailProgramByKodeProgramInAndKodeOpd(request.kodeProgram(), kodeOpd)).thenReturn(programs);
 
-        List<Program> result = programController.findBatch(request);
+        List<Program> result = programController.findBatch(kodeOpd, request);
 
         assertEquals(programs, result);
-        verify(programService).detailProgramByKodeProgramIn(request.kodeProgram());
+        verify(programService).detailProgramByKodeProgramInAndKodeOpd(request.kodeProgram(), kodeOpd);
     }
 
     @Test

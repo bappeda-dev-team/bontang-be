@@ -70,6 +70,35 @@ public class KegiatanControllerTest {
     }
 
     @Test
+    void findAllByKodeOpd_returnsAllKegiatanForOpdFromService() {
+        String kodeOpd = "OPD-01";
+        Instant created1 = Instant.parse("2024-01-01T00:00:00Z");
+        Instant modified1 = Instant.parse("2024-01-02T00:00:00Z");
+        Instant created2 = Instant.parse("2024-02-01T00:00:00Z");
+        Instant modified2 = Instant.parse("2024-02-02T00:00:00Z");
+        List<Kegiatan> kegiatanList = List.of(
+                new Kegiatan(1L, "KG-001", "Kegiatan 1", 10L, created1, modified1),
+                new Kegiatan(2L, "KG-002", "Kegiatan 2", 11L, created2, modified2)
+        );
+
+        when(kegiatanService.findAllByKodeOpd(kodeOpd)).thenReturn(kegiatanList);
+        when(kegiatanService.getKodeProgram(10L)).thenReturn("PR-10");
+        when(kegiatanService.getKodeProgram(11L)).thenReturn("PR-11");
+
+        List<KegiatanResponse> result = kegiatanController.findAllByKodeOpd(kodeOpd);
+
+        List<KegiatanResponse> expected = List.of(
+                new KegiatanResponse(1L, "KG-001", "Kegiatan 1", "PR-10", created1, modified1),
+                new KegiatanResponse(2L, "KG-002", "Kegiatan 2", "PR-11", created2, modified2)
+        );
+
+        assertEquals(expected, result);
+        verify(kegiatanService).findAllByKodeOpd(kodeOpd);
+        verify(kegiatanService).getKodeProgram(10L);
+        verify(kegiatanService).getKodeProgram(11L);
+    }
+
+    @Test
     void getByKodeKegiatan_returnsKegiatanFromService() {
         String kodeKegiatan = "KG-001";
         Kegiatan kegiatan = new Kegiatan(1L, kodeKegiatan, "Kegiatan 1", 10L, Instant.now(), Instant.now());
@@ -84,18 +113,19 @@ public class KegiatanControllerTest {
 
     @Test
     void findBatch_returnsKegiatanFromService() {
+        String kodeOpd = "OPD-01";
         KegiatanBatchRequest request = new KegiatanBatchRequest(List.of("KG-001", "KG-002"));
         List<Kegiatan> kegiatans = List.of(
                 new Kegiatan(1L, "KG-001", "Kegiatan 1", 10L, Instant.now(), Instant.now()),
                 new Kegiatan(2L, "KG-002", "Kegiatan 2", 11L, Instant.now(), Instant.now())
         );
 
-        when(kegiatanService.detailKegiatanByKodeKegiatanIn(request.kodeKegiatan())).thenReturn(kegiatans);
+        when(kegiatanService.detailKegiatanByKodeOpdAndKodeKegiatanIn(kodeOpd, request.kodeKegiatan())).thenReturn(kegiatans);
 
-        List<Kegiatan> result = kegiatanController.findBatch(request);
+        List<Kegiatan> result = kegiatanController.findBatch(kodeOpd, request);
 
         assertEquals(kegiatans, result);
-        verify(kegiatanService).detailKegiatanByKodeKegiatanIn(request.kodeKegiatan());
+        verify(kegiatanService).detailKegiatanByKodeOpdAndKodeKegiatanIn(kodeOpd, request.kodeKegiatan());
     }
 
     @Test
@@ -163,5 +193,15 @@ public class KegiatanControllerTest {
         kegiatanController.delete(kodeKegiatan);
 
         verify(kegiatanService).hapusKegiatan(kodeKegiatan);
+    }
+
+    @Test
+    void deleteByKodeOpdAndKodeKegiatan_deletesKegiatanUsingService() {
+        String kodeOpd = "OPD-01";
+        String kodeKegiatan = "KG-001";
+
+        kegiatanController.deleteByKodeOpdAndKodeKegiatan(kodeOpd, kodeKegiatan);
+
+        verify(kegiatanService).hapusKegiatan(kodeOpd, kodeKegiatan);
     }
 }

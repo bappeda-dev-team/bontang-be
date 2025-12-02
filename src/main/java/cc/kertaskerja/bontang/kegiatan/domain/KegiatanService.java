@@ -33,6 +33,10 @@ public class KegiatanService{
         return kegiatanRepository.findAll();
     }
 
+    public List<Kegiatan> findAllByKodeOpd(String kodeOpd) {
+        return kegiatanRepository.findAllByKodeOpd(kodeOpd);
+    }
+
     public Kegiatan detailKegiatanByKodeKegiatan(String kodeKegiatan) {
         return kegiatanRepository.findByKodeKegiatan(kodeKegiatan)
                 .orElseThrow(() -> new KegiatanNotFoundException(kodeKegiatan));
@@ -40,6 +44,26 @@ public class KegiatanService{
 
     public List<Kegiatan> detailKegiatanByKodeKegiatanIn(List<String> kodeKegiatan) {
         List<Kegiatan> kegiatans = kegiatanRepository.findAllByKodeKegiatanIn(kodeKegiatan);
+        if (kegiatans.size() != kodeKegiatan.size()) {
+            Set<String> foundKode = kegiatans.stream()
+                    .map(Kegiatan::kodeKegiatan)
+                    .collect(Collectors.toSet());
+
+            String missingKode = kodeKegiatan.stream()
+                    .filter(kode -> !foundKode.contains(kode))
+                    .findFirst()
+                    .orElse(null);
+
+            if (missingKode != null) {
+                throw new KegiatanNotFoundException(missingKode);
+            }
+        }
+
+        return kegiatans;
+    }
+
+    public List<Kegiatan> detailKegiatanByKodeOpdAndKodeKegiatanIn(String kodeOpd, List<String> kodeKegiatan) {
+        List<Kegiatan> kegiatans = kegiatanRepository.findAllByKodeKegiatanInAndKodeOpd(kodeKegiatan, kodeOpd);
         if (kegiatans.size() != kodeKegiatan.size()) {
             Set<String> foundKode = kegiatans.stream()
                     .map(Kegiatan::kodeKegiatan)
@@ -88,6 +112,17 @@ public class KegiatanService{
         }
 
         kegiatanRepository.deleteByKodeKegiatan(kodeKegiatan);
+    }
+
+    public void hapusKegiatan(String kodeOpd, String kodeKegiatan) {
+        Kegiatan kegiatan = kegiatanRepository.findByKodeKegiatanAndKodeOpd(kodeKegiatan, kodeOpd)
+                .orElseThrow(() -> new KegiatanNotFoundException(kodeKegiatan));
+
+        if (subKegiatanRepository.existsByKegiatanId(kegiatan.id())) {
+            throw new KegiatanDeleteForbiddenException(kodeKegiatan);
+        }
+
+        kegiatanRepository.deleteByKodeKegiatanAndKodeOpd(kodeKegiatan, kodeOpd);
     }
 
     public String getKodeProgram(Long programId) {

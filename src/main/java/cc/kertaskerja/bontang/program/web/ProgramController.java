@@ -57,11 +57,15 @@ public class ProgramController {
     }
 
     /**
-     * Ambil data program berdasarkan kumpulan kode program
+     * Ambil semua data program berdasarkan kode opd
+     * @param kodeOpd
      */
-    @PostMapping("find/batch")
-    public List<Program> findBatch(@Valid @RequestBody ProgramBatchRequest request) {
-        return programService.detailProgramByKodeProgramIn(request.kodeProgram());
+    @GetMapping("detail/findall/{kodeOpd}")
+    public List<ProgramResponse> findAllByKodeOpd(@PathVariable("kodeOpd") String kodeOpd) {
+        Iterable<Program> programs = programService.findAllByKodeOpd(kodeOpd);
+        return StreamSupport.stream(programs.spliterator(), false)
+                .map(this::mapToResponse)
+                .toList();
     }
 
     /**
@@ -106,6 +110,17 @@ public class ProgramController {
     }
 
     /**
+     * Ambil data program berdasarkan kumpulan kode program
+     */
+    @PostMapping("{kodeOpd}/find/batch")
+    public List<Program> findBatch(
+            @PathVariable("kodeOpd") String kodeOpd,
+            @Valid @RequestBody ProgramBatchRequest request
+    ) {
+        return programService.detailProgramByKodeProgramInAndKodeOpd(request.kodeProgram(), kodeOpd);
+    }
+
+    /**
      * Hapus program berdasarkan kode program
      * @param kodeProgram
      */
@@ -113,6 +128,20 @@ public class ProgramController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("kodeProgram") String kodeProgram) {
         programService.hapusProgram(kodeProgram);
+    }
+
+    /**
+     * Hapus program berdasarkan kode opd dan kode program
+     * @param kodeOpd
+     * @param kodeProgram
+     */
+    @DeleteMapping("delete/{kodeOpd}/{kodeProgram}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteByKodeOpdAndKodeProgram(
+            @PathVariable("kodeOpd") String kodeOpd,
+            @PathVariable("kodeProgram") String kodeProgram
+    ) {
+        programService.hapusProgram(kodeOpd, kodeProgram);
     }
 
     private ProgramResponse mapToResponse(Program program) {

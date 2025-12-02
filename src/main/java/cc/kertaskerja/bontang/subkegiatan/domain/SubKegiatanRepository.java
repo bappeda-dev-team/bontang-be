@@ -23,7 +23,42 @@ public interface SubKegiatanRepository extends CrudRepository<SubKegiatan, Long>
     Optional<SubKegiatan> findByKodeSubKegiatan(@NonNull String kodeSubKegiatan);
 
     @NonNull
+    @Query("SELECT s.id, s.kode_subkegiatan, s.nama_subkegiatan, s.kegiatan_id, s.created_date, s.last_modified_date " +
+            "FROM subkegiatan s " +
+            "JOIN kegiatan k ON s.kegiatan_id = k.id " +
+            "JOIN program p ON k.program_id = p.id " +
+            "JOIN bidang_urusan b ON p.bidang_urusan_id = b.id " +
+            "WHERE b.kode_opd = :kodeOpd")
+    List<SubKegiatan> findAllByKodeOpd(@NonNull @Param("kodeOpd") String kodeOpd);
+
+    @NonNull
     List<SubKegiatan> findAllByKodeSubKegiatanIn(@NonNull Collection<String> kodeSubKegiatans);
+
+    @NonNull
+    @Query("SELECT s.id, s.kode_subkegiatan, s.nama_subkegiatan, s.kegiatan_id, s.created_date, s.last_modified_date " +
+            "FROM subkegiatan s " +
+            "JOIN kegiatan k ON s.kegiatan_id = k.id " +
+            "JOIN program p ON k.program_id = p.id " +
+            "JOIN bidang_urusan b ON p.bidang_urusan_id = b.id " +
+            "WHERE s.kode_subkegiatan IN (:kodeSubKegiatans) " +
+            "AND b.kode_opd = :kodeOpd")
+    List<SubKegiatan> findAllByKodeSubKegiatanInAndKodeOpd(
+            @NonNull @Param("kodeSubKegiatans") Collection<String> kodeSubKegiatans,
+            @NonNull @Param("kodeOpd") String kodeOpd
+    );
+
+    @NonNull
+    @Query("SELECT s.id, s.kode_subkegiatan, s.nama_subkegiatan, s.kegiatan_id, s.created_date, s.last_modified_date " +
+            "FROM subkegiatan s " +
+            "JOIN kegiatan k ON s.kegiatan_id = k.id " +
+            "JOIN program p ON k.program_id = p.id " +
+            "JOIN bidang_urusan b ON p.bidang_urusan_id = b.id " +
+            "WHERE s.kode_subkegiatan = :kodeSubKegiatan " +
+            "AND b.kode_opd = :kodeOpd")
+    Optional<SubKegiatan> findByKodeSubKegiatanAndKodeOpd(
+            @NonNull @Param("kodeSubKegiatan") String kodeSubKegiatan,
+            @NonNull @Param("kodeOpd") String kodeOpd
+    );
 
     @Modifying
     @Transactional

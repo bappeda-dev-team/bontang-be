@@ -48,11 +48,30 @@ public class SubKegiatanController {
     }
 
     /**
-     * Ambil data sub kegiatan berdasarkan kumpulan kode sub kegiatan
+     * Ambil semua data sub kegiatan berdasarkan kode opd
+     * @param kodeOpd
      */
-    @PostMapping("find/batch")
-    public List<SubKegiatan> findBatch(@Valid @RequestBody SubKegiatanBatchRequest request) {
-        return subKegiatanService.detailSubKegiatanByKodeSubKegiatanIn(request.kodeSubKegiatan());
+    @GetMapping("detail/findall/{kodeOpd}")
+    public List<SubKegiatanResponse> findAllByKodeOpd(@PathVariable("kodeOpd") String kodeOpd) {
+        List<SubKegiatan> subKegiatans = subKegiatanService.findAllByKodeOpd(kodeOpd);
+
+        return subKegiatans.stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    /**
+     * Ambil data sub kegiatan berdasarkan kode opd dan kumpulan kode sub kegiatan
+     */
+    @PostMapping("{kodeOpd}/find/batch")
+    public List<SubKegiatan> findBatch(
+            @PathVariable("kodeOpd") String kodeOpd,
+            @Valid @RequestBody SubKegiatanBatchRequest request
+    ) {
+        return subKegiatanService.detailSubKegiatanByKodeOpdAndKodeSubKegiatanIn(
+                kodeOpd,
+                request.kodeSubKegiatan()
+        );
     }
 
     /**
@@ -104,6 +123,20 @@ public class SubKegiatanController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("kodeSubKegiatan") String kodeSubKegiatan) {
         subKegiatanService.hapusSubKegiatan(kodeSubKegiatan);
+    }
+
+    /**
+     * Hapus sub kegiatan berdasarkan kode opd dan kode sub kegiatan
+     * @param kodeOpd
+     * @param kodeSubKegiatan
+     */
+    @DeleteMapping("delete/{kodeOpd}/{kodeSubKegiatan}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(
+            @PathVariable("kodeOpd") String kodeOpd,
+            @PathVariable("kodeSubKegiatan") String kodeSubKegiatan
+    ) {
+        subKegiatanService.hapusSubKegiatan(kodeOpd, kodeSubKegiatan);
     }
 
     private SubKegiatanResponse mapToResponse(SubKegiatan subKegiatan) {

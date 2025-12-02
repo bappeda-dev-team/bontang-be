@@ -33,6 +33,10 @@ public class ProgramService {
         return programRepository.findAll();
     }
 
+    public List<Program> findAllByKodeOpd(String kodeOpd) {
+        return programRepository.findAllByKodeOpd(kodeOpd);
+    }
+
     public String getKodeBidangUrusan(Long bidangUrusanId) {
         return bidangUrusanRepository.findById(bidangUrusanId)
                 .map(BidangUrusan::kodeBidangUrusan)
@@ -81,6 +85,26 @@ public class ProgramService {
         return programs;
     }
 
+    public List<Program> detailProgramByKodeProgramInAndKodeOpd(List<String> kodePrograms, String kodeOpd) {
+        List<Program> programs = programRepository.findAllByKodeProgramInAndKodeOpd(kodePrograms, kodeOpd);
+        if (programs.size() != kodePrograms.size()) {
+            Set<String> foundKode = programs.stream()
+                    .map(Program::kodeProgram)
+                    .collect(Collectors.toSet());
+
+            String missingKode = kodePrograms.stream()
+                    .filter(kode -> !foundKode.contains(kode))
+                    .findFirst()
+                    .orElse(null);
+
+            if (missingKode != null) {
+                throw new ProgramNotFoundException(missingKode);
+            }
+        }
+
+        return programs;
+    }
+
     public Program tambahProgram(Program program, String kodeBidangUrusan) {
         Long bidangUrusanId = getBidangUrusanId(kodeBidangUrusan);
         Program programWithBidang = attachBidangUrusan(program, bidangUrusanId);
@@ -108,5 +132,16 @@ public class ProgramService {
         }
 
         programRepository.deleteByKodeProgram(kodeProgram);
+    }
+
+    public void hapusProgram(String kodeOpd, String kodeProgram) {
+        Program program = programRepository.findByKodeProgramAndKodeOpd(kodeProgram, kodeOpd)
+                .orElseThrow(() -> new ProgramNotFoundException(kodeProgram));
+
+        if (kegiatanRepository.existsByProgramId(program.id())) {
+            throw new ProgramDeleteForbiddenException(kodeProgram);
+        }
+
+        programRepository.deleteByKodeProgramAndKodeOpd(kodeProgram, kodeOpd);
     }
 }

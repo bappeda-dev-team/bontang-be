@@ -25,8 +25,46 @@ public interface ProgramRepository extends CrudRepository<Program, Long> {
     @NonNull
     List<Program> findAllByKodeProgramIn(@NonNull Collection<String> kodePrograms);
 
+    @NonNull
+    @Query("SELECT p.id, p.kode_program, p.nama_program, p.bidang_urusan_id, p.created_date, p.last_modified_date " +
+            "FROM program p " +
+            "JOIN bidang_urusan b ON p.bidang_urusan_id = b.id " +
+            "WHERE b.kode_opd = :kodeOpd")
+    List<Program> findAllByKodeOpd(@NonNull @Param("kodeOpd") String kodeOpd);
+
+    @NonNull
+    @Query("SELECT p.id, p.kode_program, p.nama_program, p.bidang_urusan_id, p.created_date, p.last_modified_date " +
+            "FROM program p " +
+            "JOIN bidang_urusan b ON p.bidang_urusan_id = b.id " +
+            "WHERE p.kode_program = :kodeProgram AND b.kode_opd = :kodeOpd")
+    Optional<Program> findByKodeProgramAndKodeOpd(
+            @NonNull @Param("kodeProgram") String kodeProgram,
+            @NonNull @Param("kodeOpd") String kodeOpd
+    );
+
+    @NonNull
+    @Query("SELECT p.id, p.kode_program, p.nama_program, p.bidang_urusan_id, p.created_date, p.last_modified_date " +
+            "FROM program p " +
+            "JOIN bidang_urusan b ON p.bidang_urusan_id = b.id " +
+            "WHERE p.kode_program IN (:kodePrograms) AND b.kode_opd = :kodeOpd")
+    List<Program> findAllByKodeProgramInAndKodeOpd(
+            @NonNull @Param("kodePrograms") Collection<String> kodePrograms,
+            @NonNull @Param("kodeOpd") String kodeOpd
+    );
+
     @Modifying
     @Transactional
     @Query("DELETE FROM program WHERE kode_program = :kodeProgram")
     void deleteByKodeProgram(@NonNull @Param("kodeProgram") String kodeProgram);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM program p USING bidang_urusan b " +
+            "WHERE p.bidang_urusan_id = b.id " +
+            "AND p.kode_program = :kodeProgram " +
+            "AND b.kode_opd = :kodeOpd")
+    void deleteByKodeProgramAndKodeOpd(
+            @NonNull @Param("kodeProgram") String kodeProgram,
+            @NonNull @Param("kodeOpd") String kodeOpd
+    );
 }

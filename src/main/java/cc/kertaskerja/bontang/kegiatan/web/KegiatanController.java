@@ -47,11 +47,15 @@ public class KegiatanController {
     }
 
     /**
-     * Ambil data kegiatan berdasarkan kumpulan kode kegiatan
+     * Ambil semua data kegiatan berdasarkan kode opd
+     * @param kodeOpd
      */
-    @PostMapping("find/batch")
-    public List<Kegiatan> findBatch(@Valid @RequestBody KegiatanBatchRequest request) {
-        return kegiatanService.detailKegiatanByKodeKegiatanIn(request.kodeKegiatan());
+    @GetMapping("detail/findall/{kodeOpd}")
+    public List<KegiatanResponse> findAllByKodeOpd(@PathVariable("kodeOpd") String kodeOpd) {
+        Iterable<Kegiatan> kegiatans = kegiatanService.findAllByKodeOpd(kodeOpd);
+        return StreamSupport.stream(kegiatans.spliterator(), false)
+                .map(this::mapToResponse)
+                .toList();
     }
 
     /**
@@ -96,6 +100,18 @@ public class KegiatanController {
     }
 
     /**
+     * Ambil data kegiatan berdasarkan kumpulan kode kegiatan
+     */
+    @PostMapping("{kodeOpd}/find/batch")
+    public List<Kegiatan> findBatch(
+            @PathVariable("kodeOpd") String kodeOpd,
+            @Valid @RequestBody KegiatanBatchRequest request
+    ) {
+        return kegiatanService.detailKegiatanByKodeOpdAndKodeKegiatanIn(kodeOpd, request.kodeKegiatan());
+    }
+
+
+    /**
      * Hapus kegiatan berdasarkan kode kegiatan
      * @param kodeKegiatan
      */
@@ -103,6 +119,20 @@ public class KegiatanController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("kodeKegiatan") String kodeKegiatan) {
         kegiatanService.hapusKegiatan(kodeKegiatan);
+    }
+
+    /**
+     * Hapus kegiatan berdasarkan kode opd dan kode kegiatan
+     * @param kodeOpd
+     * @param kodeKegiatan
+     */
+    @DeleteMapping("delete/{kodeOpd}/{kodeKegiatan}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteByKodeOpdAndKodeKegiatan(
+            @PathVariable("kodeOpd") String kodeOpd,
+            @PathVariable("kodeKegiatan") String kodeKegiatan
+    ) {
+        kegiatanService.hapusKegiatan(kodeOpd, kodeKegiatan);
     }
 
     private KegiatanResponse mapToResponse(Kegiatan kegiatan) {
