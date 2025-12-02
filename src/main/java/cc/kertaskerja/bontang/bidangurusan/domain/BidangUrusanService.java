@@ -40,7 +40,7 @@ public class BidangUrusanService {
     }
 
     public BidangUrusan simpanBidangUrusan(String kodeOpd, BidangUrusanRequest request) {
-        BidangUrusanDto towerData = cariBidangUrusanTowerByNama(request.namaBidangUrusan())
+        BidangUrusanDto towerData = cariBidangUrusanTower(request.namaBidangUrusan())
                 .orElseThrow(() -> new BidangUrusanNotFoundException(request.namaBidangUrusan()));
 
         if (bidangUrusanRepository.existsByKodeOpdAndKodeBidangUrusan(kodeOpd, towerData.kodeBidangUrusan())) {
@@ -147,10 +147,24 @@ public class BidangUrusanService {
                 .orElseGet(List::of);
     }
 
-    private Optional<BidangUrusanDto> cariBidangUrusanTowerByNama(String namaBidangUrusan) {
+    private Optional<BidangUrusanDto> cariBidangUrusanTower(String identifier) {
+        if (!StringUtils.hasText(identifier)) {
+            return Optional.empty();
+        }
+
+        String keyword = identifier.trim();
+        String numericKeyword = keyword.replaceAll("\\D", "");
+
         return fetchAllFromTower()
                 .stream()
-                .filter(item -> namaBidangUrusan.equalsIgnoreCase(item.namaBidangUrusan()))
+                .filter(item ->
+                        keyword.equalsIgnoreCase(item.namaBidangUrusan()) ||
+                                keyword.equalsIgnoreCase(item.kodeBidangUrusan()) ||
+                                (item.id() != null && (
+                                        keyword.equalsIgnoreCase(String.valueOf(item.id())) ||
+                                                (!numericKeyword.isEmpty() && numericKeyword.equals(String.valueOf(item.id())))
+                                ))
+                )
                 .findFirst();
     }
 
