@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -111,8 +110,12 @@ public class OpdController {
 
         Opd updated = opdService.ubahOpd(kodeOpd, opd);
 
-        if (StringUtils.hasText(request.namaBidangUrusan())) {
-            bidangUrusanService.updateNamaBidangUrusan(kodeOpd, request.namaBidangUrusan());
+        if (request.bidangUrusan() != null) {
+            bidangUrusanService.simpanAtauPerbaruiBidangUrusan(
+                    kodeOpd,
+                    request.kodeOpd(),
+                    request.bidangUrusan()
+            );
         }
 
         return mapToResponse(updated);
@@ -168,6 +171,7 @@ public class OpdController {
 
     private OpdBidangUrusanResponse mapBidangUrusan(BidangUrusan bidangUrusan) {
         return new OpdBidangUrusanResponse(
+                bidangUrusan.id(),
                 bidangUrusan.kodeBidangUrusan(),
                 bidangUrusan.namaBidangUrusan()
         );

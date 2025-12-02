@@ -7,6 +7,7 @@ import cc.kertaskerja.bontang.bidangurusan.web.BidangUrusanRequest;
 import cc.kertaskerja.bontang.opd.domain.Opd;
 import cc.kertaskerja.bontang.opd.domain.OpdService;
 import cc.kertaskerja.bontang.opd.domain.exception.OpdDeleteForbiddenException;
+import cc.kertaskerja.bontang.opd.web.OpdBidangUrusanRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -67,7 +68,7 @@ public class OpdControllerTest {
 
         List<OpdResponse> expected = List.of(
                 new OpdResponse(1L, "OPD-001", "BAPPEDA", created, modified, List.of(
-                        new OpdBidangUrusanResponse("BID-01", "Urusan A")
+                        new OpdBidangUrusanResponse(1L, "BID-01", "Urusan A")
                 )),
                 new OpdResponse(2L, "OPD-002", "BPKAD", created, modified, List.of())
         );
@@ -111,15 +112,27 @@ public class OpdControllerTest {
     void put_updatesOpdUsingService() {
         String kodeOpd = "OPD-001";
         Opd existingOpd = new Opd(1L, kodeOpd, "BAPPEDA", Instant.parse("2024-01-01T00:00:00Z"), Instant.parse("2024-01-02T00:00:00Z"));
-        OpdRequest request = new OpdRequest(null, "OPD-002", "BAPPEDA UPDATED", "Bidang Diperbarui");
+        OpdRequest request = new OpdRequest(
+                null,
+                "OPD-002",
+                "BAPPEDA UPDATED",
+                List.of(new OpdBidangUrusanRequest(5L, "BID-01", "Bidang Diperbarui"))
+        );
 
         Instant updatedAt = Instant.parse("2024-01-03T00:00:00Z");
         Opd updatedOpd = new Opd(1L, request.kodeOpd(), request.namaOpd(), existingOpd.createdDate(), updatedAt);
 
         when(opdService.detailOpdByKodeOpd(kodeOpd)).thenReturn(existingOpd);
         when(opdService.ubahOpd(eq(kodeOpd), any(Opd.class))).thenReturn(updatedOpd);
+        when(bidangUrusanService.simpanAtauPerbaruiBidangUrusan(
+                eq(kodeOpd),
+                eq(request.kodeOpd()),
+                eq(request.bidangUrusan())
+        )).thenReturn(List.of(
+                new BidangUrusan(5L, request.kodeOpd(), "BID-01", "Bidang Diperbarui", existingOpd.createdDate(), updatedAt)
+        ));
         when(bidangUrusanService.findByKodeOpd(request.kodeOpd())).thenReturn(List.of(
-                new BidangUrusan(5L, request.kodeOpd(), "BID-01", request.namaBidangUrusan(), existingOpd.createdDate(), updatedAt)
+                new BidangUrusan(5L, request.kodeOpd(), "BID-01", "Bidang Diperbarui", existingOpd.createdDate(), updatedAt)
         ));
 
         OpdResponse result = opdController.put(kodeOpd, request);
@@ -127,7 +140,7 @@ public class OpdControllerTest {
         ArgumentCaptor<Opd> opdCaptor = ArgumentCaptor.forClass(Opd.class);
         verify(opdService).detailOpdByKodeOpd(kodeOpd);
         verify(opdService).ubahOpd(eq(kodeOpd), opdCaptor.capture());
-        verify(bidangUrusanService).updateNamaBidangUrusan(kodeOpd, request.namaBidangUrusan());
+        verify(bidangUrusanService).simpanAtauPerbaruiBidangUrusan(kodeOpd, request.kodeOpd(), request.bidangUrusan());
         verify(bidangUrusanService).findByKodeOpd(request.kodeOpd());
 
         Opd opdPassed = opdCaptor.getValue();
@@ -143,7 +156,7 @@ public class OpdControllerTest {
                 updatedOpd.namaOpd(),
                 updatedOpd.createdDate(),
                 updatedOpd.lastModifiedDate(),
-                List.of(new OpdBidangUrusanResponse("BID-01", request.namaBidangUrusan()))
+                List.of(new OpdBidangUrusanResponse(5L, "BID-01", "Bidang Diperbarui"))
         );
 
         assertEquals(expected, result);
@@ -151,7 +164,7 @@ public class OpdControllerTest {
 
     @Test
     void post_createsOpdAndReturnsCreatedResponse() {
-        OpdRequest request = new OpdRequest(null, "OPD-001", "BAPPEDA", null);
+        OpdRequest request = new OpdRequest(null, "OPD-001", "BAPPEDA", List.of());
         Opd savedOpd = new Opd(1L, request.kodeOpd(), request.namaOpd(), Instant.parse("2024-01-01T00:00:00Z"), Instant.parse("2024-01-01T00:00:00Z"));
 
         when(opdService.tambahOpd(any(Opd.class))).thenReturn(savedOpd);

@@ -1,8 +1,11 @@
 package cc.kertaskerja.bontang.opd.web;
 
 import jakarta.annotation.Nullable;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
 
 public record OpdRequest(
         @Nullable
@@ -17,6 +20,7 @@ public record OpdRequest(
         String namaOpd,
 
         @Nullable
-        String namaBidangUrusan
+        @Valid
+        List<OpdBidangUrusanRequest> bidangUrusan
 ) {
 }
