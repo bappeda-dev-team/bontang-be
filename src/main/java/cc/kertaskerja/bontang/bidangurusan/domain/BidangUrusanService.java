@@ -12,8 +12,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class BidangUrusanService {
@@ -61,15 +66,45 @@ public class BidangUrusanService {
             String targetKodeOpd,
             List<OpdBidangUrusanRequest> requests
     ) {
-        if (requests == null || requests.isEmpty()) {
+        if (requests == null) {
             return List.of();
         }
 
         String kodeOpd = StringUtils.hasText(targetKodeOpd) ? targetKodeOpd : existingKodeOpd;
 
-        return requests.stream()
-                .map(request -> simpanAtauPerbaruiBidangUrusan(kodeOpd, request))
-                .toList();
+        Map<Long, BidangUrusan> existing = new LinkedHashMap<>();
+        bidangUrusanRepository.findByKodeOpd(existingKodeOpd)
+                .forEach(item -> {
+                    if (item.id() != null) {
+                        existing.put(item.id(), item);
+                    }
+                });
+
+        if (StringUtils.hasText(targetKodeOpd) && !targetKodeOpd.equals(existingKodeOpd)) {
+            bidangUrusanRepository.findByKodeOpd(targetKodeOpd)
+                    .forEach(item -> {
+                        if (item.id() != null) {
+                            existing.putIfAbsent(item.id(), item);
+                        }
+                    });
+        }
+
+        List<BidangUrusan> saved = new ArrayList<>();
+        Set<Long> retainedIds = new HashSet<>();
+
+        for (OpdBidangUrusanRequest request : requests) {
+            BidangUrusan savedData = simpanAtauPerbaruiBidangUrusan(kodeOpd, request);
+            saved.add(savedData);
+            if (savedData.id() != null) {
+                retainedIds.add(savedData.id());
+            }
+        }
+
+        existing.values().stream()
+                .filter(item -> item.id() != null && !retainedIds.contains(item.id()))
+                .forEach(this::hapusBidangUrusan);
+
+        return saved;
     }
 
     private BidangUrusan simpanAtauPerbaruiBidangUrusan(String kodeOpd, OpdBidangUrusanRequest request) {
@@ -172,8 +207,12 @@ public class BidangUrusanService {
         BidangUrusan bidangUrusan = bidangUrusanRepository.findByKodeBidangUrusan(kodeBidangUrusan)
                 .orElseThrow(() -> new BidangUrusanNotFoundException(kodeBidangUrusan));
 
+        hapusBidangUrusan(bidangUrusan);
+    }
+
+    private void hapusBidangUrusan(BidangUrusan bidangUrusan) {
         if (programRepository.existsByBidangUrusanId(bidangUrusan.id())) {
-            throw new BidangUrusanDeleteForbiddenException(kodeBidangUrusan);
+            throw new BidangUrusanDeleteForbiddenException(bidangUrusan.kodeBidangUrusan());
         }
 
         bidangUrusanRepository.deleteById(bidangUrusan.id());
