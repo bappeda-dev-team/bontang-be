@@ -19,9 +19,6 @@ public record Kegiatan(
         @Column("nama_kegiatan")
         String namaKegiatan,
 
-        @Column("program_id")
-        Long programId,
-
         @CreatedDate
         Instant createdDate,
 
@@ -30,14 +27,12 @@ public record Kegiatan(
 ) {
     public static Kegiatan of (
             String kodeKegiatan,
-            String namaKegiatan,
-            Long programId
+            String namaKegiatan
     ) {
         return new Kegiatan(
                 null,
                 kodeKegiatan,
                 namaKegiatan,
-                programId,
                 null,
                 null
         );

@@ -1,20 +1,18 @@
 package cc.kertaskerja.bontang.kegiatan.domain;
 
-import cc.kertaskerja.bontang.kegiatan.domain.exception.KegiatanAlreadyExistException;
 import cc.kertaskerja.bontang.kegiatan.domain.exception.KegiatanDeleteForbiddenException;
 import cc.kertaskerja.bontang.kegiatan.domain.exception.KegiatanNotFoundException;
 import cc.kertaskerja.bontang.program.domain.Program;
 import cc.kertaskerja.bontang.program.domain.ProgramRepository;
+import cc.kertaskerja.bontang.program.domain.exception.ProgramNotFoundException;
 import cc.kertaskerja.bontang.subkegiatan.domain.SubKegiatanRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,7 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class KegiatanServiceTest {
+class KegiatanServiceTest {
 
     @Mock
     private KegiatanRepository kegiatanRepository;
@@ -42,9 +40,9 @@ public class KegiatanServiceTest {
 
     @Test
     void findAll_returnsAllKegiatan() {
-        Kegiatan kegiatan1 = new Kegiatan(1L, "KG-001", "Kegiatan 1", 10L, Instant.now(), Instant.now());
-        Kegiatan kegiatan2 = new Kegiatan(2L, "KG-002", "Kegiatan 2", 20L, Instant.now(), Instant.now());
-        List<Kegiatan> kegiatanList = Arrays.asList(kegiatan1, kegiatan2);
+        Kegiatan kegiatan1 = new Kegiatan(1L, "KG-001", "Kegiatan 1", Instant.now(), Instant.now());
+        Kegiatan kegiatan2 = new Kegiatan(2L, "KG-002", "Kegiatan 2", Instant.now(), Instant.now());
+        List<Kegiatan> kegiatanList = List.of(kegiatan1, kegiatan2);
 
         when(kegiatanRepository.findAll()).thenReturn(kegiatanList);
 
@@ -57,7 +55,7 @@ public class KegiatanServiceTest {
     @Test
     void detailKegiatanByKodeKegiatan_returnsKegiatan_whenFound() {
         String kodeKegiatan = "KG-001";
-        Kegiatan kegiatan = new Kegiatan(1L, kodeKegiatan, "Kegiatan 1", 10L, Instant.now(), Instant.now());
+        Kegiatan kegiatan = new Kegiatan(1L, kodeKegiatan, "Kegiatan 1", Instant.now(), Instant.now());
         when(kegiatanRepository.findByKodeKegiatan(kodeKegiatan)).thenReturn(Optional.of(kegiatan));
 
         Kegiatan result = kegiatanService.detailKegiatanByKodeKegiatan(kodeKegiatan);
@@ -76,67 +74,68 @@ public class KegiatanServiceTest {
     }
 
     @Test
-    void tambahKegiatan_savesKegiatan_whenKodeKegiatanNotExists() {
-        String kodeKegiatan = "KG-001";
-        String kodeProgram = "PR-001";
-        Program program = new Program(10L, kodeProgram, "Program 1", 100L, Instant.now(), Instant.now());
-        Kegiatan kegiatan = Kegiatan.of(kodeKegiatan, "Kegiatan 1", null);
-        Kegiatan savedKegiatan = new Kegiatan(1L, kodeKegiatan, "Kegiatan 1", program.id(), Instant.now(), Instant.now());
+    void detailKegiatanByKodeKegiatanIn_returnsKegiatans_whenAllFound() {
+        List<String> kodeKegiatans = List.of("KG-001", "KG-002");
+        Kegiatan kegiatan1 = new Kegiatan(1L, "KG-001", "Kegiatan 1", Instant.now(), Instant.now());
+        Kegiatan kegiatan2 = new Kegiatan(2L, "KG-002", "Kegiatan 2", Instant.now(), Instant.now());
+        List<Kegiatan> kegiatanList = List.of(kegiatan1, kegiatan2);
 
-        when(kegiatanRepository.existsByKodeKegiatan(kodeKegiatan)).thenReturn(false);
-        when(programRepository.findByKodeProgram(kodeProgram)).thenReturn(Optional.of(program));
-        when(kegiatanRepository.save(any(Kegiatan.class))).thenReturn(savedKegiatan);
+        when(kegiatanRepository.findAllByKodeKegiatanIn(kodeKegiatans)).thenReturn(kegiatanList);
 
-        Kegiatan result = kegiatanService.tambahKegiatan(kegiatan, kodeProgram);
+        List<Kegiatan> result = kegiatanService.detailKegiatanByKodeKegiatanIn(kodeKegiatans);
 
-        assertEquals(savedKegiatan, result);
-        verify(kegiatanRepository).existsByKodeKegiatan(kodeKegiatan);
-        verify(programRepository).findByKodeProgram(kodeProgram);
-        ArgumentCaptor<Kegiatan> kegiatanCaptor = ArgumentCaptor.forClass(Kegiatan.class);
-        verify(kegiatanRepository).save(kegiatanCaptor.capture());
-        assertEquals(program.id(), kegiatanCaptor.getValue().programId());
+        assertEquals(kegiatanList, result);
+        verify(kegiatanRepository).findAllByKodeKegiatanIn(kodeKegiatans);
     }
 
     @Test
-    void tambahKegiatan_throwsException_whenKodeKegiatanAlreadyExists() {
-        String kodeKegiatan = "KG-001";
-        Kegiatan kegiatan = Kegiatan.of(kodeKegiatan, "Kegiatan 1", null);
+    void detailKegiatanByKodeKegiatanIn_throwsException_whenMissingOne() {
+        List<String> kodeKegiatans = List.of("KG-001", "KG-002");
+        Kegiatan kegiatan1 = new Kegiatan(1L, "KG-001", "Kegiatan 1", Instant.now(), Instant.now());
 
-        when(kegiatanRepository.existsByKodeKegiatan(kodeKegiatan)).thenReturn(true);
+        when(kegiatanRepository.findAllByKodeKegiatanIn(kodeKegiatans)).thenReturn(List.of(kegiatan1));
 
-        assertThrows(KegiatanAlreadyExistException.class, () -> kegiatanService.tambahKegiatan(kegiatan, "PR-01"));
-        verify(kegiatanRepository).existsByKodeKegiatan(kodeKegiatan);
-        verify(kegiatanRepository, never()).save(any());
+        assertThrows(KegiatanNotFoundException.class, () -> kegiatanService.detailKegiatanByKodeKegiatanIn(kodeKegiatans));
+        verify(kegiatanRepository).findAllByKodeKegiatanIn(kodeKegiatans);
+    }
+
+    @Test
+    void tambahKegiatan_savesKegiatan() {
+        Kegiatan kegiatan = Kegiatan.of("KG-001", "Kegiatan 1");
+        Kegiatan savedKegiatan = new Kegiatan(1L, "KG-001", "Kegiatan 1", Instant.now(), Instant.now());
+
+        when(kegiatanRepository.save(kegiatan)).thenReturn(savedKegiatan);
+
+        Kegiatan result = kegiatanService.tambahKegiatan(kegiatan);
+
+        assertEquals(savedKegiatan, result);
+        verify(kegiatanRepository).save(kegiatan);
     }
 
     @Test
     void ubahKegiatan_savesKegiatan_whenKodeKegiatanExists() {
         String kodeKegiatan = "KG-001";
-        String kodeProgram = "PR-001";
-        Program program = new Program(20L, kodeProgram, "Program 1", 101L, Instant.now(), Instant.now());
-        Kegiatan kegiatan = Kegiatan.of(kodeKegiatan, "Kegiatan 1", null);
-        Kegiatan updatedKegiatan = new Kegiatan(1L, kodeKegiatan, "Kegiatan 1 Updated", program.id(), Instant.now(), Instant.now());
+        Kegiatan kegiatan = Kegiatan.of(kodeKegiatan, "Kegiatan 1");
+        Kegiatan updatedKegiatan = new Kegiatan(1L, kodeKegiatan, "Kegiatan 1 Updated", Instant.now(), Instant.now());
 
         when(kegiatanRepository.existsByKodeKegiatan(kodeKegiatan)).thenReturn(true);
-        when(programRepository.findByKodeProgram(kodeProgram)).thenReturn(Optional.of(program));
-        when(kegiatanRepository.save(any(Kegiatan.class))).thenReturn(updatedKegiatan);
+        when(kegiatanRepository.save(kegiatan)).thenReturn(updatedKegiatan);
 
-        Kegiatan result = kegiatanService.ubahKegiatan(kodeKegiatan, kegiatan, kodeProgram);
+        Kegiatan result = kegiatanService.ubahKegiatan(kodeKegiatan, kegiatan);
 
         assertEquals(updatedKegiatan, result);
         verify(kegiatanRepository).existsByKodeKegiatan(kodeKegiatan);
-        verify(programRepository).findByKodeProgram(kodeProgram);
-        verify(kegiatanRepository).save(any(Kegiatan.class));
+        verify(kegiatanRepository).save(kegiatan);
     }
 
     @Test
     void ubahKegiatan_throwsException_whenKodeKegiatanNotExists() {
         String kodeKegiatan = "KG-404";
-        Kegiatan kegiatan = Kegiatan.of(kodeKegiatan, "Kegiatan 1", null);
+        Kegiatan kegiatan = Kegiatan.of(kodeKegiatan, "Kegiatan 1");
 
         when(kegiatanRepository.existsByKodeKegiatan(kodeKegiatan)).thenReturn(false);
 
-        assertThrows(KegiatanNotFoundException.class, () -> kegiatanService.ubahKegiatan(kodeKegiatan, kegiatan, "PR-01"));
+        assertThrows(KegiatanNotFoundException.class, () -> kegiatanService.ubahKegiatan(kodeKegiatan, kegiatan));
         verify(kegiatanRepository).existsByKodeKegiatan(kodeKegiatan);
         verify(kegiatanRepository, never()).save(any());
     }
@@ -144,7 +143,7 @@ public class KegiatanServiceTest {
     @Test
     void hapusKegiatan_deletesKegiatan_whenTidakAdaSubKegiatan() {
         String kodeKegiatan = "KG-001";
-        Kegiatan kegiatan = new Kegiatan(1L, kodeKegiatan, "Kegiatan 1", 10L, Instant.now(), Instant.now());
+        Kegiatan kegiatan = new Kegiatan(1L, kodeKegiatan, "Kegiatan 1", Instant.now(), Instant.now());
 
         when(kegiatanRepository.findByKodeKegiatan(kodeKegiatan)).thenReturn(Optional.of(kegiatan));
         when(subKegiatanRepository.existsByKegiatanId(kegiatan.id())).thenReturn(false);
@@ -170,7 +169,7 @@ public class KegiatanServiceTest {
     @Test
     void hapusKegiatan_throwsForbidden_whenAdaSubKegiatan() {
         String kodeKegiatan = "KG-001";
-        Kegiatan kegiatan = new Kegiatan(1L, kodeKegiatan, "Kegiatan 1", 10L, Instant.now(), Instant.now());
+        Kegiatan kegiatan = new Kegiatan(1L, kodeKegiatan, "Kegiatan 1", Instant.now(), Instant.now());
 
         when(kegiatanRepository.findByKodeKegiatan(kodeKegiatan)).thenReturn(Optional.of(kegiatan));
         when(subKegiatanRepository.existsByKegiatanId(kegiatan.id())).thenReturn(true);
@@ -179,5 +178,26 @@ public class KegiatanServiceTest {
 
         verify(subKegiatanRepository).existsByKegiatanId(kegiatan.id());
         verify(kegiatanRepository, never()).deleteByKodeKegiatan(any());
+    }
+
+    @Test
+    void getKodeProgram_returnsKodeProgram_whenProgramFound() {
+        Long programId = 99L;
+        Program program = new Program(programId, "PR-099", "Program 99", Instant.now(), Instant.now());
+        when(programRepository.findById(programId)).thenReturn(Optional.of(program));
+
+        String result = kegiatanService.getKodeProgram(programId);
+
+        assertEquals(program.kodeProgram(), result);
+        verify(programRepository).findById(programId);
+    }
+
+    @Test
+    void getKodeProgram_throwsException_whenProgramNotFound() {
+        Long programId = 999L;
+        when(programRepository.findById(programId)).thenReturn(Optional.empty());
+
+        assertThrows(ProgramNotFoundException.class, () -> kegiatanService.getKodeProgram(programId));
+        verify(programRepository).findById(programId);
     }
 }

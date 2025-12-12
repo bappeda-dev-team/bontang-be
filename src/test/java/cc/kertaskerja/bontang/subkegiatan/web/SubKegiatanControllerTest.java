@@ -82,23 +82,45 @@ public class SubKegiatanControllerTest {
 
     @Test
     void findBatch_returnsSubKegiatanListFromService() {
-        String kodeOpd = "OPD-01";
         List<String> kodeSubKegiatanList = List.of("SK-001", "SK-002");
         List<SubKegiatan> subKegiatanList = List.of(
                 new SubKegiatan(1L, "SK-001", "Sub Kegiatan 1", 10L, Instant.now(), Instant.now()),
                 new SubKegiatan(2L, "SK-002", "Sub Kegiatan 2", 20L, Instant.now(), Instant.now())
         );
 
-        when(subKegiatanService.detailSubKegiatanByKodeOpdAndKodeSubKegiatanIn(kodeOpd, kodeSubKegiatanList))
-                .thenReturn(subKegiatanList);
+        when(subKegiatanService.detailSubKegiatanIn(kodeSubKegiatanList)).thenReturn(subKegiatanList);
 
-        List<SubKegiatan> result = subKegiatanController.findBatch(
-                kodeOpd,
-                new SubKegiatanBatchRequest(kodeSubKegiatanList)
-        );
+        List<SubKegiatan> result = subKegiatanController.findBatch(new SubKegiatanBatchRequest(kodeSubKegiatanList));
 
         assertEquals(subKegiatanList, result);
-        verify(subKegiatanService).detailSubKegiatanByKodeOpdAndKodeSubKegiatanIn(kodeOpd, kodeSubKegiatanList);
+        verify(subKegiatanService).detailSubKegiatanIn(kodeSubKegiatanList);
+    }
+
+    @Test
+    void findAllByKodeOpd_returnsAllSubKegiatanFromService() {
+        String kodeOpd = "OPD-01";
+        Instant createdDate1 = Instant.parse("2024-02-01T00:00:00Z");
+        Instant createdDate2 = Instant.parse("2024-02-02T00:00:00Z");
+        List<SubKegiatan> subKegiatanList = List.of(
+                new SubKegiatan(1L, "SK-010", "Sub Kegiatan 10", 10L, createdDate1, createdDate1),
+                new SubKegiatan(2L, "SK-020", "Sub Kegiatan 20", 20L, createdDate2, createdDate2)
+        );
+
+        when(subKegiatanService.findAllByKodeOpd(kodeOpd)).thenReturn(subKegiatanList);
+        when(subKegiatanService.getKodeKegiatan(10L)).thenReturn("KG-10");
+        when(subKegiatanService.getKodeKegiatan(20L)).thenReturn("KG-20");
+
+        List<SubKegiatanResponse> result = subKegiatanController.findAllByKodeOpd(kodeOpd);
+
+        List<SubKegiatanResponse> expected = List.of(
+                new SubKegiatanResponse(1L, "SK-010", "Sub Kegiatan 10", "KG-10", createdDate1, createdDate1),
+                new SubKegiatanResponse(2L, "SK-020", "Sub Kegiatan 20", "KG-20", createdDate2, createdDate2)
+        );
+
+        assertEquals(expected, result);
+        verify(subKegiatanService).findAllByKodeOpd(kodeOpd);
+        verify(subKegiatanService).getKodeKegiatan(10L);
+        verify(subKegiatanService).getKodeKegiatan(20L);
     }
 
     @Test
@@ -166,5 +188,15 @@ public class SubKegiatanControllerTest {
         subKegiatanController.delete(kodeSubKegiatan);
 
         verify(subKegiatanService).hapusSubKegiatan(kodeSubKegiatan);
+    }
+
+    @Test
+    void deleteByKodeOpd_deletesSubKegiatanUsingService() {
+        String kodeOpd = "OPD-01";
+        String kodeSubKegiatan = "SK-002";
+
+        subKegiatanController.delete(kodeOpd, kodeSubKegiatan);
+
+        verify(subKegiatanService).hapusSubKegiatan(kodeOpd, kodeSubKegiatan);
     }
 }

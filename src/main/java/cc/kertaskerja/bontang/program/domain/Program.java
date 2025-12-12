@@ -19,9 +19,6 @@ public record Program(
         @Column("nama_program")
         String namaProgram,
 
-        @Column("bidang_urusan_id")
-        Long bidangUrusanId,
-
         @CreatedDate
         Instant createdDate,
 
@@ -30,14 +27,12 @@ public record Program(
 ) {
     public static Program of (
             String kodeProgram,
-            String namaProgram,
-            Long bidangUrusanId
+            String namaProgram
     ) {
         return new Program(
                 null,
                 kodeProgram,
                 namaProgram,
-                bidangUrusanId,
                 null,
                 null
         );

@@ -18,6 +18,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import cc.kertaskerja.bontang.program.domain.Program;
 import cc.kertaskerja.bontang.program.domain.ProgramService;
 import cc.kertaskerja.bontang.program.web.request.ProgramBatchRequest;
+//import cc.kertaskerja.bontang.program.web.request.ProgramBatchRequest;
 import cc.kertaskerja.bontang.program.web.request.ProgramRequest;
 import cc.kertaskerja.bontang.program.web.response.ProgramResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -57,18 +58,6 @@ public class ProgramController {
     }
 
     /**
-     * Ambil semua data program berdasarkan kode opd
-     * @param kodeOpd
-     */
-    @GetMapping("detail/findall/{kodeOpd}")
-    public List<ProgramResponse> findAllByKodeOpd(@PathVariable("kodeOpd") String kodeOpd) {
-        Iterable<Program> programs = programService.findAllByKodeOpd(kodeOpd);
-        return StreamSupport.stream(programs.spliterator(), false)
-                .map(this::mapToResponse)
-                .toList();
-    }
-
-    /**
      * Ubah data program berdasarkan kode program
      * @param kodeProgram
      */
@@ -80,12 +69,11 @@ public class ProgramController {
                 existingProgram.id(),
                 request.kodeProgram(),
                 request.namaProgram(),
-                existingProgram.bidangUrusanId(),
                 existingProgram.createdDate(),
                 null
         );
 
-        return programService.ubahProgram(kodeProgram, program, request.kodeBidangUrusan());
+        return programService.ubahProgram(kodeProgram, program);
     }
 
     /**
@@ -96,10 +84,9 @@ public class ProgramController {
     public ResponseEntity<Program> post(@Valid @RequestBody ProgramRequest request) {
         Program program = Program.of(
                 request.kodeProgram(),
-                request.namaProgram(),
-                null
+                request.namaProgram()
         );
-        Program saved = programService.tambahProgram(program, request.kodeBidangUrusan());
+        Program saved = programService.tambahProgram(program);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
@@ -112,12 +99,11 @@ public class ProgramController {
     /**
      * Ambil data program berdasarkan kumpulan kode program
      */
-    @PostMapping("{kodeOpd}/find/batch")
+    @PostMapping("/find/batch")
     public List<Program> findBatch(
-            @PathVariable("kodeOpd") String kodeOpd,
             @Valid @RequestBody ProgramBatchRequest request
     ) {
-        return programService.detailProgramByKodeProgramInAndKodeOpd(request.kodeProgram(), kodeOpd);
+        return programService.detailProgramByKodeProgramIn(request.kodeProgram());
     }
 
     /**
@@ -130,29 +116,16 @@ public class ProgramController {
         programService.hapusProgram(kodeProgram);
     }
 
-    /**
-     * Hapus program berdasarkan kode opd dan kode program
-     * @param kodeOpd
-     * @param kodeProgram
-     */
-    @DeleteMapping("delete/{kodeOpd}/{kodeProgram}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteByKodeOpdAndKodeProgram(
-            @PathVariable("kodeOpd") String kodeOpd,
-            @PathVariable("kodeProgram") String kodeProgram
-    ) {
-        programService.hapusProgram(kodeOpd, kodeProgram);
-    }
 
     private ProgramResponse mapToResponse(Program program) {
-        String kodeBidangUrusan = programService.getKodeBidangUrusan(program.bidangUrusanId());
         return new ProgramResponse(
                 program.id(),
                 program.kodeProgram(),
                 program.namaProgram(),
-                kodeBidangUrusan,
+                null,
                 program.createdDate(),
                 program.lastModifiedDate()
         );
     }
+
 }

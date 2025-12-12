@@ -1,6 +1,5 @@
 package cc.kertaskerja.bontang.kegiatan.domain;
 
-import cc.kertaskerja.bontang.kegiatan.domain.exception.KegiatanAlreadyExistException;
 import cc.kertaskerja.bontang.kegiatan.domain.exception.KegiatanDeleteForbiddenException;
 import cc.kertaskerja.bontang.kegiatan.domain.exception.KegiatanNotFoundException;
 import cc.kertaskerja.bontang.program.domain.Program;
@@ -33,74 +32,22 @@ public class KegiatanService{
         return kegiatanRepository.findAll();
     }
 
-    public List<Kegiatan> findAllByKodeOpd(String kodeOpd) {
-        return kegiatanRepository.findAllByKodeOpd(kodeOpd);
-    }
-
     public Kegiatan detailKegiatanByKodeKegiatan(String kodeKegiatan) {
         return kegiatanRepository.findByKodeKegiatan(kodeKegiatan)
                 .orElseThrow(() -> new KegiatanNotFoundException(kodeKegiatan));
     }
 
-    public List<Kegiatan> detailKegiatanByKodeKegiatanIn(List<String> kodeKegiatan) {
-        List<Kegiatan> kegiatans = kegiatanRepository.findAllByKodeKegiatanIn(kodeKegiatan);
-        if (kegiatans.size() != kodeKegiatan.size()) {
-            Set<String> foundKode = kegiatans.stream()
-                    .map(Kegiatan::kodeKegiatan)
-                    .collect(Collectors.toSet());
-
-            String missingKode = kodeKegiatan.stream()
-                    .filter(kode -> !foundKode.contains(kode))
-                    .findFirst()
-                    .orElse(null);
-
-            if (missingKode != null) {
-                throw new KegiatanNotFoundException(missingKode);
-            }
-        }
-
-        return kegiatans;
+    public Kegiatan tambahKegiatan(Kegiatan kegiatan) {
+    	
+        return kegiatanRepository.save(kegiatan);
     }
 
-    public List<Kegiatan> detailKegiatanByKodeOpdAndKodeKegiatanIn(String kodeOpd, List<String> kodeKegiatan) {
-        List<Kegiatan> kegiatans = kegiatanRepository.findAllByKodeKegiatanInAndKodeOpd(kodeKegiatan, kodeOpd);
-        if (kegiatans.size() != kodeKegiatan.size()) {
-            Set<String> foundKode = kegiatans.stream()
-                    .map(Kegiatan::kodeKegiatan)
-                    .collect(Collectors.toSet());
-
-            String missingKode = kodeKegiatan.stream()
-                    .filter(kode -> !foundKode.contains(kode))
-                    .findFirst()
-                    .orElse(null);
-
-            if (missingKode != null) {
-                throw new KegiatanNotFoundException(missingKode);
-            }
-        }
-
-        return kegiatans;
-    }
-
-    public Kegiatan tambahKegiatan(Kegiatan kegiatan, String kodeProgram) {
-        String kodeKegiatan = kegiatan.kodeKegiatan();
-        if (kegiatanRepository.existsByKodeKegiatan(kodeKegiatan)) {
-            throw new KegiatanAlreadyExistException(kodeKegiatan);
-        }
-
-        Long programId = getProgramId(kodeProgram);
-        Kegiatan kegiatanWithProgram = attachProgram(kegiatan, programId);
-        return kegiatanRepository.save(kegiatanWithProgram);
-    }
-
-    public Kegiatan ubahKegiatan(String kodeKegiatan, Kegiatan kegiatan, String kodeProgram) {
+    public Kegiatan ubahKegiatan(String kodeKegiatan, Kegiatan kegiatan) {
         if (!kegiatanRepository.existsByKodeKegiatan(kodeKegiatan)) {
             throw new KegiatanNotFoundException(kodeKegiatan);
         }
-
-        Long programId = getProgramId(kodeProgram);
-        Kegiatan kegiatanWithProgram = attachProgram(kegiatan, programId);
-        return kegiatanRepository.save(kegiatanWithProgram);
+        
+        return kegiatanRepository.save(kegiatan);
     }
 
     public void hapusKegiatan(String kodeKegiatan) {
@@ -114,37 +61,30 @@ public class KegiatanService{
         kegiatanRepository.deleteByKodeKegiatan(kodeKegiatan);
     }
 
-    public void hapusKegiatan(String kodeOpd, String kodeKegiatan) {
-        Kegiatan kegiatan = kegiatanRepository.findByKodeKegiatanAndKodeOpd(kodeKegiatan, kodeOpd)
-                .orElseThrow(() -> new KegiatanNotFoundException(kodeKegiatan));
+    public List<Kegiatan> detailKegiatanByKodeKegiatanIn(List<String> kodeKegiatans) {
+        List<Kegiatan> kegiatans = kegiatanRepository.findAllByKodeKegiatanIn(kodeKegiatans);
 
-        if (subKegiatanRepository.existsByKegiatanId(kegiatan.id())) {
-            throw new KegiatanDeleteForbiddenException(kodeKegiatan);
+        if (kegiatans.size() != kodeKegiatans.size()) {
+            Set<String> foundKode = kegiatans.stream()
+                    .map(Kegiatan::kodeKegiatan)
+                    .collect(Collectors.toSet());
+
+            String missingKode = kodeKegiatans.stream()
+                    .filter(kode -> !foundKode.contains(kode))
+                    .findFirst()
+                    .orElse(null);
+
+            if (missingKode != null) {
+                throw new KegiatanNotFoundException(missingKode);
+            }
         }
 
-        kegiatanRepository.deleteByKodeKegiatanAndKodeOpd(kodeKegiatan, kodeOpd);
+        return kegiatans;
     }
 
     public String getKodeProgram(Long programId) {
         return programRepository.findById(programId)
                 .map(Program::kodeProgram)
                 .orElseThrow(() -> new ProgramNotFoundException(String.valueOf(programId)));
-    }
-
-    private Long getProgramId(String kodeProgram) {
-        return programRepository.findByKodeProgram(kodeProgram)
-                .map(Program::id)
-                .orElseThrow(() -> new ProgramNotFoundException(kodeProgram));
-    }
-
-    private Kegiatan attachProgram(Kegiatan kegiatan, Long programId) {
-        return new Kegiatan(
-                kegiatan.id(),
-                kegiatan.kodeKegiatan(),
-                kegiatan.namaKegiatan(),
-                programId,
-                kegiatan.createdDate(),
-                kegiatan.lastModifiedDate()
-        );
     }
 }

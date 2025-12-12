@@ -3,8 +3,6 @@ package cc.kertaskerja.bontang.program.domain;
 import cc.kertaskerja.bontang.bidangurusan.domain.BidangUrusan;
 import cc.kertaskerja.bontang.bidangurusan.domain.BidangUrusanRepository;
 import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanNotFoundException;
-import cc.kertaskerja.bontang.kegiatan.domain.KegiatanRepository;
-import cc.kertaskerja.bontang.program.domain.exception.ProgramDeleteForbiddenException;
 import org.springframework.stereotype.Service;
 
 import cc.kertaskerja.bontang.program.domain.exception.ProgramNotFoundException;
@@ -17,47 +15,23 @@ import java.util.stream.Collectors;
 public class ProgramService {
     private final ProgramRepository programRepository;
     private final BidangUrusanRepository bidangUrusanRepository;
-    private final KegiatanRepository kegiatanRepository;
 
     public ProgramService(
             ProgramRepository programRepository,
-            BidangUrusanRepository bidangUrusanRepository,
-            KegiatanRepository kegiatanRepository
+            BidangUrusanRepository bidangUrusanRepository
     ) {
         this.programRepository = programRepository;
         this.bidangUrusanRepository = bidangUrusanRepository;
-        this.kegiatanRepository = kegiatanRepository;
     }
 
     public Iterable<Program> findAll() {
         return programRepository.findAll();
     }
 
-    public List<Program> findAllByKodeOpd(String kodeOpd) {
-        return programRepository.findAllByKodeOpd(kodeOpd);
-    }
-
     public String getKodeBidangUrusan(Long bidangUrusanId) {
         return bidangUrusanRepository.findById(bidangUrusanId)
                 .map(BidangUrusan::kodeBidangUrusan)
                 .orElseThrow(() -> new BidangUrusanNotFoundException(String.valueOf(bidangUrusanId)));
-    }
-
-    private Long getBidangUrusanId(String kodeBidangUrusan) {
-        return bidangUrusanRepository.findByKodeBidangUrusan(kodeBidangUrusan)
-                .map(BidangUrusan::id)
-                .orElseThrow(() -> new BidangUrusanNotFoundException(kodeBidangUrusan));
-    }
-
-    private Program attachBidangUrusan(Program program, Long bidangUrusanId) {
-        return new Program(
-                program.id(),
-                program.kodeProgram(),
-                program.namaProgram(),
-                bidangUrusanId,
-                program.createdDate(),
-                program.lastModifiedDate()
-        );
     }
 
     public Program detailProgramByKodeProgram(String kodeProgram) {
@@ -85,63 +59,24 @@ public class ProgramService {
         return programs;
     }
 
-    public List<Program> detailProgramByKodeProgramInAndKodeOpd(List<String> kodePrograms, String kodeOpd) {
-        List<Program> programs = programRepository.findAllByKodeProgramInAndKodeOpd(kodePrograms, kodeOpd);
-        if (programs.size() != kodePrograms.size()) {
-            Set<String> foundKode = programs.stream()
-                    .map(Program::kodeProgram)
-                    .collect(Collectors.toSet());
+    public Program tambahProgram(Program program) {
 
-            String missingKode = kodePrograms.stream()
-                    .filter(kode -> !foundKode.contains(kode))
-                    .findFirst()
-                    .orElse(null);
-
-            if (missingKode != null) {
-                throw new ProgramNotFoundException(missingKode);
-            }
-        }
-
-        return programs;
+        return programRepository.save(program);
     }
 
-    public Program tambahProgram(Program program, String kodeBidangUrusan) {
-        Long bidangUrusanId = getBidangUrusanId(kodeBidangUrusan);
-        Program programWithBidang = attachBidangUrusan(program, bidangUrusanId);
-
-        return programRepository.save(programWithBidang);
-    }
-
-    public Program ubahProgram(String kodeProgram, Program program, String kodeBidangUrusan) {
+    public Program ubahProgram(String kodeProgram, Program program) {
         if (!programRepository.existsByKodeProgram(kodeProgram)) {
             throw new ProgramNotFoundException(kodeProgram);
         }
 
-        Long bidangUrusanId = getBidangUrusanId(kodeBidangUrusan);
-        Program programWithBidang = attachBidangUrusan(program, bidangUrusanId);
-
-        return programRepository.save(programWithBidang);
+        return programRepository.save(program);
     }
 
     public void hapusProgram(String kodeProgram) {
-        Program program = programRepository.findByKodeProgram(kodeProgram)
-                .orElseThrow(() -> new ProgramNotFoundException(kodeProgram));
-
-        if (kegiatanRepository.existsByProgramId(program.id())) {
-            throw new ProgramDeleteForbiddenException(kodeProgram);
+        if (!programRepository.existsByKodeProgram(kodeProgram)) {
+            throw new ProgramNotFoundException(kodeProgram);
         }
 
         programRepository.deleteByKodeProgram(kodeProgram);
-    }
-
-    public void hapusProgram(String kodeOpd, String kodeProgram) {
-        Program program = programRepository.findByKodeProgramAndKodeOpd(kodeProgram, kodeOpd)
-                .orElseThrow(() -> new ProgramNotFoundException(kodeProgram));
-
-        if (kegiatanRepository.existsByProgramId(program.id())) {
-            throw new ProgramDeleteForbiddenException(kodeProgram);
-        }
-
-        programRepository.deleteByKodeProgramAndKodeOpd(kodeProgram, kodeOpd);
     }
 }

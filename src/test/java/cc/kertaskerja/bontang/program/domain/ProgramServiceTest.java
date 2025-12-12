@@ -3,13 +3,10 @@ package cc.kertaskerja.bontang.program.domain;
 import cc.kertaskerja.bontang.bidangurusan.domain.BidangUrusan;
 import cc.kertaskerja.bontang.bidangurusan.domain.BidangUrusanRepository;
 import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanNotFoundException;
-import cc.kertaskerja.bontang.kegiatan.domain.KegiatanRepository;
-import cc.kertaskerja.bontang.program.domain.exception.ProgramDeleteForbiddenException;
 import cc.kertaskerja.bontang.program.domain.exception.ProgramNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -30,20 +27,18 @@ public class ProgramServiceTest {
     private ProgramRepository programRepository;
     @Mock
     private BidangUrusanRepository bidangUrusanRepository;
-    @Mock
-    private KegiatanRepository kegiatanRepository;
 
     private ProgramService programService;
 
     @BeforeEach
     void setUp() {
-        programService = new ProgramService(programRepository, bidangUrusanRepository, kegiatanRepository);
+        programService = new ProgramService(programRepository, bidangUrusanRepository);
     }
 
     @Test
     void findAll_returnsAllPrograms() {
-        Program program1 = new Program(1L, "PR-001", "Program 1", 10L, Instant.now(), Instant.now());
-        Program program2 = new Program(2L, "PR-002", "Program 2", 20L, Instant.now(), Instant.now());
+        Program program1 = new Program(1L, "PR-001", "Program 1", Instant.now(), Instant.now());
+        Program program2 = new Program(2L, "PR-002", "Program 2", Instant.now(), Instant.now());
         List<Program> programList = Arrays.asList(program1, program2);
 
         when(programRepository.findAll()).thenReturn(programList);
@@ -57,7 +52,7 @@ public class ProgramServiceTest {
     @Test
     void detailProgramByKodeProgram_returnsProgram_whenFound() {
         String kodeProgram = "PR-001";
-        Program program = new Program(1L, kodeProgram, "Program 1", 10L, Instant.now(), Instant.now());
+        Program program = new Program(1L, kodeProgram, "Program 1", Instant.now(), Instant.now());
         when(programRepository.findByKodeProgram(kodeProgram)).thenReturn(Optional.of(program));
 
         Program result = programService.detailProgramByKodeProgram(kodeProgram);
@@ -76,65 +71,70 @@ public class ProgramServiceTest {
     }
 
     @Test
-    void tambahProgram_savesProgram() {
-        String kodeProgram = "PR-001";
-        String kodeBidangUrusan = "BU-01";
-        BidangUrusan bidangUrusan = new BidangUrusan(99L, "OPD-1", kodeBidangUrusan, "Bidang 1", Instant.now(), Instant.now());
-        Program program = Program.of(kodeProgram, "Program 1", null);
-        Program savedProgram = new Program(1L, kodeProgram, "Program 1", bidangUrusan.id(), Instant.now(), Instant.now());
+    void detailProgramByKodeProgramIn_returnsPrograms_whenAllFound() {
+        List<String> kodePrograms = Arrays.asList("PR-001", "PR-002");
+        Program program1 = new Program(1L, "PR-001", "Program 1", Instant.now(), Instant.now());
+        Program program2 = new Program(2L, "PR-002", "Program 2", Instant.now(), Instant.now());
 
-        when(bidangUrusanRepository.findByKodeBidangUrusan(kodeBidangUrusan)).thenReturn(Optional.of(bidangUrusan));
-        when(programRepository.save(any(Program.class))).thenReturn(savedProgram);
+        when(programRepository.findAllByKodeProgramIn(kodePrograms)).thenReturn(Arrays.asList(program1, program2));
 
-        Program result = programService.tambahProgram(program, kodeBidangUrusan);
+        List<Program> result = programService.detailProgramByKodeProgramIn(kodePrograms);
 
-        assertEquals(savedProgram, result);
-        ArgumentCaptor<Program> programCaptor = ArgumentCaptor.forClass(Program.class);
-        verify(bidangUrusanRepository).findByKodeBidangUrusan(kodeBidangUrusan);
-        verify(programRepository).save(programCaptor.capture());
-        assertEquals(bidangUrusan.id(), programCaptor.getValue().bidangUrusanId());
+        assertEquals(2, result.size());
+        assertEquals(program1, result.get(0));
+        assertEquals(program2, result.get(1));
+        verify(programRepository).findAllByKodeProgramIn(kodePrograms);
     }
 
     @Test
-    void tambahProgram_throwsException_whenBidangUrusanNotFound() {
-        String kodeBidangUrusan = "BU-XX";
-        Program program = Program.of("PR-001", "Program 1", null);
+    void detailProgramByKodeProgramIn_throwsException_whenProgramMissing() {
+        List<String> kodePrograms = Arrays.asList("PR-001", "PR-002");
+        Program program1 = new Program(1L, "PR-001", "Program 1", Instant.now(), Instant.now());
 
-        when(bidangUrusanRepository.findByKodeBidangUrusan(kodeBidangUrusan)).thenReturn(Optional.empty());
+        when(programRepository.findAllByKodeProgramIn(kodePrograms)).thenReturn(List.of(program1));
 
-        assertThrows(BidangUrusanNotFoundException.class, () -> programService.tambahProgram(program, kodeBidangUrusan));
-        verify(bidangUrusanRepository).findByKodeBidangUrusan(kodeBidangUrusan);
-        verify(programRepository, never()).save(any());
+        ProgramNotFoundException exception = assertThrows(ProgramNotFoundException.class, () -> programService.detailProgramByKodeProgramIn(kodePrograms));
+        assertEquals("Program dengan kode PR-002 tidak ditemukan.", exception.getMessage());
+        verify(programRepository).findAllByKodeProgramIn(kodePrograms);
+    }
+
+    @Test
+    void tambahProgram_savesProgram() {
+        Program program = Program.of("PR-001", "Program 1");
+        Program savedProgram = new Program(1L, "PR-001", "Program 1", Instant.now(), Instant.now());
+
+        when(programRepository.save(program)).thenReturn(savedProgram);
+
+        Program result = programService.tambahProgram(program);
+
+        assertEquals(savedProgram, result);
+        verify(programRepository).save(program);
     }
 
     @Test
     void ubahProgram_savesProgram_whenKodeProgramExists() {
         String kodeProgram = "PR-001";
-        String kodeBidangUrusan = "BU-01";
-        BidangUrusan bidangUrusan = new BidangUrusan(88L, "OPD-2", kodeBidangUrusan, "Bidang 1", Instant.now(), Instant.now());
-        Program program = Program.of(kodeProgram, "Program 1", null);
-        Program updatedProgram = new Program(1L, kodeProgram, "Program 1 Updated", bidangUrusan.id(), Instant.now(), Instant.now());
+        Program program = Program.of(kodeProgram, "Program 1");
+        Program updatedProgram = new Program(1L, kodeProgram, "Program 1 Updated", Instant.now(), Instant.now());
 
         when(programRepository.existsByKodeProgram(kodeProgram)).thenReturn(true);
-        when(bidangUrusanRepository.findByKodeBidangUrusan(kodeBidangUrusan)).thenReturn(Optional.of(bidangUrusan));
-        when(programRepository.save(any(Program.class))).thenReturn(updatedProgram);
+        when(programRepository.save(program)).thenReturn(updatedProgram);
 
-        Program result = programService.ubahProgram(kodeProgram, program, kodeBidangUrusan);
+        Program result = programService.ubahProgram(kodeProgram, program);
 
         assertEquals(updatedProgram, result);
         verify(programRepository).existsByKodeProgram(kodeProgram);
-        verify(bidangUrusanRepository).findByKodeBidangUrusan(kodeBidangUrusan);
-        verify(programRepository).save(any(Program.class));
+        verify(programRepository).save(program);
     }
 
     @Test
     void ubahProgram_throwsException_whenKodeProgramNotExists() {
         String kodeProgram = "PR-404";
-        Program program = Program.of(kodeProgram, "Program 1", null);
+        Program program = Program.of(kodeProgram, "Program 1");
 
         when(programRepository.existsByKodeProgram(kodeProgram)).thenReturn(false);
 
-        assertThrows(ProgramNotFoundException.class, () -> programService.ubahProgram(kodeProgram, program, "BU-01"));
+        assertThrows(ProgramNotFoundException.class, () -> programService.ubahProgram(kodeProgram, program));
         verify(programRepository).existsByKodeProgram(kodeProgram);
         verify(programRepository, never()).save(any());
     }
@@ -142,15 +142,12 @@ public class ProgramServiceTest {
     @Test
     void hapusProgram_deletesProgram_whenKodeProgramExists() {
         String kodeProgram = "PR-001";
-        Program program = new Program(1L, kodeProgram, "Program 1", 10L, Instant.now(), Instant.now());
 
-        when(programRepository.findByKodeProgram(kodeProgram)).thenReturn(Optional.of(program));
-        when(kegiatanRepository.existsByProgramId(program.id())).thenReturn(false);
+        when(programRepository.existsByKodeProgram(kodeProgram)).thenReturn(true);
 
         programService.hapusProgram(kodeProgram);
 
-        verify(programRepository).findByKodeProgram(kodeProgram);
-        verify(kegiatanRepository).existsByProgramId(program.id());
+        verify(programRepository).existsByKodeProgram(kodeProgram);
         verify(programRepository).deleteByKodeProgram(kodeProgram);
     }
 
@@ -158,11 +155,10 @@ public class ProgramServiceTest {
     void hapusProgram_throwsException_whenKodeProgramNotExists() {
         String kodeProgram = "PR-404";
 
-        when(programRepository.findByKodeProgram(kodeProgram)).thenReturn(Optional.empty());
+        when(programRepository.existsByKodeProgram(kodeProgram)).thenReturn(false);
 
         assertThrows(ProgramNotFoundException.class, () -> programService.hapusProgram(kodeProgram));
-        verify(programRepository).findByKodeProgram(kodeProgram);
-        verify(kegiatanRepository, never()).existsByProgramId(any());
+        verify(programRepository).existsByKodeProgram(kodeProgram);
         verify(programRepository, never()).deleteByKodeProgram(any());
     }
 
@@ -179,16 +175,11 @@ public class ProgramServiceTest {
     }
 
     @Test
-    void hapusProgram_throwsException_whenProgramHasKegiatan() {
-        String kodeProgram = "PR-001";
-        Program program = new Program(1L, kodeProgram, "Program 1", 10L, Instant.now(), Instant.now());
+    void getKodeBidangUrusan_throwsException_whenIdNotFound() {
+        Long bidangUrusanId = 999L;
+        when(bidangUrusanRepository.findById(bidangUrusanId)).thenReturn(Optional.empty());
 
-        when(programRepository.findByKodeProgram(kodeProgram)).thenReturn(Optional.of(program));
-        when(kegiatanRepository.existsByProgramId(program.id())).thenReturn(true);
-
-        assertThrows(ProgramDeleteForbiddenException.class, () -> programService.hapusProgram(kodeProgram));
-        verify(programRepository).findByKodeProgram(kodeProgram);
-        verify(kegiatanRepository).existsByProgramId(program.id());
-        verify(programRepository, never()).deleteByKodeProgram(any());
+        assertThrows(BidangUrusanNotFoundException.class, () -> programService.getKodeBidangUrusan(bidangUrusanId));
+        verify(bidangUrusanRepository).findById(bidangUrusanId);
     }
 }

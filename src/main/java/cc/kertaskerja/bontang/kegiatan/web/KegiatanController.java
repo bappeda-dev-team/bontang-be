@@ -47,15 +47,11 @@ public class KegiatanController {
     }
 
     /**
-     * Ambil semua data kegiatan berdasarkan kode opd
-     * @param kodeOpd
+     * Ambil data kegiatan berdasarkan kumpulan kode kegiatan
      */
-    @GetMapping("detail/findall/{kodeOpd}")
-    public List<KegiatanResponse> findAllByKodeOpd(@PathVariable("kodeOpd") String kodeOpd) {
-        Iterable<Kegiatan> kegiatans = kegiatanService.findAllByKodeOpd(kodeOpd);
-        return StreamSupport.stream(kegiatans.spliterator(), false)
-                .map(this::mapToResponse)
-                .toList();
+    @PostMapping("/find/batch")
+    public List<Kegiatan> findBatch(@Valid @RequestBody KegiatanBatchRequest request) {
+        return kegiatanService.detailKegiatanByKodeKegiatanIn(request.kodeKegiatan());
     }
 
     /**
@@ -70,12 +66,11 @@ public class KegiatanController {
                 existingKegiatan.id(),
                 request.kodeKegiatan(),
                 request.namaKegiatan(),
-                existingKegiatan.programId(),
                 existingKegiatan.createdDate(),
                 null
         );
 
-        return kegiatanService.ubahKegiatan(kodeKegiatan, kegiatan, request.kodeProgram());
+        return kegiatanService.ubahKegiatan(kodeKegiatan, kegiatan);
     }
 
     /**
@@ -86,10 +81,9 @@ public class KegiatanController {
     public ResponseEntity<Kegiatan> post(@Valid @RequestBody KegiatanRequest request) {
         Kegiatan kegiatan = Kegiatan.of(
                 request.kodeKegiatan(),
-                request.namaKegiatan(),
-                null
+                request.namaKegiatan()
         );
-        Kegiatan saved = kegiatanService.tambahKegiatan(kegiatan, request.kodeProgram());
+        Kegiatan saved = kegiatanService.tambahKegiatan(kegiatan);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
@@ -97,17 +91,6 @@ public class KegiatanController {
                 .toUri();
 
         return ResponseEntity.created(location).body(saved);
-    }
-
-    /**
-     * Ambil data kegiatan berdasarkan kumpulan kode kegiatan
-     */
-    @PostMapping("{kodeOpd}/find/batch")
-    public List<Kegiatan> findBatch(
-            @PathVariable("kodeOpd") String kodeOpd,
-            @Valid @RequestBody KegiatanBatchRequest request
-    ) {
-        return kegiatanService.detailKegiatanByKodeOpdAndKodeKegiatanIn(kodeOpd, request.kodeKegiatan());
     }
 
 
@@ -121,27 +104,11 @@ public class KegiatanController {
         kegiatanService.hapusKegiatan(kodeKegiatan);
     }
 
-    /**
-     * Hapus kegiatan berdasarkan kode opd dan kode kegiatan
-     * @param kodeOpd
-     * @param kodeKegiatan
-     */
-    @DeleteMapping("delete/{kodeOpd}/{kodeKegiatan}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteByKodeOpdAndKodeKegiatan(
-            @PathVariable("kodeOpd") String kodeOpd,
-            @PathVariable("kodeKegiatan") String kodeKegiatan
-    ) {
-        kegiatanService.hapusKegiatan(kodeOpd, kodeKegiatan);
-    }
-
     private KegiatanResponse mapToResponse(Kegiatan kegiatan) {
-        String kodeProgram = kegiatanService.getKodeProgram(kegiatan.programId());
         return new KegiatanResponse(
                 kegiatan.id(),
                 kegiatan.kodeKegiatan(),
                 kegiatan.namaKegiatan(),
-                kodeProgram,
                 kegiatan.createdDate(),
                 kegiatan.lastModifiedDate()
         );

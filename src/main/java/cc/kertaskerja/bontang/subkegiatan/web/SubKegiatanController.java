@@ -65,11 +65,9 @@ public class SubKegiatanController {
      */
     @PostMapping("{kodeOpd}/find/batch")
     public List<SubKegiatan> findBatch(
-            @PathVariable("kodeOpd") String kodeOpd,
             @Valid @RequestBody SubKegiatanBatchRequest request
     ) {
-        return subKegiatanService.detailSubKegiatanByKodeOpdAndKodeSubKegiatanIn(
-                kodeOpd,
+        return subKegiatanService.detailSubKegiatanIn(
                 request.kodeSubKegiatan()
         );
     }

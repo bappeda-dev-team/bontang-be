@@ -68,7 +68,7 @@ public class SubKegiatanService {
         subKegiatanRepository.deleteById(subKegiatan.id());
     }
 
-    public List<SubKegiatan> detailSubKegiatanByKodeSubKegiatanIn(List<String> kodeSubKegiatans) {
+    public List<SubKegiatan> detailSubKegiatanIn(List<String> kodeSubKegiatans) {
         List<SubKegiatan> subKegiatans = subKegiatanRepository.findAllByKodeSubKegiatanIn(kodeSubKegiatans);
         if (subKegiatans.size() != kodeSubKegiatans.size()) {
             Set<String> foundKode = subKegiatans.stream()
@@ -88,13 +88,11 @@ public class SubKegiatanService {
         return subKegiatans;
     }
 
-    public List<SubKegiatan> detailSubKegiatanByKodeOpdAndKodeSubKegiatanIn(
-            String kodeOpd,
+    public List<SubKegiatan> detailSubKegiatanByAndKodeSubKegiatanIn(
             List<String> kodeSubKegiatans
     ) {
-        List<SubKegiatan> subKegiatans = subKegiatanRepository.findAllByKodeSubKegiatanInAndKodeOpd(
-                kodeSubKegiatans,
-                kodeOpd
+        List<SubKegiatan> subKegiatans = subKegiatanRepository.findAllByKodeSubKegiatanIn(
+                kodeSubKegiatans
         );
 
         if (subKegiatans.size() != kodeSubKegiatans.size()) {
