@@ -23,9 +23,6 @@ public interface ProgramRepository extends CrudRepository<Program, Long> {
     @NonNull
     List<Program> findAllByKodeProgramIn(@NonNull Collection<String> kodePrograms);
 
-    @Query("SELECT CASE WHEN COUNT(*) > 0 THEN TRUE ELSE FALSE END FROM program WHERE bidang_urusan_id = :bidangUrusanId")
-    boolean existsByBidangUrusanId(@NonNull @Param("bidangUrusanId") Long bidangUrusanId);
-
     @Modifying
     @Transactional
     @Query("DELETE FROM program WHERE kode_program = :kodeProgram")

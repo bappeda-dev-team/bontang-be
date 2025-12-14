@@ -93,6 +93,21 @@ public class OpdController {
     }
 
     /**
+     * Hapus bidang urusan terpilih berdasarkan kode bidang urusan dari tower data untuk suatu opd
+     * @param kodeOpd
+     * @param kodeBidangUrusan
+     */
+    @DeleteMapping("{kodeOpd}/bidang-urusan/{kodeBidangUrusan}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void hapusBidangUrusan(
+            @PathVariable("kodeOpd") String kodeOpd,
+            @PathVariable("kodeBidangUrusan") String kodeBidangUrusan
+    ) {
+        opdService.detailOpdByKodeOpd(kodeOpd);
+        bidangUrusanService.hapusBidangUrusan(kodeOpd, kodeBidangUrusan);
+    }
+
+    /**
      * Ubah data opd berdasarkan kode opd
      * @param kodeOpd
      */
@@ -109,17 +124,6 @@ public class OpdController {
         );
 
         Opd updated = opdService.ubahOpd(kodeOpd, opd);
-        boolean kodeOpdBerubah = !existingOpd.kodeOpd().equals(request.kodeOpd());
-
-        if (request.bidangUrusan() != null) {
-            bidangUrusanService.simpanAtauPerbaruiBidangUrusan(
-                    kodeOpd,
-                    request.kodeOpd(),
-                    request.bidangUrusan()
-            );
-        } else if (kodeOpdBerubah) {
-            bidangUrusanService.pindahBidangUrusanKeOpd(kodeOpd, request.kodeOpd());
-        }
 
         return mapToResponse(updated);
     }

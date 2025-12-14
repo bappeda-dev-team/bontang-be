@@ -1,9 +1,7 @@
 package cc.kertaskerja.bontang.bidangurusan.domain;
 
 import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanAlreadyExistException;
-import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanDeleteForbiddenException;
 import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanNotFoundException;
-import cc.kertaskerja.bontang.program.domain.ProgramRepository;
 import cc.kertaskerja.bontang.bidangurusan.web.BidangUrusanRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +15,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -43,14 +42,11 @@ public class BidangUrusanServiceTest {
     @Mock
     private BidangUrusanRepository bidangUrusanRepository;
 
-    @Mock
-    private ProgramRepository programRepository;
-
     private BidangUrusanService bidangUrusanService;
 
     @BeforeEach
     void setUp() {
-        bidangUrusanService = new BidangUrusanService(towerDataWebClient, bidangUrusanRepository, programRepository);
+        bidangUrusanService = new BidangUrusanService(towerDataWebClient, bidangUrusanRepository);
 
         lenient().when(towerDataWebClient.get()).thenReturn(requestHeadersUriSpec);
         lenient().when(requestHeadersUriSpec.uri("/bidangurusan/detail/findall")).thenReturn(requestHeadersSpec);
@@ -123,9 +119,9 @@ public class BidangUrusanServiceTest {
     }
 
     @Test
-    void simpanBidangUrusan_usesTowerKodeBidangUrusan_withCaseInsensitiveNama() {
+    void simpanBidangUrusan_acceptsKodeBidangUrusan_asIdentifier() {
         String kodeOpd = "OPD-02";
-        BidangUrusanRequest request = new BidangUrusanRequest("bidang infrastruktur");
+        BidangUrusanRequest request = new BidangUrusanRequest("BU-020");
         BidangUrusanDto towerData = new BidangUrusanDto(20L, "BU-020", "Bidang Infrastruktur");
         BidangUrusan savedBidangUrusan = new BidangUrusan(2L, kodeOpd, towerData.kodeBidangUrusan(), towerData.namaBidangUrusan(), Instant.now(), Instant.now());
 
@@ -166,33 +162,28 @@ public class BidangUrusanServiceTest {
     }
 
     @Test
-    void hapusBidangUrusan_throwsForbidden_whenProgramExist() {
+    void hapusBidangUrusan_deletesWhenFound() {
         String kodeBidangUrusan = "BU-001";
         String kodeOpd = "OPD-01";
         BidangUrusan bidangUrusan = new BidangUrusan(1L, kodeOpd, kodeBidangUrusan, "Bidang Infrastruktur", Instant.now(), Instant.now());
 
-        when(bidangUrusanRepository.findByKodeBidangUrusan(kodeBidangUrusan)).thenReturn(java.util.Optional.of(bidangUrusan));
-        when(programRepository.existsByBidangUrusanId(bidangUrusan.id())).thenReturn(true);
-
-        assertThrows(BidangUrusanDeleteForbiddenException.class, () -> bidangUrusanService.hapusBidangUrusan(kodeBidangUrusan));
-
-        verify(bidangUrusanRepository).findByKodeBidangUrusan(kodeBidangUrusan);
-        verify(bidangUrusanRepository, never()).deleteById(any());
-    }
-
-    @Test
-    void hapusBidangUrusan_deletes_whenNoChildProgram() {
-        String kodeBidangUrusan = "BU-001";
-        String kodeOpd = "OPD-01";
-        BidangUrusan bidangUrusan = new BidangUrusan(1L, kodeOpd, kodeBidangUrusan, "Bidang Infrastruktur", Instant.now(), Instant.now());
-
-        when(bidangUrusanRepository.findByKodeBidangUrusan(kodeBidangUrusan)).thenReturn(java.util.Optional.of(bidangUrusan));
-        when(programRepository.existsByBidangUrusanId(bidangUrusan.id())).thenReturn(false);
+        when(bidangUrusanRepository.findByKodeBidangUrusan(kodeBidangUrusan)).thenReturn(Optional.of(bidangUrusan));
 
         bidangUrusanService.hapusBidangUrusan(kodeBidangUrusan);
 
         verify(bidangUrusanRepository).findByKodeBidangUrusan(kodeBidangUrusan);
         verify(bidangUrusanRepository).deleteById(bidangUrusan.id());
+    }
+
+    @Test
+    void hapusBidangUrusan_throwsException_whenNotFound() {
+        String kodeBidangUrusan = "BU-999";
+
+        when(bidangUrusanRepository.findByKodeBidangUrusan(kodeBidangUrusan)).thenReturn(Optional.empty());
+
+        assertThrows(BidangUrusanNotFoundException.class, () -> bidangUrusanService.hapusBidangUrusan(kodeBidangUrusan));
+
+        verify(bidangUrusanRepository, never()).deleteById(any());
     }
 
     @SuppressWarnings("unchecked")

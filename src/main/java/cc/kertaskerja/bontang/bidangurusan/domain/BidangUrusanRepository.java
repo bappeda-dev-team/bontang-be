@@ -11,6 +11,9 @@ public interface BidangUrusanRepository extends CrudRepository<BidangUrusan, Lon
     @NonNull
     Optional<BidangUrusan> findByKodeBidangUrusan(@NonNull String kodeBidangUrusan);
 
+    @NonNull
+    Optional<BidangUrusan> findByKodeOpdAndKodeBidangUrusan(@NonNull String kodeOpd, @NonNull String kodeBidangUrusan);
+
     boolean existsByKodeOpd(@NonNull String kodeOpd);
 
     Iterable<BidangUrusan> findByKodeOpd(@NonNull String kodeOpd);
