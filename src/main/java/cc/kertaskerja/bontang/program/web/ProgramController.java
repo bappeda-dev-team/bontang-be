@@ -2,6 +2,8 @@ package cc.kertaskerja.bontang.program.web;
 
 import java.net.URI;
 
+import cc.kertaskerja.bontang.kegiatan.domain.Kegiatan;
+import cc.kertaskerja.bontang.kegiatan.web.response.KegiatanResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -53,7 +55,13 @@ public class ProgramController {
     public List<ProgramResponse> findAll() {
         Iterable<Program> programs = programService.findAll();
         return StreamSupport.stream(programs.spliterator(), false)
-                .map(this::mapToResponse)
+                .map(program -> new ProgramResponse(
+                        program.id(),
+                        program.kodeProgram(),
+                        program.namaProgram(),
+                        program.createdDate(),
+                        program.lastModifiedDate()
+                ))
                 .toList();
     }
 
@@ -99,7 +107,7 @@ public class ProgramController {
     /**
      * Ambil data program berdasarkan kumpulan kode program
      */
-    @PostMapping("/find/batch")
+    @PostMapping("/find/batch/kode-program")
     public List<Program> findBatch(
             @Valid @RequestBody ProgramBatchRequest request
     ) {
@@ -115,17 +123,4 @@ public class ProgramController {
     public void delete(@PathVariable("kodeProgram") String kodeProgram) {
         programService.hapusProgram(kodeProgram);
     }
-
-
-    private ProgramResponse mapToResponse(Program program) {
-        return new ProgramResponse(
-                program.id(),
-                program.kodeProgram(),
-                program.namaProgram(),
-                null,
-                program.createdDate(),
-                program.lastModifiedDate()
-        );
-    }
-
 }

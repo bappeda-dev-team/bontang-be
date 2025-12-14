@@ -98,7 +98,7 @@ public class KegiatanControllerTest {
     void put_updatesKegiatanUsingService() {
         String kodeKegiatan = "KG-001";
         Kegiatan existingKegiatan = new Kegiatan(1L, kodeKegiatan, "Kegiatan 1", Instant.parse("2024-01-01T00:00:00Z"), Instant.parse("2024-01-02T00:00:00Z"));
-        KegiatanRequest request = new KegiatanRequest(null, "KG-002", "Kegiatan Updated");
+        KegiatanRequest request = new KegiatanRequest("KG-002", "Kegiatan Updated");
         Kegiatan updatedKegiatan = new Kegiatan(1L, request.kodeKegiatan(), request.namaKegiatan(), existingKegiatan.createdDate(), Instant.parse("2024-01-03T00:00:00Z"));
 
         when(kegiatanService.detailKegiatanByKodeKegiatan(kodeKegiatan)).thenReturn(existingKegiatan);
@@ -122,7 +122,7 @@ public class KegiatanControllerTest {
 
     @Test
     void post_createsKegiatanAndReturnsCreatedResponse() {
-        KegiatanRequest request = new KegiatanRequest(null, "KG-001", "Kegiatan 1");
+        KegiatanRequest request = new KegiatanRequest("KG-001", "Kegiatan 1");
         Kegiatan savedKegiatan = new Kegiatan(1L, request.kodeKegiatan(), request.namaKegiatan(), Instant.parse("2024-01-01T00:00:00Z"), Instant.parse("2024-01-01T00:00:00Z"));
 
         when(kegiatanService.tambahKegiatan(any(Kegiatan.class))).thenReturn(savedKegiatan);

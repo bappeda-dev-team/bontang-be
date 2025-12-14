@@ -5,6 +5,8 @@ import cc.kertaskerja.bontang.kegiatan.domain.KegiatanService;
 import cc.kertaskerja.bontang.kegiatan.web.request.KegiatanBatchRequest;
 import cc.kertaskerja.bontang.kegiatan.web.request.KegiatanRequest;
 import cc.kertaskerja.bontang.kegiatan.web.response.KegiatanResponse;
+import cc.kertaskerja.bontang.subkegiatan.domain.SubKegiatan;
+import cc.kertaskerja.bontang.subkegiatan.web.response.SubKegiatanResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -42,7 +44,13 @@ public class KegiatanController {
     public List<KegiatanResponse> findAll() {
         Iterable<Kegiatan> kegiatans = kegiatanService.findAll();
         return StreamSupport.stream(kegiatans.spliterator(), false)
-                .map(this::mapToResponse)
+                .map(kegiatan -> new KegiatanResponse(
+                        kegiatan.id(),
+                        kegiatan.kodeKegiatan(),
+                        kegiatan.namaKegiatan(),
+                        kegiatan.createdDate(),
+                        kegiatan.lastModifiedDate()
+                ))
                 .toList();
     }
 
@@ -102,15 +110,5 @@ public class KegiatanController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("kodeKegiatan") String kodeKegiatan) {
         kegiatanService.hapusKegiatan(kodeKegiatan);
-    }
-
-    private KegiatanResponse mapToResponse(Kegiatan kegiatan) {
-        return new KegiatanResponse(
-                kegiatan.id(),
-                kegiatan.kodeKegiatan(),
-                kegiatan.namaKegiatan(),
-                kegiatan.createdDate(),
-                kegiatan.lastModifiedDate()
-        );
     }
 }

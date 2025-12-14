@@ -5,9 +5,6 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 public record ProgramRequest(
-        @Nullable
-        Long idProgram,
-
         @NotNull(message = "Kode Program tidak boleh kosong")
         @NotEmpty(message = "Kode Program tidak boleh kosong")
         String kodeProgram,

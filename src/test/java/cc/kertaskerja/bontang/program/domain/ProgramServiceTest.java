@@ -99,6 +99,18 @@ public class ProgramServiceTest {
     }
 
     @Test
+    void detailProgramByKodeProgramIn_throwsException_whenFirstProgramMissing() {
+        List<String> kodePrograms = Arrays.asList("PR-001", "PR-002");
+        Program program2 = new Program(2L, "PR-002", "Program 2", Instant.now(), Instant.now());
+
+        when(programRepository.findAllByKodeProgramIn(kodePrograms)).thenReturn(List.of(program2));
+
+        ProgramNotFoundException exception = assertThrows(ProgramNotFoundException.class, () -> programService.detailProgramByKodeProgramIn(kodePrograms));
+        assertEquals("Program dengan kode PR-001 tidak ditemukan.", exception.getMessage());
+        verify(programRepository).findAllByKodeProgramIn(kodePrograms);
+    }
+
+    @Test
     void tambahProgram_savesProgram() {
         Program program = Program.of("PR-001", "Program 1");
         Program savedProgram = new Program(1L, "PR-001", "Program 1", Instant.now(), Instant.now());

@@ -41,30 +41,22 @@ public class SubKegiatanController {
     @GetMapping("detail/findall")
     public List<SubKegiatanResponse> findAll() {
         Iterable<SubKegiatan> subKegiatans = subKegiatanService.findAll();
-
         return StreamSupport.stream(subKegiatans.spliterator(), false)
-                .map(this::mapToResponse)
+                .map(subKegiatan -> new SubKegiatanResponse(
+                        subKegiatan.id(),
+                        subKegiatan.kodeSubKegiatan(),
+                        subKegiatan.namaSubKegiatan(),
+                        subKegiatan.createdDate(),
+                        subKegiatan.lastModifiedDate()
+                ))
                 .toList();
     }
 
     /**
-     * Ambil semua data sub kegiatan berdasarkan kode opd
-     * @param kodeOpd
+     * Ambil data sub kegiatan berdasarkan kumpulan kode sub kegiatan
      */
-    @GetMapping("detail/findall/{kodeOpd}")
-    public List<SubKegiatanResponse> findAllByKodeOpd(@PathVariable("kodeOpd") String kodeOpd) {
-        List<SubKegiatan> subKegiatans = subKegiatanService.findAllByKodeOpd(kodeOpd);
-
-        return subKegiatans.stream()
-                .map(this::mapToResponse)
-                .toList();
-    }
-
-    /**
-     * Ambil data sub kegiatan berdasarkan kode opd dan kumpulan kode sub kegiatan
-     */
-    @PostMapping("{kodeOpd}/find/batch")
-    public List<SubKegiatan> findBatch(
+    @PostMapping("/find/batch/kode-subkegiatan")
+    public List<SubKegiatan> findBatchByKodeSubKegiatan(
             @Valid @RequestBody SubKegiatanBatchRequest request
     ) {
         return subKegiatanService.detailSubKegiatanIn(
@@ -78,18 +70,18 @@ public class SubKegiatanController {
      */
     @PutMapping("update/{kodeSubKegiatan}")
     public SubKegiatan put(@PathVariable("kodeSubKegiatan") String kodeSubKegiatan, @Valid @RequestBody SubKegiatanRequest request) {
+
         SubKegiatan existingSubKegiatan = subKegiatanService.detailSubKegiatanByKodeSubKegiatan(kodeSubKegiatan);
 
         SubKegiatan subKegiatan = new SubKegiatan(
                 existingSubKegiatan.id(),
                 request.kodeSubKegiatan(),
                 request.namaSubKegiatan(),
-                existingSubKegiatan.kegiatanId(),
                 existingSubKegiatan.createdDate(),
                 null
         );
 
-        return subKegiatanService.ubahSubKegiatan(kodeSubKegiatan, subKegiatan, request.kodeKegiatan());
+        return subKegiatanService.ubahSubKegiatan(kodeSubKegiatan, subKegiatan);
     }
 
     /**
@@ -100,10 +92,9 @@ public class SubKegiatanController {
     public ResponseEntity<SubKegiatan> post(@Valid @RequestBody SubKegiatanRequest request) {
         SubKegiatan subKegiatan = SubKegiatan.of(
                 request.kodeSubKegiatan(),
-                request.namaSubKegiatan(),
-                null
+                request.namaSubKegiatan()
         );
-        SubKegiatan saved = subKegiatanService.tambahSubKegiatan(subKegiatan, request.kodeKegiatan());
+        SubKegiatan saved = subKegiatanService.tambahSubKegiatan(subKegiatan);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
@@ -123,30 +114,4 @@ public class SubKegiatanController {
         subKegiatanService.hapusSubKegiatan(kodeSubKegiatan);
     }
 
-    /**
-     * Hapus sub kegiatan berdasarkan kode opd dan kode sub kegiatan
-     * @param kodeOpd
-     * @param kodeSubKegiatan
-     */
-    @DeleteMapping("delete/{kodeOpd}/{kodeSubKegiatan}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(
-            @PathVariable("kodeOpd") String kodeOpd,
-            @PathVariable("kodeSubKegiatan") String kodeSubKegiatan
-    ) {
-        subKegiatanService.hapusSubKegiatan(kodeOpd, kodeSubKegiatan);
-    }
-
-    private SubKegiatanResponse mapToResponse(SubKegiatan subKegiatan) {
-        String kodeKegiatan = subKegiatanService.getKodeKegiatan(subKegiatan.kegiatanId());
-
-        return new SubKegiatanResponse(
-                subKegiatan.id(),
-                subKegiatan.kodeSubKegiatan(),
-                subKegiatan.namaSubKegiatan(),
-                kodeKegiatan,
-                subKegiatan.createdDate(),
-                subKegiatan.lastModifiedDate()
-        );
-    }
 }

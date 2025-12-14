@@ -5,7 +5,6 @@ import cc.kertaskerja.bontang.subkegiatan.domain.SubKegiatanService;
 import cc.kertaskerja.bontang.subkegiatan.web.request.SubKegiatanBatchRequest;
 import cc.kertaskerja.bontang.subkegiatan.web.request.SubKegiatanRequest;
 import cc.kertaskerja.bontang.subkegiatan.web.response.SubKegiatanResponse;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,35 +41,11 @@ public class SubKegiatanControllerTest {
     }
 
     @Test
-    void findAll_returnsAllSubKegiatanFromService() {
-        Instant createdDate1 = Instant.parse("2024-01-01T00:00:00Z");
-        Instant createdDate2 = Instant.parse("2024-01-02T00:00:00Z");
-        Iterable<SubKegiatan> subKegiatanList = List.of(
-                new SubKegiatan(1L, "SK-001", "Sub Kegiatan 1", 10L, createdDate1, createdDate1),
-                new SubKegiatan(2L, "SK-002", "Sub Kegiatan 2", 20L, createdDate2, createdDate2)
-        );
-
-        when(subKegiatanService.findAll()).thenReturn(subKegiatanList);
-        when(subKegiatanService.getKodeKegiatan(10L)).thenReturn("KG-10");
-        when(subKegiatanService.getKodeKegiatan(20L)).thenReturn("KG-20");
-
-        List<SubKegiatanResponse> result = subKegiatanController.findAll();
-
-        List<SubKegiatanResponse> expected = List.of(
-                new SubKegiatanResponse(1L, "SK-001", "Sub Kegiatan 1", "KG-10", createdDate1, createdDate1),
-                new SubKegiatanResponse(2L, "SK-002", "Sub Kegiatan 2", "KG-20", createdDate2, createdDate2)
-        );
-
-        assertEquals(expected, result);
-        verify(subKegiatanService).findAll();
-        verify(subKegiatanService).getKodeKegiatan(10L);
-        verify(subKegiatanService).getKodeKegiatan(20L);
-    }
-
-    @Test
     void getByKodeSubKegiatan_returnsSubKegiatanFromService() {
         String kodeSubKegiatan = "SK-001";
-        SubKegiatan subKegiatan = new SubKegiatan(1L, kodeSubKegiatan, "Sub Kegiatan 1", 10L, Instant.now(), Instant.now());
+        Instant createdDate = Instant.parse("2024-01-01T00:00:00Z");
+        Instant lastModifiedDate = Instant.parse("2024-01-02T00:00:00Z");
+        SubKegiatan subKegiatan = new SubKegiatan(1L, kodeSubKegiatan, "Sub Kegiatan 1", createdDate, lastModifiedDate);
 
         when(subKegiatanService.detailSubKegiatanByKodeSubKegiatan(kodeSubKegiatan)).thenReturn(subKegiatan);
 
@@ -81,70 +56,70 @@ public class SubKegiatanControllerTest {
     }
 
     @Test
-    void findBatch_returnsSubKegiatanListFromService() {
+    void findBatchByKodeSubKegiatan_returnsSubKegiatanListFromService() {
         List<String> kodeSubKegiatanList = List.of("SK-001", "SK-002");
         List<SubKegiatan> subKegiatanList = List.of(
-                new SubKegiatan(1L, "SK-001", "Sub Kegiatan 1", 10L, Instant.now(), Instant.now()),
-                new SubKegiatan(2L, "SK-002", "Sub Kegiatan 2", 20L, Instant.now(), Instant.now())
+                new SubKegiatan(1L, "SK-001", "Sub Kegiatan 1", Instant.parse("2024-01-01T00:00:00Z"), Instant.parse("2024-01-01T00:00:00Z")),
+                new SubKegiatan(2L, "SK-002", "Sub Kegiatan 2", Instant.parse("2024-02-01T00:00:00Z"), Instant.parse("2024-02-02T00:00:00Z"))
         );
 
         when(subKegiatanService.detailSubKegiatanIn(kodeSubKegiatanList)).thenReturn(subKegiatanList);
 
-        List<SubKegiatan> result = subKegiatanController.findBatch(new SubKegiatanBatchRequest(kodeSubKegiatanList));
+        List<SubKegiatan> result = subKegiatanController.findBatchByKodeSubKegiatan(new SubKegiatanBatchRequest(kodeSubKegiatanList));
 
         assertEquals(subKegiatanList, result);
         verify(subKegiatanService).detailSubKegiatanIn(kodeSubKegiatanList);
     }
 
     @Test
-    void findAllByKodeOpd_returnsAllSubKegiatanFromService() {
-        String kodeOpd = "OPD-01";
-        Instant createdDate1 = Instant.parse("2024-02-01T00:00:00Z");
-        Instant createdDate2 = Instant.parse("2024-02-02T00:00:00Z");
+    void findAll_returnsSubKegiatanResponseListFromService() {
         List<SubKegiatan> subKegiatanList = List.of(
-                new SubKegiatan(1L, "SK-010", "Sub Kegiatan 10", 10L, createdDate1, createdDate1),
-                new SubKegiatan(2L, "SK-020", "Sub Kegiatan 20", 20L, createdDate2, createdDate2)
+                new SubKegiatan(1L, "SK-001", "Sub Kegiatan 1", Instant.parse("2024-01-01T00:00:00Z"), Instant.parse("2024-01-01T00:00:00Z")),
+                new SubKegiatan(2L, "SK-002", "Sub Kegiatan 2", Instant.parse("2024-02-01T00:00:00Z"), Instant.parse("2024-02-02T00:00:00Z"))
         );
 
-        when(subKegiatanService.findAllByKodeOpd(kodeOpd)).thenReturn(subKegiatanList);
-        when(subKegiatanService.getKodeKegiatan(10L)).thenReturn("KG-10");
-        when(subKegiatanService.getKodeKegiatan(20L)).thenReturn("KG-20");
+        when(subKegiatanService.findAll()).thenReturn(subKegiatanList);
 
-        List<SubKegiatanResponse> result = subKegiatanController.findAllByKodeOpd(kodeOpd);
+        List<SubKegiatanResponse> result = subKegiatanController.findAll();
 
-        List<SubKegiatanResponse> expected = List.of(
-                new SubKegiatanResponse(1L, "SK-010", "Sub Kegiatan 10", "KG-10", createdDate1, createdDate1),
-                new SubKegiatanResponse(2L, "SK-020", "Sub Kegiatan 20", "KG-20", createdDate2, createdDate2)
-        );
+        assertEquals(subKegiatanList.size(), result.size());
 
-        assertEquals(expected, result);
-        verify(subKegiatanService).findAllByKodeOpd(kodeOpd);
-        verify(subKegiatanService).getKodeKegiatan(10L);
-        verify(subKegiatanService).getKodeKegiatan(20L);
+        for (int i = 0; i < subKegiatanList.size(); i++) {
+            SubKegiatan expected = subKegiatanList.get(i);
+            SubKegiatanResponse response = result.get(i);
+
+            assertEquals(expected.id(), response.id());
+            assertEquals(expected.kodeSubKegiatan(), response.kodeSubKegiatan());
+            assertEquals(expected.namaSubKegiatan(), response.namaSubKegiatan());
+            assertEquals(expected.createdDate(), response.createdDate());
+            assertEquals(expected.lastModifiedDate(), response.lastModifiedDate());
+        }
+
+        verify(subKegiatanService).findAll();
     }
 
     @Test
     void put_updatesSubKegiatanUsingService() {
         String kodeSubKegiatan = "SK-001";
-        String kodeKegiatan = "KG-01";
-        SubKegiatan existingSubKegiatan = new SubKegiatan(1L, kodeSubKegiatan, "Sub Kegiatan 1", 30L, Instant.parse("2024-01-01T00:00:00Z"), Instant.parse("2024-01-02T00:00:00Z"));
-        SubKegiatanRequest request = new SubKegiatanRequest(null, "SK-002", "Sub Kegiatan Updated", kodeKegiatan);
-        SubKegiatan updatedSubKegiatan = new SubKegiatan(1L, request.kodeSubKegiatan(), request.namaSubKegiatan(), 40L, existingSubKegiatan.createdDate(), Instant.parse("2024-01-03T00:00:00Z"));
+        Instant createdDate = Instant.parse("2024-01-01T00:00:00Z");
+        Instant lastModifiedDate = Instant.parse("2024-01-02T00:00:00Z");
+        SubKegiatan existingSubKegiatan = new SubKegiatan(1L, kodeSubKegiatan, "Sub Kegiatan 1", createdDate, lastModifiedDate);
+        SubKegiatanRequest request = new SubKegiatanRequest("SK-002", "Sub Kegiatan Updated");
+        SubKegiatan updatedSubKegiatan = new SubKegiatan(1L, request.kodeSubKegiatan(), request.namaSubKegiatan(), createdDate, Instant.parse("2024-01-03T00:00:00Z"));
 
         when(subKegiatanService.detailSubKegiatanByKodeSubKegiatan(kodeSubKegiatan)).thenReturn(existingSubKegiatan);
-        when(subKegiatanService.ubahSubKegiatan(eq(kodeSubKegiatan), any(SubKegiatan.class), eq(kodeKegiatan))).thenReturn(updatedSubKegiatan);
+        when(subKegiatanService.ubahSubKegiatan(eq(kodeSubKegiatan), any(SubKegiatan.class))).thenReturn(updatedSubKegiatan);
 
         SubKegiatan result = subKegiatanController.put(kodeSubKegiatan, request);
 
         ArgumentCaptor<SubKegiatan> subKegiatanCaptor = ArgumentCaptor.forClass(SubKegiatan.class);
         verify(subKegiatanService).detailSubKegiatanByKodeSubKegiatan(kodeSubKegiatan);
-        verify(subKegiatanService).ubahSubKegiatan(eq(kodeSubKegiatan), subKegiatanCaptor.capture(), eq(kodeKegiatan));
+        verify(subKegiatanService).ubahSubKegiatan(eq(kodeSubKegiatan), subKegiatanCaptor.capture());
 
         SubKegiatan subKegiatanPassed = subKegiatanCaptor.getValue();
         assertEquals(existingSubKegiatan.id(), subKegiatanPassed.id());
         assertEquals(request.kodeSubKegiatan(), subKegiatanPassed.kodeSubKegiatan());
         assertEquals(request.namaSubKegiatan(), subKegiatanPassed.namaSubKegiatan());
-        assertEquals(existingSubKegiatan.kegiatanId(), subKegiatanPassed.kegiatanId());
         assertEquals(existingSubKegiatan.createdDate(), subKegiatanPassed.createdDate());
         assertNull(subKegiatanPassed.lastModifiedDate());
 
@@ -153,11 +128,10 @@ public class SubKegiatanControllerTest {
 
     @Test
     void post_createsSubKegiatanAndReturnsCreatedResponse() {
-        String kodeKegiatan = "KG-01";
-        SubKegiatanRequest request = new SubKegiatanRequest(null, "SK-001", "Sub Kegiatan 1", kodeKegiatan);
-        SubKegiatan savedSubKegiatan = new SubKegiatan(1L, request.kodeSubKegiatan(), request.namaSubKegiatan(), 10L, Instant.parse("2024-01-01T00:00:00Z"), Instant.parse("2024-01-01T00:00:00Z"));
+        SubKegiatanRequest request = new SubKegiatanRequest("SK-001", "Sub Kegiatan 1");
+        SubKegiatan savedSubKegiatan = new SubKegiatan(1L, request.kodeSubKegiatan(), request.namaSubKegiatan(), Instant.parse("2024-01-01T00:00:00Z"), Instant.parse("2024-01-01T00:00:00Z"));
 
-        when(subKegiatanService.tambahSubKegiatan(any(SubKegiatan.class), eq(kodeKegiatan))).thenReturn(savedSubKegiatan);
+        when(subKegiatanService.tambahSubKegiatan(any(SubKegiatan.class))).thenReturn(savedSubKegiatan);
 
         MockHttpServletRequest servletRequest = new MockHttpServletRequest();
         servletRequest.setRequestURI("/subkegiatan");
@@ -166,13 +140,14 @@ public class SubKegiatanControllerTest {
         ResponseEntity<SubKegiatan> response = subKegiatanController.post(request);
 
         ArgumentCaptor<SubKegiatan> subKegiatanCaptor = ArgumentCaptor.forClass(SubKegiatan.class);
-        verify(subKegiatanService).tambahSubKegiatan(subKegiatanCaptor.capture(), eq(kodeKegiatan));
+        verify(subKegiatanService).tambahSubKegiatan(subKegiatanCaptor.capture());
 
         SubKegiatan subKegiatanPassed = subKegiatanCaptor.getValue();
         assertNull(subKegiatanPassed.id());
         assertEquals(request.kodeSubKegiatan(), subKegiatanPassed.kodeSubKegiatan());
         assertEquals(request.namaSubKegiatan(), subKegiatanPassed.namaSubKegiatan());
-        assertNull(subKegiatanPassed.kegiatanId());
+        assertNull(subKegiatanPassed.createdDate());
+        assertNull(subKegiatanPassed.lastModifiedDate());
 
         assertEquals(201, response.getStatusCodeValue());
         assertEquals(savedSubKegiatan, response.getBody());
@@ -188,15 +163,5 @@ public class SubKegiatanControllerTest {
         subKegiatanController.delete(kodeSubKegiatan);
 
         verify(subKegiatanService).hapusSubKegiatan(kodeSubKegiatan);
-    }
-
-    @Test
-    void deleteByKodeOpd_deletesSubKegiatanUsingService() {
-        String kodeOpd = "OPD-01";
-        String kodeSubKegiatan = "SK-002";
-
-        subKegiatanController.delete(kodeOpd, kodeSubKegiatan);
-
-        verify(subKegiatanService).hapusSubKegiatan(kodeOpd, kodeSubKegiatan);
     }
 }

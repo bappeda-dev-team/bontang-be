@@ -1,11 +1,6 @@
 package cc.kertaskerja.bontang.kegiatan.domain;
 
-import cc.kertaskerja.bontang.kegiatan.domain.exception.KegiatanDeleteForbiddenException;
 import cc.kertaskerja.bontang.kegiatan.domain.exception.KegiatanNotFoundException;
-import cc.kertaskerja.bontang.program.domain.Program;
-import cc.kertaskerja.bontang.program.domain.ProgramRepository;
-import cc.kertaskerja.bontang.program.domain.exception.ProgramNotFoundException;
-import cc.kertaskerja.bontang.subkegiatan.domain.SubKegiatanRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,16 +21,12 @@ class KegiatanServiceTest {
 
     @Mock
     private KegiatanRepository kegiatanRepository;
-    @Mock
-    private ProgramRepository programRepository;
-    @Mock
-    private SubKegiatanRepository subKegiatanRepository;
 
     private KegiatanService kegiatanService;
 
     @BeforeEach
     void setUp() {
-        kegiatanService = new KegiatanService(kegiatanRepository, programRepository, subKegiatanRepository);
+        kegiatanService = new KegiatanService(kegiatanRepository);
     }
 
     @Test
@@ -141,17 +132,13 @@ class KegiatanServiceTest {
     }
 
     @Test
-    void hapusKegiatan_deletesKegiatan_whenTidakAdaSubKegiatan() {
+    void hapusKegiatan_deletesKegiatan_whenKodeKegiatanExists() {
         String kodeKegiatan = "KG-001";
-        Kegiatan kegiatan = new Kegiatan(1L, kodeKegiatan, "Kegiatan 1", Instant.now(), Instant.now());
-
-        when(kegiatanRepository.findByKodeKegiatan(kodeKegiatan)).thenReturn(Optional.of(kegiatan));
-        when(subKegiatanRepository.existsByKegiatanId(kegiatan.id())).thenReturn(false);
+        when(kegiatanRepository.existsByKodeKegiatan(kodeKegiatan)).thenReturn(true);
 
         kegiatanService.hapusKegiatan(kodeKegiatan);
 
-        verify(kegiatanRepository).findByKodeKegiatan(kodeKegiatan);
-        verify(subKegiatanRepository).existsByKegiatanId(kegiatan.id());
+        verify(kegiatanRepository).existsByKodeKegiatan(kodeKegiatan);
         verify(kegiatanRepository).deleteByKodeKegiatan(kodeKegiatan);
     }
 
@@ -159,45 +146,10 @@ class KegiatanServiceTest {
     void hapusKegiatan_throwsException_whenKodeKegiatanNotExists() {
         String kodeKegiatan = "KG-404";
 
-        when(kegiatanRepository.findByKodeKegiatan(kodeKegiatan)).thenReturn(Optional.empty());
+        when(kegiatanRepository.existsByKodeKegiatan(kodeKegiatan)).thenReturn(false);
 
         assertThrows(KegiatanNotFoundException.class, () -> kegiatanService.hapusKegiatan(kodeKegiatan));
-        verify(kegiatanRepository).findByKodeKegiatan(kodeKegiatan);
+        verify(kegiatanRepository).existsByKodeKegiatan(kodeKegiatan);
         verify(kegiatanRepository, never()).deleteByKodeKegiatan(any());
-    }
-
-    @Test
-    void hapusKegiatan_throwsForbidden_whenAdaSubKegiatan() {
-        String kodeKegiatan = "KG-001";
-        Kegiatan kegiatan = new Kegiatan(1L, kodeKegiatan, "Kegiatan 1", Instant.now(), Instant.now());
-
-        when(kegiatanRepository.findByKodeKegiatan(kodeKegiatan)).thenReturn(Optional.of(kegiatan));
-        when(subKegiatanRepository.existsByKegiatanId(kegiatan.id())).thenReturn(true);
-
-        assertThrows(KegiatanDeleteForbiddenException.class, () -> kegiatanService.hapusKegiatan(kodeKegiatan));
-
-        verify(subKegiatanRepository).existsByKegiatanId(kegiatan.id());
-        verify(kegiatanRepository, never()).deleteByKodeKegiatan(any());
-    }
-
-    @Test
-    void getKodeProgram_returnsKodeProgram_whenProgramFound() {
-        Long programId = 99L;
-        Program program = new Program(programId, "PR-099", "Program 99", Instant.now(), Instant.now());
-        when(programRepository.findById(programId)).thenReturn(Optional.of(program));
-
-        String result = kegiatanService.getKodeProgram(programId);
-
-        assertEquals(program.kodeProgram(), result);
-        verify(programRepository).findById(programId);
-    }
-
-    @Test
-    void getKodeProgram_throwsException_whenProgramNotFound() {
-        Long programId = 999L;
-        when(programRepository.findById(programId)).thenReturn(Optional.empty());
-
-        assertThrows(ProgramNotFoundException.class, () -> kegiatanService.getKodeProgram(programId));
-        verify(programRepository).findById(programId);
     }
 }

@@ -61,13 +61,11 @@ public class ProgramControllerTest {
         assertEquals(program1.id(), firstResponse.id());
         assertEquals(program1.kodeProgram(), firstResponse.kodeProgram());
         assertEquals(program1.namaProgram(), firstResponse.namaProgram());
-        assertNull(firstResponse.kodeBidangUrusan());
         assertEquals(program1Created, firstResponse.createdDate());
         assertEquals(program1Updated, firstResponse.lastModifiedDate());
         assertEquals(program2.id(), secondResponse.id());
         assertEquals(program2.kodeProgram(), secondResponse.kodeProgram());
         assertEquals(program2.namaProgram(), secondResponse.namaProgram());
-        assertNull(secondResponse.kodeBidangUrusan());
         assertEquals(program2Created, secondResponse.createdDate());
         assertEquals(program2Updated, secondResponse.lastModifiedDate());
         verify(programService).findAll();
@@ -106,7 +104,7 @@ public class ProgramControllerTest {
     void put_updatesProgramUsingService() {
         String kodeProgram = "PR-001";
         Program existingProgram = new Program(1L, kodeProgram, "Program 1", Instant.parse("2024-01-01T00:00:00Z"), Instant.parse("2024-01-02T00:00:00Z"));
-        ProgramRequest request = new ProgramRequest(null, "PR-002", "Program Updated");
+        ProgramRequest request = new ProgramRequest("PR-002", "Program Updated");
         Program updatedProgram = new Program(1L, request.kodeProgram(), request.namaProgram(), existingProgram.createdDate(), Instant.parse("2024-01-03T00:00:00Z"));
 
         when(programService.detailProgramByKodeProgram(kodeProgram)).thenReturn(existingProgram);
@@ -130,7 +128,7 @@ public class ProgramControllerTest {
 
     @Test
     void post_createsProgramAndReturnsCreatedResponse() {
-        ProgramRequest request = new ProgramRequest(null, "PR-001", "Program 1");
+        ProgramRequest request = new ProgramRequest("PR-001", "Program 1");
         Program savedProgram = new Program(1L, request.kodeProgram(), request.namaProgram(), Instant.parse("2024-01-01T00:00:00Z"), Instant.parse("2024-01-01T00:00:00Z"));
 
         when(programService.tambahProgram(any(Program.class))).thenReturn(savedProgram);
