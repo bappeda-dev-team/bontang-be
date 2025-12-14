@@ -95,10 +95,8 @@ public class BidangUrusanControllerTest {
     @Test
     void delete_menghapusBidangUrusan() {
         String kodeBidangUrusan = "BU-001";
-        String kodeOpd = "OPD-01";
+        bidangUrusanController.delete(kodeBidangUrusan);
 
-        bidangUrusanController.delete(kodeBidangUrusan, kodeOpd);
-
-        verify(bidangUrusanService).hapusBidangUrusan(kodeOpd, kodeBidangUrusan);
+        verify(bidangUrusanService).hapusBidangUrusan(kodeBidangUrusan);
     }
 }

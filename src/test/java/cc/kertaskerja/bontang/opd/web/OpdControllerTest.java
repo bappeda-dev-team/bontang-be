@@ -28,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -157,6 +158,45 @@ public class OpdControllerTest {
                 updatedOpd.createdDate(),
                 updatedOpd.lastModifiedDate(),
                 List.of(new OpdBidangUrusanResponse(5L, "BID-01", "Bidang Diperbarui"))
+        );
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void put_movesBidangUrusanWhenBidangUrusanMissingAndKodeOpdChanges() {
+        String kodeOpd = "OPD-001";
+        String newKodeOpd = "OPD-002";
+        Opd existingOpd = new Opd(kodeOpd.hashCode() + 1L, kodeOpd, "BAPPEDA", Instant.parse("2024-01-01T00:00:00Z"), Instant.parse("2024-01-02T00:00:00Z"));
+        OpdRequest request = new OpdRequest(
+                null,
+                newKodeOpd,
+                "BAPPEDA UPDATED",
+                null
+        );
+
+        Instant updatedAt = Instant.parse("2024-01-03T00:00:00Z");
+        Opd updatedOpd = new Opd(existingOpd.id(), newKodeOpd, request.namaOpd(), existingOpd.createdDate(), updatedAt);
+
+        when(opdService.detailOpdByKodeOpd(kodeOpd)).thenReturn(existingOpd);
+        when(opdService.ubahOpd(eq(kodeOpd), any(Opd.class))).thenReturn(updatedOpd);
+        when(bidangUrusanService.findByKodeOpd(newKodeOpd)).thenReturn(List.of());
+
+        OpdResponse result = opdController.put(kodeOpd, request);
+
+        verify(opdService).detailOpdByKodeOpd(kodeOpd);
+        verify(opdService).ubahOpd(eq(kodeOpd), any(Opd.class));
+        verify(bidangUrusanService).pindahBidangUrusanKeOpd(kodeOpd, newKodeOpd);
+        verify(bidangUrusanService).findByKodeOpd(newKodeOpd);
+        verify(bidangUrusanService, never()).simpanAtauPerbaruiBidangUrusan(any(), any(), any());
+
+        OpdResponse expected = new OpdResponse(
+                updatedOpd.id(),
+                updatedOpd.kodeOpd(),
+                updatedOpd.namaOpd(),
+                updatedOpd.createdDate(),
+                updatedOpd.lastModifiedDate(),
+                List.of()
         );
 
         assertEquals(expected, result);

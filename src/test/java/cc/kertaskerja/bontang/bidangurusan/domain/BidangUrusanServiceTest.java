@@ -171,11 +171,12 @@ public class BidangUrusanServiceTest {
         String kodeOpd = "OPD-01";
         BidangUrusan bidangUrusan = new BidangUrusan(1L, kodeOpd, kodeBidangUrusan, "Bidang Infrastruktur", Instant.now(), Instant.now());
 
-        when(bidangUrusanRepository.findByKodeOpdAndKodeBidangUrusan(kodeOpd, kodeBidangUrusan)).thenReturn(java.util.Optional.of(bidangUrusan));
+        when(bidangUrusanRepository.findByKodeBidangUrusan(kodeBidangUrusan)).thenReturn(java.util.Optional.of(bidangUrusan));
         when(programRepository.existsByBidangUrusanId(bidangUrusan.id())).thenReturn(true);
 
-        assertThrows(BidangUrusanDeleteForbiddenException.class, () -> bidangUrusanService.hapusBidangUrusan(kodeOpd, kodeBidangUrusan));
+        assertThrows(BidangUrusanDeleteForbiddenException.class, () -> bidangUrusanService.hapusBidangUrusan(kodeBidangUrusan));
 
+        verify(bidangUrusanRepository).findByKodeBidangUrusan(kodeBidangUrusan);
         verify(bidangUrusanRepository, never()).deleteById(any());
     }
 
@@ -185,11 +186,12 @@ public class BidangUrusanServiceTest {
         String kodeOpd = "OPD-01";
         BidangUrusan bidangUrusan = new BidangUrusan(1L, kodeOpd, kodeBidangUrusan, "Bidang Infrastruktur", Instant.now(), Instant.now());
 
-        when(bidangUrusanRepository.findByKodeOpdAndKodeBidangUrusan(kodeOpd, kodeBidangUrusan)).thenReturn(java.util.Optional.of(bidangUrusan));
+        when(bidangUrusanRepository.findByKodeBidangUrusan(kodeBidangUrusan)).thenReturn(java.util.Optional.of(bidangUrusan));
         when(programRepository.existsByBidangUrusanId(bidangUrusan.id())).thenReturn(false);
 
-        bidangUrusanService.hapusBidangUrusan(kodeOpd, kodeBidangUrusan);
+        bidangUrusanService.hapusBidangUrusan(kodeBidangUrusan);
 
+        verify(bidangUrusanRepository).findByKodeBidangUrusan(kodeBidangUrusan);
         verify(bidangUrusanRepository).deleteById(bidangUrusan.id());
     }
 

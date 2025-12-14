@@ -156,9 +156,9 @@ public class OpdController {
 
     private OpdResponse mapToResponse(Opd opd) {
         List<OpdBidangUrusanResponse> bidangUrusan = StreamSupport.stream(
-                bidangUrusanService.findByKodeOpd(opd.kodeOpd()).spliterator(),
-                false
-        )
+                        bidangUrusanService.findByKodeOpd(opd.kodeOpd()).spliterator(),
+                        false
+                )
                 .map(this::mapBidangUrusan)
                 .toList();
 

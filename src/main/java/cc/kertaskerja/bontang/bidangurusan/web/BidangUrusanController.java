@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -71,12 +70,9 @@ public class BidangUrusanController {
      * Hapus bidang urusan berdasarkan kode bidang urusan
      * @param kodeBidangUrusan
      */
-    @DeleteMapping("delete/{kodeOpd}/{kodeBidangUrusan}")
+    @DeleteMapping("delete/{kodeBidangUrusan}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(
-            @PathVariable("kodeBidangUrusan") String kodeBidangUrusan,
-            @RequestParam("kodeOpd") String kodeOpd
-    ) {
-        bidangUrusanService.hapusBidangUrusan(kodeOpd, kodeBidangUrusan);
+    public void delete(@PathVariable("kodeBidangUrusan") String kodeBidangUrusan) {
+        bidangUrusanService.hapusBidangUrusan(kodeBidangUrusan);
     }
 }
