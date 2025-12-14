@@ -153,28 +153,6 @@ public class BidangUrusanService {
         }
     }
 
-    public void updateNamaBidangUrusan(String kodeOpd, String namaBidangUrusan) {
-        Iterable<BidangUrusan> bidangUrusans = bidangUrusanRepository.findByKodeOpd(kodeOpd);
-        boolean hasData = false;
-
-        for (BidangUrusan bidangUrusan : bidangUrusans) {
-            hasData = true;
-            BidangUrusan updated = new BidangUrusan(
-                    bidangUrusan.id(),
-                    bidangUrusan.kodeOpd(),
-                    bidangUrusan.kodeBidangUrusan(),
-                    namaBidangUrusan,
-                    bidangUrusan.createdDate(),
-                    null
-            );
-            bidangUrusanRepository.save(updated);
-        }
-
-        if (!hasData) {
-            throw new BidangUrusanNotFoundException("Kode OPD " + kodeOpd);
-        }
-    }
-
     private List<BidangUrusanDto> fetchAllFromTower() {
         List<BidangUrusanDto> response = towerDataWebClient.get()
                 .uri("/bidangurusan/detail/findall")
@@ -207,12 +185,17 @@ public class BidangUrusanService {
                 .findFirst();
     }
 
-    public void hapusBidangUrusan(String kodeBidangUrusan) {
-        BidangUrusan bidangUrusan = bidangUrusanRepository.findByKodeBidangUrusan(kodeBidangUrusan)
-                .orElseThrow(() -> new BidangUrusanNotFoundException(kodeBidangUrusan));
+    public void hapusBidangUrusan(String kodeOpd, String kodeBidangUrusan) {
+        BidangUrusan bidangUrusan = bidangUrusanRepository
+                .findByKodeOpdAndKodeBidangUrusan(kodeOpd, kodeBidangUrusan)
+                .orElseThrow(() -> new BidangUrusanNotFoundException(
+                        kodeBidangUrusan + " pada OPD " + kodeOpd
+                ));
 
         hapusBidangUrusan(bidangUrusan);
     }
+
+    // Method helper
 
     private void hapusBidangUrusan(BidangUrusan bidangUrusan) {
         if (programRepository.existsByBidangUrusanId(bidangUrusan.id())) {

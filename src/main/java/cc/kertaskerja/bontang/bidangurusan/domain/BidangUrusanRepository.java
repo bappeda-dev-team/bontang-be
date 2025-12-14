@@ -9,7 +9,10 @@ public interface BidangUrusanRepository extends CrudRepository<BidangUrusan, Lon
     boolean existsByKodeOpdAndKodeBidangUrusan(@NonNull String kodeOpd, @NonNull String kodeBidangUrusan);
 
     @NonNull
-    Optional<BidangUrusan> findByKodeBidangUrusan(@NonNull String kodeBidangUrusan);
+    Optional<BidangUrusan> findByKodeOpdAndKodeBidangUrusan(
+            @NonNull String kodeOpd,
+            @NonNull String kodeBidangUrusan
+    );
 
     boolean existsByKodeOpd(@NonNull String kodeOpd);
 
