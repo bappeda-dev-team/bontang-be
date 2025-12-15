@@ -125,6 +125,12 @@ public class OpdController {
 
         Opd updated = opdService.ubahOpd(kodeOpd, opd);
 
+        if (request.bidangUrusan() != null) {
+            bidangUrusanService.simpanAtauPerbaruiBidangUrusan(existingOpd.kodeOpd(), request.kodeOpd(), request.bidangUrusan());
+        } else if (!existingOpd.kodeOpd().equals(request.kodeOpd())) {
+            bidangUrusanService.pindahBidangUrusanKeOpd(existingOpd.kodeOpd(), request.kodeOpd());
+        }
+
         return mapToResponse(updated);
     }
 

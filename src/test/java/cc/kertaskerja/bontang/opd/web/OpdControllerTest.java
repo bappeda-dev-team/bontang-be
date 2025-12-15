@@ -7,6 +7,7 @@ import cc.kertaskerja.bontang.bidangurusan.web.BidangUrusanRequest;
 import cc.kertaskerja.bontang.opd.domain.Opd;
 import cc.kertaskerja.bontang.opd.domain.OpdService;
 import cc.kertaskerja.bontang.opd.domain.exception.OpdDeleteForbiddenException;
+import cc.kertaskerja.bontang.opd.web.OpdBidangUrusanRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -188,6 +191,28 @@ public class OpdControllerTest {
         );
 
         assertEquals(expected, result);
+        verify(bidangUrusanService).pindahBidangUrusanKeOpd(existingOpd.kodeOpd(), request.kodeOpd());
+        verify(bidangUrusanService, never()).simpanAtauPerbaruiBidangUrusan(anyString(), anyString(), any());
+    }
+
+    @Test
+    void put_withBidangUrusanRequest_menyinkronkanBidang() {
+        String kodeOpd = "OPD-001";
+        Instant created = Instant.parse("2024-01-01T00:00:00Z");
+        Opd existingOpd = new Opd(1L, kodeOpd, "BAPPEDA", created, Instant.parse("2024-01-02T00:00:00Z"));
+        List<OpdBidangUrusanRequest> bidang = List.of(new OpdBidangUrusanRequest(10L, "BID-01", "Urusan X"));
+        OpdRequest request = new OpdRequest(null, kodeOpd, "BAPPEDA UPDATED", bidang);
+        Opd updatedOpd = new Opd(existingOpd.id(), request.kodeOpd(), request.namaOpd(), existingOpd.createdDate(), Instant.parse("2024-01-03T00:00:00Z"));
+
+        when(opdService.detailOpdByKodeOpd(kodeOpd)).thenReturn(existingOpd);
+        when(opdService.ubahOpd(eq(kodeOpd), any(Opd.class))).thenReturn(updatedOpd);
+        when(bidangUrusanService.simpanAtauPerbaruiBidangUrusan(existingOpd.kodeOpd(), request.kodeOpd(), bidang)).thenReturn(List.of());
+        when(bidangUrusanService.findByKodeOpd(kodeOpd)).thenReturn(List.of());
+
+        opdController.put(kodeOpd, request);
+
+        verify(bidangUrusanService).simpanAtauPerbaruiBidangUrusan(existingOpd.kodeOpd(), request.kodeOpd(), bidang);
+        verify(bidangUrusanService, never()).pindahBidangUrusanKeOpd(anyString(), anyString());
     }
 
     @Test

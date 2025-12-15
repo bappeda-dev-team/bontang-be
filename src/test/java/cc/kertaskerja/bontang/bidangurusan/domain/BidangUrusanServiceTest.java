@@ -3,6 +3,7 @@ package cc.kertaskerja.bontang.bidangurusan.domain;
 import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanAlreadyExistException;
 import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanNotFoundException;
 import cc.kertaskerja.bontang.bidangurusan.web.BidangUrusanRequest;
+import cc.kertaskerja.bontang.opd.web.OpdBidangUrusanRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +17,7 @@ import reactor.core.publisher.Mono;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -162,6 +164,44 @@ public class BidangUrusanServiceTest {
     }
 
     @Test
+    void simpanAtauPerbaruiBidangUrusan_updatesExistingAndAddsNewData() {
+        String existingKodeOpd = "OPD-01";
+        String targetKodeOpd = "OPD-02";
+        BidangUrusan existing = new BidangUrusan(5L, existingKodeOpd, "BU-001", "Bidang Lama", Instant.now(), Instant.now());
+        OpdBidangUrusanRequest updated = new OpdBidangUrusanRequest(existing.id(), "BU-001", "Bidang Baru");
+        OpdBidangUrusanRequest baru = new OpdBidangUrusanRequest(null, "BU-002", "Bidang Baru 2");
+
+        when(bidangUrusanRepository.findByKodeOpd(existingKodeOpd)).thenReturn(List.of(existing));
+        when(bidangUrusanRepository.findByKodeOpd(targetKodeOpd)).thenReturn(List.of());
+        when(bidangUrusanRepository.existsByKodeOpdAndKodeBidangUrusan(targetKodeOpd, "BU-002")).thenReturn(false);
+
+        AtomicLong sequence = new AtomicLong(10);
+        when(bidangUrusanRepository.save(any(BidangUrusan.class))).thenAnswer(invocation -> {
+            BidangUrusan arg = invocation.getArgument(0);
+            Long id = arg.id() != null ? arg.id() : sequence.getAndIncrement();
+            return new BidangUrusan(id, arg.kodeOpd(), arg.kodeBidangUrusan(), arg.namaBidangUrusan(), arg.createdDate(), arg.lastModifiedDate());
+        });
+
+        List<BidangUrusan> result = bidangUrusanService.simpanAtauPerbaruiBidangUrusan(existingKodeOpd, targetKodeOpd, List.of(updated, baru));
+
+        assertEquals(2, result.size());
+        verify(bidangUrusanRepository, times(2)).save(any(BidangUrusan.class));
+        verify(bidangUrusanRepository, never()).deleteById(existing.id());
+    }
+
+    @Test
+    void simpanAtauPerbaruiBidangUrusan_menghapusDataYangTidakLagiDipilih() {
+        String kodeOpd = "OPD-01";
+        BidangUrusan existing = new BidangUrusan(7L, kodeOpd, "BU-001", "Bidang Lama", Instant.now(), Instant.now());
+
+        when(bidangUrusanRepository.findByKodeOpd(kodeOpd)).thenReturn(List.of(existing));
+
+        bidangUrusanService.simpanAtauPerbaruiBidangUrusan(kodeOpd, kodeOpd, List.of());
+
+        verify(bidangUrusanRepository).deleteById(existing.id());
+    }
+
+    @Test
     void hapusBidangUrusan_deletesWhenFound() {
         String kodeBidangUrusan = "BU-001";
         String kodeOpd = "OPD-01";
@@ -226,6 +266,22 @@ public class BidangUrusanServiceTest {
         assertThrows(BidangUrusanNotFoundException.class, () -> bidangUrusanService.hapusBidangUrusan(kodeOpd, identifier));
 
         verify(bidangUrusanRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void pindahBidangUrusanKeOpd_memindahkanSemuaBidang() {
+        String sumber = "OPD-01";
+        String target = "OPD-99";
+        BidangUrusan bidang = new BidangUrusan(11L, sumber, "BU-001", "Bidang Lama", Instant.now(), Instant.now());
+
+        when(bidangUrusanRepository.findByKodeOpd(sumber)).thenReturn(List.of(bidang));
+        when(bidangUrusanRepository.findByKodeOpd(target)).thenReturn(List.of());
+
+        bidangUrusanService.pindahBidangUrusanKeOpd(sumber, target);
+
+        ArgumentCaptor<BidangUrusan> captor = ArgumentCaptor.forClass(BidangUrusan.class);
+        verify(bidangUrusanRepository).save(captor.capture());
+        assertEquals(target, captor.getValue().kodeOpd());
     }
 
     @SuppressWarnings("unchecked")
