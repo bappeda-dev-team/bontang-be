@@ -186,6 +186,48 @@ public class BidangUrusanServiceTest {
         verify(bidangUrusanRepository, never()).deleteById(any());
     }
 
+    @Test
+    void hapusBidangUrusanByOpd_deletesWhenIdentifierMatchesKode() {
+        String kodeOpd = "OPD-02";
+        String identifier = "BU-010";
+        BidangUrusan bidangUrusan = new BidangUrusan(3L, kodeOpd, identifier, "Bidang Infrastruktur", Instant.now(), Instant.now());
+
+        when(bidangUrusanRepository.findByKodeOpdAndKodeBidangUrusan(kodeOpd, identifier)).thenReturn(Optional.of(bidangUrusan));
+
+        bidangUrusanService.hapusBidangUrusan(kodeOpd, identifier);
+
+        verify(bidangUrusanRepository).deleteById(bidangUrusan.id());
+    }
+
+    @Test
+    void hapusBidangUrusanByOpd_resolvesIdentifierViaTowerData() {
+        String kodeOpd = "OPD-02";
+        String identifier = "Bidang Infrastruktur";
+        BidangUrusanDto towerData = new BidangUrusanDto(15L, "BU-015", identifier);
+        BidangUrusan bidangUrusan = new BidangUrusan(4L, kodeOpd, towerData.kodeBidangUrusan(), identifier, Instant.now(), Instant.now());
+
+        mockTowerDataResponse(Mono.just(List.of(towerData)));
+        when(bidangUrusanRepository.findByKodeOpdAndKodeBidangUrusan(kodeOpd, identifier)).thenReturn(Optional.empty());
+        when(bidangUrusanRepository.findByKodeOpdAndKodeBidangUrusan(kodeOpd, towerData.kodeBidangUrusan())).thenReturn(Optional.of(bidangUrusan));
+
+        bidangUrusanService.hapusBidangUrusan(kodeOpd, identifier);
+
+        verify(bidangUrusanRepository).deleteById(bidangUrusan.id());
+    }
+
+    @Test
+    void hapusBidangUrusanByOpd_throwsException_whenIdentifierNotFound() {
+        String kodeOpd = "OPD-02";
+        String identifier = "Tidak Ada";
+
+        mockTowerDataResponse(Mono.just(List.of()));
+        when(bidangUrusanRepository.findByKodeOpdAndKodeBidangUrusan(kodeOpd, identifier)).thenReturn(Optional.empty());
+
+        assertThrows(BidangUrusanNotFoundException.class, () -> bidangUrusanService.hapusBidangUrusan(kodeOpd, identifier));
+
+        verify(bidangUrusanRepository, never()).deleteById(any());
+    }
+
     @SuppressWarnings("unchecked")
     private void mockTowerDataResponse(Mono<List<BidangUrusanDto>> response) {
         when(responseSpec.bodyToMono(any(ParameterizedTypeReference.class))).thenReturn(response);

@@ -2,7 +2,6 @@ package cc.kertaskerja.bontang.bidangurusan.domain;
 
 import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanAlreadyExistException;
 import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanNotFoundException;
-import cc.kertaskerja.bontang.opd.web.OpdBidangUrusanRequest;
 import cc.kertaskerja.bontang.bidangurusan.web.BidangUrusanRequest;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
@@ -10,15 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Locale;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class BidangUrusanService {
@@ -97,11 +89,19 @@ public class BidangUrusanService {
         hapusBidangUrusan(bidangUrusan);
     }
 
-    public void hapusBidangUrusan(String kodeOpd, String kodeBidangUrusan) {
-        BidangUrusan bidangUrusan = bidangUrusanRepository.findByKodeOpdAndKodeBidangUrusan(kodeOpd, kodeBidangUrusan)
-                .orElseThrow(() -> new BidangUrusanNotFoundException(kodeBidangUrusan));
+    public void hapusBidangUrusan(String kodeOpd, String identifier) {
+        BidangUrusan bidangUrusan = bidangUrusanRepository.findByKodeOpdAndKodeBidangUrusan(kodeOpd, identifier)
+                .orElseGet(() -> cariBidangUrusanBerdasarkanTower(kodeOpd, identifier));
 
         hapusBidangUrusan(bidangUrusan);
+    }
+
+    private BidangUrusan cariBidangUrusanBerdasarkanTower(String kodeOpd, String identifier) {
+        BidangUrusanDto towerData = cariBidangUrusanTower(identifier)
+                .orElseThrow(() -> new BidangUrusanNotFoundException(identifier));
+
+        return bidangUrusanRepository.findByKodeOpdAndKodeBidangUrusan(kodeOpd, towerData.kodeBidangUrusan())
+                .orElseThrow(() -> new BidangUrusanNotFoundException(identifier));
     }
 
     private void hapusBidangUrusan(BidangUrusan bidangUrusan) {
