@@ -2,8 +2,6 @@ package cc.kertaskerja.bontang.program.web;
 
 import java.net.URI;
 
-import cc.kertaskerja.bontang.kegiatan.domain.Kegiatan;
-import cc.kertaskerja.bontang.kegiatan.web.response.KegiatanResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -59,6 +57,8 @@ public class ProgramController {
                         program.id(),
                         program.kodeProgram(),
                         program.namaProgram(),
+                        program.kodeOpd(),
+                        program.tahun(),
                         program.createdDate(),
                         program.lastModifiedDate()
                 ))
@@ -77,6 +77,8 @@ public class ProgramController {
                 existingProgram.id(),
                 request.kodeProgram(),
                 request.namaProgram(),
+                request.kodeOpd(),
+                request.tahun(),
                 existingProgram.createdDate(),
                 null
         );
@@ -92,7 +94,9 @@ public class ProgramController {
     public ResponseEntity<Program> post(@Valid @RequestBody ProgramRequest request) {
         Program program = Program.of(
                 request.kodeProgram(),
-                request.namaProgram()
+                request.namaProgram(),
+                request.kodeOpd(),
+                request.tahun()
         );
         Program saved = programService.tambahProgram(program);
         URI location = ServletUriComponentsBuilder

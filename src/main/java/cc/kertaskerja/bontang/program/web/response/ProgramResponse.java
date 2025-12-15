@@ -6,6 +6,8 @@ public record ProgramResponse(
         Long id,
         String kodeProgram,
         String namaProgram,
+        String kodeOpd,
+        Integer tahun,
         Instant createdDate,
         Instant lastModifiedDate
 ) {

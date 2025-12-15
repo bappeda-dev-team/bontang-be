@@ -6,6 +6,8 @@ public record KegiatanResponse(
         Long id,
         String kodeKegiatan,
         String namaKegiatan,
+        String kodeOpd,
+        Integer tahun,
         Instant createdDate,
         Instant lastModifiedDate
 ) {

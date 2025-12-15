@@ -48,6 +48,8 @@ public class KegiatanController {
                         kegiatan.id(),
                         kegiatan.kodeKegiatan(),
                         kegiatan.namaKegiatan(),
+                        kegiatan.kodeOpd(),
+                        kegiatan.tahun(),
                         kegiatan.createdDate(),
                         kegiatan.lastModifiedDate()
                 ))
@@ -74,6 +76,8 @@ public class KegiatanController {
                 existingKegiatan.id(),
                 request.kodeKegiatan(),
                 request.namaKegiatan(),
+                request.kodeOpd(),
+                request.tahun(),
                 existingKegiatan.createdDate(),
                 null
         );
@@ -89,7 +93,9 @@ public class KegiatanController {
     public ResponseEntity<Kegiatan> post(@Valid @RequestBody KegiatanRequest request) {
         Kegiatan kegiatan = Kegiatan.of(
                 request.kodeKegiatan(),
-                request.namaKegiatan()
+                request.namaKegiatan(),
+                request.kodeOpd(),
+                request.tahun()
         );
         Kegiatan saved = kegiatanService.tambahKegiatan(kegiatan);
         URI location = ServletUriComponentsBuilder

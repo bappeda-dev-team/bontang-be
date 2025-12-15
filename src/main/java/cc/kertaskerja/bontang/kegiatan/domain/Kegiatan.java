@@ -19,6 +19,12 @@ public record Kegiatan(
         @Column("nama_kegiatan")
         String namaKegiatan,
 
+        @Column("kode_opd")
+        String kodeOpd,
+
+        @Column("tahun")
+         Integer tahun,
+
         @CreatedDate
         Instant createdDate,
 
@@ -27,12 +33,16 @@ public record Kegiatan(
 ) {
     public static Kegiatan of (
             String kodeKegiatan,
-            String namaKegiatan
+            String namaKegiatan,
+            String kodeOpd,
+            Integer tahun
     ) {
         return new Kegiatan(
                 null,
                 kodeKegiatan,
                 namaKegiatan,
+                kodeOpd,
+                tahun,
                 null,
                 null
         );

@@ -46,6 +46,8 @@ public class SubKegiatanController {
                         subKegiatan.id(),
                         subKegiatan.kodeSubKegiatan(),
                         subKegiatan.namaSubKegiatan(),
+                        subKegiatan.kodeOpd(),
+                        subKegiatan.tahun(),
                         subKegiatan.createdDate(),
                         subKegiatan.lastModifiedDate()
                 ))
@@ -77,6 +79,8 @@ public class SubKegiatanController {
                 existingSubKegiatan.id(),
                 request.kodeSubKegiatan(),
                 request.namaSubKegiatan(),
+                request.kodeOpd(),
+                request.tahun(),
                 existingSubKegiatan.createdDate(),
                 null
         );
@@ -92,7 +96,9 @@ public class SubKegiatanController {
     public ResponseEntity<SubKegiatan> post(@Valid @RequestBody SubKegiatanRequest request) {
         SubKegiatan subKegiatan = SubKegiatan.of(
                 request.kodeSubKegiatan(),
-                request.namaSubKegiatan()
+                request.namaSubKegiatan(),
+                request.kodeOpd(),
+                request.tahun()
         );
         SubKegiatan saved = subKegiatanService.tambahSubKegiatan(subKegiatan);
         URI location = ServletUriComponentsBuilder
