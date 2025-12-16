@@ -2,6 +2,7 @@ package cc.kertaskerja.bontang.programopd.web;
 
 import cc.kertaskerja.bontang.program.domain.Program;
 import cc.kertaskerja.bontang.program.domain.ProgramService;
+import cc.kertaskerja.bontang.program.web.request.ProgramBatchRequest;
 import cc.kertaskerja.bontang.programopd.domain.ProgramOpd;
 import cc.kertaskerja.bontang.programopd.domain.ProgramOpdService;
 import cc.kertaskerja.bontang.programopd.web.ProgramOpdResponse;
@@ -82,8 +83,10 @@ public class ProgramOpdController {
 
     // ambil data program opd berdasarkan kumpulan kode program
     @PostMapping("/find/batch/kode-program")
-    public List<Program> findProgramBatch(@RequestBody List<String> kodePrograms) {
-        return programService.detailProgramByKodeProgramIn(kodePrograms);
+    public List<Program> findProgramBatch(@Valid @RequestBody ProgramBatchRequest request) {
+        List<Program> programs = programService.detailProgramByKodeProgramIn(request.kodeProgram());
+        programs.forEach(programOpdService::simpanProgramOpd);
+        return programs;
     }
 
     // hapus program opd
