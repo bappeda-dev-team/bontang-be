@@ -1,6 +1,6 @@
-CREATE TABLE IF NOT EXISTS dasar_hukum (
+CREATE TABLE IF NOT EXISTS gambaran_umum (
 	id					    BIGSERIAL PRIMARY KEY NOT NULL,
-    peraturan_terkait       VARCHAR(255) NOT NULL,
+    gambaran_umum           VARCHAR(255) NOT NULL,
 	uraian                  VARCHAR(255) NOT NULL,
     kode_opd                VARCHAR(255),
     tahun                   INTEGER,
