@@ -7,8 +7,8 @@ import java.time.Instant;
 
 public record KegiatanOpdResponse(
         Long id,
-        String kodeProgramOpd,
-        String namaProgramOpd,
+        String kodeKegiatanOpd,
+        String namaKegiatanOpd,
         String kodeOpd,
         Integer tahun,
         Instant createdDate,
