@@ -45,17 +45,7 @@ public class TargetController {
      */
     @PutMapping("update/{id}")
     public Target put(@PathVariable("id") Long id, @Valid @RequestBody TargetRequest request) {
-        Target existingTarget = targetService.detailTargetById(id);
-
-        Target target = new Target(
-                existingTarget.id(),
-                request.target(),
-                request.satuan(),
-                existingTarget.createdDate(),
-                null
-        );
-
-        return targetService.ubahTarget(id, target);
+        return targetService.ubahTarget(id, request);
     }
 
     /**
@@ -63,19 +53,8 @@ public class TargetController {
      * @param request
      */
     @PostMapping
-    public ResponseEntity<Target> post(@Valid @RequestBody TargetRequest request) {
-        Target target = Target.of(
-                request.target(),
-                request.satuan()
-        );
-        Target saved = targetService.tambahTarget(target);
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(saved.id())
-                .toUri();
-
-        return ResponseEntity.created(location).body(saved);
+    public Target post(@Valid @RequestBody TargetRequest request) {
+        return targetService.tambahTarget(request);
     }
 
     /**

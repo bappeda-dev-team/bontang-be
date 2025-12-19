@@ -1,6 +1,10 @@
 package cc.kertaskerja.bontang.target.domain;
 
+import cc.kertaskerja.bontang.target.web.TargetRequest;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class TargetService {
@@ -19,15 +23,27 @@ public class TargetService {
                 .orElseThrow(() -> new TargetNotFoundException(id));
     }
 
-    public Target tambahTarget(Target target) {
-
+    public Target tambahTarget(TargetRequest request) {
+        Target target = Target.of(
+                request.target(),
+                request.satuan()
+        );
         return targetRepository.save(target);
     }
 
-    public Target ubahTarget(Long id, Target target) {
-        if (!targetRepository.existsById(id)) {
+    public Target ubahTarget(Long id, TargetRequest request) {
+        Target existingTarget = detailTargetById(id);
+
+        if (!Objects.equals(existingTarget.id(), id)) {
             throw new TargetNotFoundException(id);
         }
+        Target target = new Target(
+                existingTarget.id(),
+                request.target(),
+                request.satuan(),
+                existingTarget.createdDate(),
+                null
+        );
 
         return targetRepository.save(target);
     }
@@ -38,5 +54,9 @@ public class TargetService {
         }
 
         targetRepository.deleteById(id);
+    }
+
+    public Optional<Target> findFirstByTarget(String target) {
+        return targetRepository.findFirstByTarget(target);
     }
 }
