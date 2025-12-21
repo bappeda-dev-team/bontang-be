@@ -19,6 +19,10 @@ public class GambaranUmumService {
                 .orElseThrow(() -> new GambaranUmumNotFoundException(id));
     }
 
+    public Iterable<GambaranUmum> findByKodeOpd(String kodeOpd) {
+        return gambaranUmumRepository.findByKodeOpd(kodeOpd);
+    }
+
     public GambaranUmum tambahGambaranUmum(GambaranUmum gambaranUmum) {
 
         return gambaranUmumRepository.save(gambaranUmum);

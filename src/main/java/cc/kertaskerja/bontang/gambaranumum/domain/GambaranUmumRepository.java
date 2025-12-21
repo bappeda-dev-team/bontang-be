@@ -20,4 +20,7 @@ public interface GambaranUmumRepository extends CrudRepository<GambaranUmum, Lon
     @Transactional
     @Query("DELETE FROM gambaran_umum WHERE kode_opd = :kodeOpd")
     void deleteByKodeOpd(@NonNull @Param("kodeOpd") String kodeOpd);
+    
+    @Query("SELECT * FROM gambaran_umum WHERE kode_opd = :kodeOpd ORDER BY id")
+    Iterable<GambaranUmum> findByKodeOpd(@NonNull @Param("kodeOpd") String kodeOpd);
 }

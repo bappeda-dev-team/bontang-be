@@ -19,4 +19,7 @@ public interface RencanaAksiRepository extends CrudRepository<RencanaAksi, Long>
     @Transactional
     @Query("DELETE FROM rencana_aksi WHERE id = :id")
     void deleteById(@NonNull @Param("id") Long id);
+
+    @Query("SELECT * FROM rencana_aksi WHERE id_rekin = :idRencanaKinerja ORDER BY urutan")
+    Iterable<RencanaAksi> findByIdRekinOrderByUrutan(@Param("idRencanaKinerja") Integer idRencanaKinerja);
 }

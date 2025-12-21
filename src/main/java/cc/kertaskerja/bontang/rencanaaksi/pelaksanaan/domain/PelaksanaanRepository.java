@@ -34,4 +34,16 @@ public interface PelaksanaanRepository extends CrudRepository<Pelaksanaan, Long>
 
     @Query("SELECT * FROM pelaksanaan_rencana_aksi WHERE id_rencana_aksi = :idRencanaAksi LIMIT 1")
     Optional<Pelaksanaan> findByIdRencanaAksi(@Param("idRencanaAksi") Integer idRencanaAksi);
+
+    @Query("SELECT * FROM pelaksanaan_rencana_aksi WHERE id_rencana_aksi = :idRencanaAksi ORDER BY bulan")
+    Iterable<Pelaksanaan> findByIdRencanaAksiOrderByBulan(@Param("idRencanaAksi") Integer idRencanaAksi);
+
+    @Query("SELECT COALESCE(MIN(bobot_tersedia), :totalBobot) FROM pelaksanaan_rencana_aksi WHERE id_rencana_aksi = :idRencanaAksi")
+    Integer findMinBobotTersediaByIdRencanaAksi(@Param("idRencanaAksi") Integer idRencanaAksi,
+                                                @Param("totalBobot") Integer totalBobot);
+
+    @Query("SELECT COALESCE(bobot_tersedia, :totalBobot) FROM pelaksanaan_rencana_aksi WHERE id_rencana_aksi = :idRencanaAksi AND id = :excludeId")
+    Integer findBobotTersediaById(@Param("idRencanaAksi") Integer idRencanaAksi,
+                                  @Param("excludeId") Long excludeId,
+                                  @Param("totalBobot") Integer totalBobot);
 }

@@ -15,17 +15,43 @@ import cc.kertaskerja.bontang.target.domain.TargetService;
 import cc.kertaskerja.bontang.target.domain.Target;
 import cc.kertaskerja.bontang.indikator.domain.IndikatorService;
 import cc.kertaskerja.bontang.indikator.domain.Indikator;
+import cc.kertaskerja.bontang.rencanaaksi.domain.RencanaAksiService;
+import cc.kertaskerja.bontang.rencanaaksi.domain.RencanaAksi;
+import cc.kertaskerja.bontang.rencanaaksi.pelaksanaan.domain.PelaksanaanService;
+import cc.kertaskerja.bontang.subkegiatanrencanakinerja.domain.SubKegiatanRencanaKinerjaService;
+import cc.kertaskerja.bontang.subkegiatanrencanakinerja.domain.SubKegiatanRencanaKinerja;
+import cc.kertaskerja.bontang.dasarhukum.domain.DasarHukumService;
+import cc.kertaskerja.bontang.dasarhukum.domain.DasarHukum;
+import cc.kertaskerja.bontang.gambaranumum.domain.GambaranUmumService;
+import cc.kertaskerja.bontang.gambaranumum.domain.GambaranUmum;
 
 @Service
 public class RencanaKinerjaService {
     private RencanaKinerjaRepository rencanaKinerjaRepository;
     private TargetService targetService;
     private IndikatorService indikatorService;
+    private RencanaAksiService rencanaAksiService;
+    private PelaksanaanService pelaksanaanService;
+    private SubKegiatanRencanaKinerjaService subKegiatanRencanaKinerjaService;
+    private DasarHukumService dasarHukumService;
+    private GambaranUmumService gambaranUmumService;
 
-    public RencanaKinerjaService(RencanaKinerjaRepository rencanaKinerjaRepository, TargetService targetService, IndikatorService indikatorService) {
+    public RencanaKinerjaService(RencanaKinerjaRepository rencanaKinerjaRepository,
+                           TargetService targetService,
+                           IndikatorService indikatorService,
+                           RencanaAksiService rencanaAksiService,
+                           PelaksanaanService pelaksanaanService,
+                           SubKegiatanRencanaKinerjaService subKegiatanRencanaKinerjaService,
+                           DasarHukumService dasarHukumService,
+                           GambaranUmumService gambaranUmumService) {
         this.rencanaKinerjaRepository = rencanaKinerjaRepository;
         this.targetService = targetService;
         this.indikatorService = indikatorService;
+        this.rencanaAksiService = rencanaAksiService;
+        this.pelaksanaanService = pelaksanaanService;
+        this.subKegiatanRencanaKinerjaService = subKegiatanRencanaKinerjaService;
+        this.dasarHukumService = dasarHukumService;
+        this.gambaranUmumService = gambaranUmumService;
     }
 
     public Iterable<RencanaKinerja> findAll() {
@@ -35,7 +61,14 @@ public class RencanaKinerjaService {
     public Map<String, Object> findByNipPegawaiAndKodeOpdAndTahun(String nipPegawai, String kodeOpd, Integer tahun) {
         RencanaKinerja rencanaKinerja = rencanaKinerjaRepository.findByNipPegawaiAndKodeOpdAndTahun(nipPegawai, kodeOpd, tahun)
                 .orElseThrow(() -> new RencanaKinerjaNotFoundException(nipPegawai, kodeOpd, tahun));
-        
+
+        return buildRencanaKinerjaDetailResponse(rencanaKinerja);
+    }
+
+    public Map<String, Object> findDetailByIdAndNipPegawai(Long idRencanaKinerja, String nipPegawai) {
+        RencanaKinerja rencanaKinerja = rencanaKinerjaRepository.findByIdAndNipPegawai(idRencanaKinerja, nipPegawai)
+                .orElseThrow(() -> new RencanaKinerjaNotFoundException("Rencana Kinerja dengan id " + idRencanaKinerja + " dan nip " + nipPegawai + " tidak ditemukan"));
+
         return buildRencanaKinerjaDetailResponse(rencanaKinerja);
     }
 
@@ -83,7 +116,125 @@ public class RencanaKinerjaService {
         }
         
         rencanaKinerjaResponse.put("indikator", indikatorResponseList);
+
+        // Process subkegiatan list
+        List<Map<String, Object>> subkegiatanResponseList = new ArrayList<>();
+        List<SubKegiatanRencanaKinerja> subkegiatans = subKegiatanRencanaKinerjaService.findByIdRekin(rencanaKinerja.id().intValue());
         
+        for (SubKegiatanRencanaKinerja subkegiatan : subkegiatans) {
+            Map<String, Object> subkegiatanResponse = new LinkedHashMap<>();
+            subkegiatanResponse.put("subkegiatanterpilih_id", subkegiatan.id());
+            subkegiatanResponse.put("id_rekin", subkegiatan.idRekin());
+            subkegiatanResponse.put("kode_subkegiatan", subkegiatan.kodeSubKegiatan());
+            subkegiatanResponse.put("nama_sub_kegiatan", subkegiatan.namaSubKegiatan());
+            subkegiatanResponseList.add(subkegiatanResponse);
+        }
+        
+        rencanaKinerjaResponse.put("subkegiatan", subkegiatanResponseList);
+
+        // Process dasar hukum list
+        List<Map<String, Object>> dasarHukumResponseList = new ArrayList<>();
+        Iterable<DasarHukum> dasarHukums = dasarHukumService.findByKodeOpd(rencanaKinerja.kodeOpd());
+        
+        int urutan = 1;
+        for (DasarHukum dasarHukum : dasarHukums) {
+            Map<String, Object> dasarHukumResponse = new LinkedHashMap<>();
+            dasarHukumResponse.put("id", dasarHukum.id());
+            dasarHukumResponse.put("rencana_kinerja_id", rencanaKinerja.id());
+            dasarHukumResponse.put("kode_opd", dasarHukum.kodeOpd());
+            dasarHukumResponse.put("urutan", urutan++);
+            dasarHukumResponse.put("peraturan_terkait", dasarHukum.peraturanTerkait());
+            dasarHukumResponse.put("uraian", dasarHukum.uraian());
+            dasarHukumResponseList.add(dasarHukumResponse);
+        }
+        
+        rencanaKinerjaResponse.put("dasar_hukum", dasarHukumResponseList);
+
+        // Process gambaran umum list
+        List<Map<String, Object>> gambaranUmumResponseList = new ArrayList<>();
+        Iterable<GambaranUmum> gambaranUmums = gambaranUmumService.findByKodeOpd(rencanaKinerja.kodeOpd());
+        
+        int urutanGambaran = 1;
+        for (GambaranUmum gambaranUmum : gambaranUmums) {
+            Map<String, Object> gambaranUmumResponse = new LinkedHashMap<>();
+            gambaranUmumResponse.put("id", gambaranUmum.id());
+            gambaranUmumResponse.put("rencana_kinerja_id", rencanaKinerja.id());
+            gambaranUmumResponse.put("kode_opd", gambaranUmum.kodeOpd());
+            gambaranUmumResponse.put("urutan", urutanGambaran++);
+            gambaranUmumResponse.put("gambaran_umum", gambaranUmum.gambaranUmum());
+            gambaranUmumResponseList.add(gambaranUmumResponse);
+        }
+        
+        rencanaKinerjaResponse.put("gambaran_umum", gambaranUmumResponseList);
+
+        // Process rencana aksi list
+        List<Map<String, Object>> rencanaAksiResponseList = new ArrayList<>();
+        Iterable<RencanaAksi> rencanaAksis = rencanaAksiService.findByIdRekinOrderByUrutan(rencanaKinerja.id().intValue());
+
+        int[] totalBobotPerBulan = new int[12];
+        boolean[] bulanMemilikiData = new boolean[12];
+
+        for (RencanaAksi rencanaAksi : rencanaAksis) {
+            List<Map<String, Object>> pelaksanaanList = pelaksanaanService.buildPelaksanaanResponseList(
+                rencanaAksi.id().intValue()
+            );
+
+            int jumlahBobot = 0;
+            for (Map<String, Object> pelaksanaan : pelaksanaanList) {
+                Integer bobot = (Integer) pelaksanaan.get("bobot");
+                Integer bulan = (Integer) pelaksanaan.get("bulan");
+                Object idObj = pelaksanaan.get("id");
+                jumlahBobot += bobot;
+
+                if (bulan != null && bulan >= 1 && bulan <= 12) {
+                    totalBobotPerBulan[bulan - 1] += bobot;
+                    // Tandai bulan ini memiliki data pelaksanaan (id > 0)
+                    if (idObj != null && !idObj.equals(0)) {
+                        bulanMemilikiData[bulan - 1] = true;
+                    }
+                }
+            }
+
+            // Build rencana aksi response
+            Map<String, Object> rencanaAksiResponse = new LinkedHashMap<>();
+            rencanaAksiResponse.put("id", rencanaAksi.id());
+            rencanaAksiResponse.put("rekin_id", rencanaKinerja.id());
+            rencanaAksiResponse.put("kode_opd", rencanaAksi.kodeOpd());
+            rencanaAksiResponse.put("urutan", rencanaAksi.urutan());
+            rencanaAksiResponse.put("nama_rencana_aksi", rencanaAksi.namaRencanaAksi());
+            rencanaAksiResponse.put("pelaksanaan", pelaksanaanList);
+            rencanaAksiResponse.put("jumlah_bobot", jumlahBobot);
+
+            rencanaAksiResponseList.add(rencanaAksiResponse);
+        }
+
+        // Build total_per_bulan response
+        List<Map<String, Object>> totalPerBulanList = new ArrayList<>();
+        for (int bulan = 1; bulan <= 12; bulan++) {
+            Map<String, Object> totalBulan = new LinkedHashMap<>();
+            totalBulan.put("bulan", bulan);
+            totalBulan.put("total_bobot", totalBobotPerBulan[bulan - 1]);
+            totalPerBulanList.add(totalBulan);
+        }
+
+        rencanaKinerjaResponse.put("rencana_aksi", rencanaAksiResponseList);
+        rencanaKinerjaResponse.put("total_per_bulan", totalPerBulanList);
+
+        int totalKeseluruhan = 0;
+        for (int bobot : totalBobotPerBulan) {
+            totalKeseluruhan += bobot;
+        }
+
+        int waktuDibutuhkan = 0;
+        for (boolean hasData : bulanMemilikiData) {
+            if (hasData) {
+                waktuDibutuhkan++;
+            }
+        }
+
+        rencanaKinerjaResponse.put("total_keseluruhan", totalKeseluruhan);
+        rencanaKinerjaResponse.put("waktu_dibutuhkan", waktuDibutuhkan);
+
         response.put("rencana_kinerja", rencanaKinerjaResponse);
         return response;
     }

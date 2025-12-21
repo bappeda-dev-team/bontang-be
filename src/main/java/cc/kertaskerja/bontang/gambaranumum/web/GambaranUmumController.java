@@ -39,12 +39,12 @@ public class GambaranUmumController {
     }
 
     /**
-     * Ubah data berdasarkan id
-     * @param id
+     * Ubah data berdasarkan idRencanaKinerja
+     * @param idRencanaKinerja
      */
-    @PutMapping("update/{id}")
-    public GambaranUmum put(@PathVariable("id") Long id, @Valid @RequestBody GambaranUmumRequest request) {
-        GambaranUmum existingGambaranUmum = gambaranUmumService.detailGambaranUmumById(id);
+    @PutMapping("update/{idRencanaKinerja}")
+    public GambaranUmum put(@PathVariable("idRencanaKinerja") Long idRencanaKinerja, @Valid @RequestBody GambaranUmumRequest request) {
+        GambaranUmum existingGambaranUmum = gambaranUmumService.detailGambaranUmumById(idRencanaKinerja);
 
         GambaranUmum gambaranUmum = new GambaranUmum(
                 existingGambaranUmum.id(),
@@ -56,15 +56,16 @@ public class GambaranUmumController {
                 null
         );
 
-        return gambaranUmumService.ubahGambaranUmum(id, gambaranUmum);
+        return gambaranUmumService.ubahGambaranUmum(idRencanaKinerja, gambaranUmum);
     }
 
     /**
-     * Tambah data
+     * Tambah data berdasarkan idRencanaKinerja
+     * @param idRencanaKinerja
      * @param request
      */
-    @PostMapping
-    public ResponseEntity<GambaranUmum> post(@Valid @RequestBody GambaranUmumRequest request) {
+    @PostMapping("{idRencanaKinerja}")
+    public ResponseEntity<GambaranUmum> post(@PathVariable("idRencanaKinerja") Long idRencanaKinerja, @Valid @RequestBody GambaranUmumRequest request) {
         GambaranUmum gambaranUmum = GambaranUmum.of(
                 request.gambaranUmum(),
                 request.uraian(),

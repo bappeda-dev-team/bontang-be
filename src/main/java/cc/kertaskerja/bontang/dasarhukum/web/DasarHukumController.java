@@ -2,9 +2,6 @@ package cc.kertaskerja.bontang.dasarhukum.web;
 
 import cc.kertaskerja.bontang.dasarhukum.domain.DasarHukum;
 import cc.kertaskerja.bontang.dasarhukum.domain.DasarHukumService;
-import cc.kertaskerja.bontang.sumberdana.domain.SumberDana;
-import cc.kertaskerja.bontang.sumberdana.domain.SumberDanaService;
-import cc.kertaskerja.bontang.sumberdana.web.SumberDanaRequest;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -42,12 +39,12 @@ public class DasarHukumController {
     }
 
     /**
-     * Ubah data berdasarkan id
-     * @param id
+     * Ubah data berdasarkan idRencanaKinerja
+     * @param idRencanaKinerja
      */
-    @PutMapping("update/{id}")
-    public DasarHukum put(@PathVariable("id") Long id, @Valid @RequestBody DasarHukumRequest request) {
-        DasarHukum existingDasarHukum = dasarHukumService.detailDasarHukumById(id);
+    @PutMapping("update/{idRencanaKinerja}")
+    public DasarHukum put(@PathVariable("idRencanaKinerja") Long idRencanaKinerja, @Valid @RequestBody DasarHukumRequest request) {
+        DasarHukum existingDasarHukum = dasarHukumService.detailDasarHukumById(idRencanaKinerja);
 
         DasarHukum dasarHukum = new DasarHukum(
                 existingDasarHukum.id(),
@@ -59,15 +56,16 @@ public class DasarHukumController {
                 null
         );
 
-        return dasarHukumService.ubahDasarHukum(id, dasarHukum);
+        return dasarHukumService.ubahDasarHukum(idRencanaKinerja, dasarHukum);
     }
 
     /**
-     * Tambah data
+     * Tambah data berdasarkan idRencanaKinerja
+     * @param idRencanaKinerja
      * @param request
      */
-    @PostMapping
-    public ResponseEntity<DasarHukum> post(@Valid @RequestBody DasarHukumRequest request) {
+    @PostMapping("{idRencanaKinerja}")
+    public ResponseEntity<DasarHukum> post(@PathVariable("idRencanaKinerja") Long idRencanaKinerja, @Valid @RequestBody DasarHukumRequest request) {
         DasarHukum dasarHukum = DasarHukum.of(
                 request.peraturanTerkait(),
                 request.uraian(),

@@ -4,6 +4,10 @@ import cc.kertaskerja.bontang.rencanaaksi.pelaksanaan.web.PelaksanaanRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.LinkedHashMap;
 
 @Service
 public class PelaksanaanService {
@@ -68,10 +72,53 @@ public class PelaksanaanService {
     }
 
     private Integer hitungBobotTersedia(Integer idRencanaAksi, Integer bobot, Long excludeId) {
-        int jumlahDipakai = (excludeId == null)
-                ? pelaksanaanRepository.sumBobotByIdRencanaAksi(idRencanaAksi)
-                : pelaksanaanRepository.sumBobotByIdRencanaAksiExcluding(idRencanaAksi, excludeId);
-        int sisa = TOTAL_BOBOT - jumlahDipakai - (bobot == null ? 0 : bobot);
+        // Hitung bobot_tersedia dari entitas yang sudah ada
+        // Logic: ambil entitas dengan bobot_tersedia terkecil, kemudian kurangi dengan bobot baru
+        Integer bobotTersediaSaatIni = (excludeId == null)
+                ? pelaksanaanRepository.findMinBobotTersediaByIdRencanaAksi(idRencanaAksi, TOTAL_BOBOT)
+                : pelaksanaanRepository.findBobotTersediaById(idRencanaAksi, excludeId, TOTAL_BOBOT);
+
+        // Kurangi bobot_tersedia dengan bobot yang baru
+        int sisa = bobotTersediaSaatIni - (bobot == null ? 0 : bobot);
         return Math.max(0, sisa);
+    }
+
+    public Iterable<Pelaksanaan> findByIdRencanaAksiOrderByBulan(Integer idRencanaAksi) {
+        return pelaksanaanRepository.findByIdRencanaAksiOrderByBulan(idRencanaAksi);
+    }
+
+    public List<Map<String, Object>> buildPelaksanaanResponseList(Integer idRencanaAksi) {
+        List<Map<String, Object>> pelaksanaanList = new ArrayList<>();
+        Iterable<Pelaksanaan> pelaksanaans = findByIdRencanaAksiOrderByBulan(idRencanaAksi);
+
+        Map<Integer, Pelaksanaan> pelaksanaanMap = createPelaksanaanMap(pelaksanaans);
+
+        for (int month = 1; month <= 12; month++) {
+            Map<String, Object> pelaksanaanResponse = new LinkedHashMap<>();
+            Pelaksanaan pelaksanaan = pelaksanaanMap.get(month);
+
+            if (pelaksanaan != null) {
+                pelaksanaanResponse.put("id", pelaksanaan.id());
+                pelaksanaanResponse.put("rencana_aksi_id", idRencanaAksi);
+                pelaksanaanResponse.put("bulan", pelaksanaan.bulan());
+                pelaksanaanResponse.put("bobot", pelaksanaan.bobot());
+            } else {
+                pelaksanaanResponse.put("id", 0);
+                pelaksanaanResponse.put("rencana_aksi_id", idRencanaAksi);
+                pelaksanaanResponse.put("bulan", month);
+                pelaksanaanResponse.put("bobot", 0);
+            }
+            pelaksanaanList.add(pelaksanaanResponse);
+        }
+
+        return pelaksanaanList;
+    }
+
+    private Map<Integer, Pelaksanaan> createPelaksanaanMap(Iterable<Pelaksanaan> pelaksanaanList) {
+        Map<Integer, Pelaksanaan> pelaksanaanMap = new LinkedHashMap<>();
+        for (Pelaksanaan pelaksanaan : pelaksanaanList) {
+            pelaksanaanMap.put(pelaksanaan.bulan(), pelaksanaan);
+        }
+        return pelaksanaanMap;
     }
 }

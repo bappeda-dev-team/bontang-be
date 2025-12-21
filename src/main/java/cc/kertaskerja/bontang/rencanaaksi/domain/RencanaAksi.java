@@ -14,7 +14,7 @@ public record RencanaAksi(
         Long id,
 
         @Column("id_rekin")
-        Integer idRekin,
+        Integer idRencanaKinerja,
 
         @Column("kode_opd")
         String kodeOpd,
@@ -32,14 +32,14 @@ public record RencanaAksi(
         Instant lastModifiedDate
 ) {
     public static RencanaAksi of(
-            Integer idRekin,
+            Integer idRencanaKinerja,
             String kodeOpd,
             Integer urutan,
             String namaRencanaAksi
     ) {
         return new RencanaAksi(
                 null,
-                idRekin,
+                idRencanaKinerja,
                 kodeOpd,
                 urutan,
                 namaRencanaAksi,

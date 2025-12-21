@@ -50,7 +50,7 @@ public class RencanaAksiController {
 
         RencanaAksi rencanaAksi = new RencanaAksi(
                 existingRencanaAksi.id(),
-                request.idRencanaAksi(),
+                request.idRencanaKinerja(),
                 request.kodeOpd(),
                 request.urutan(),
                 request.namaRencanaAksi(),
@@ -61,12 +61,12 @@ public class RencanaAksiController {
         return rencanaAksiService.ubahRencanaAksi(id, rencanaAksi);
     }
     
-    // Tambah by idRencanaAksi
-    @PostMapping("{idRencanaAksi}")
-    public ResponseEntity<RencanaAksi> post(@PathVariable("idRencanaAksi") Integer idRencanaAksi,
+    // Tambah by idRencanaKinerja
+    @PostMapping("{idRencanaKinerja}")
+    public ResponseEntity<RencanaAksi> post(@PathVariable("idRencanaKinerja") Integer idRencanaKinerja,
                                              @Valid @RequestBody RencanaAksiRequest request) {
         RencanaAksi rencanaAksi = RencanaAksi.of(
-                idRencanaAksi,
+                idRencanaKinerja,
                 request.kodeOpd(),
                 request.urutan(),
                 request.namaRencanaAksi()

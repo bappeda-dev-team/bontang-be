@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record RencanaAksiRequest(
         @NotNull(message = "Id rencana kinerja tidak boleh kosong")
-        Integer idRencanaAksi,
+        Integer idRencanaKinerja,
 
         @NotNull(message = "Kode opd tidak boleh kosong")
         @NotEmpty(message = "Kode opd tidak boleh kosong")

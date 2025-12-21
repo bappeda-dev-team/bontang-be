@@ -1,0 +1,2 @@
+ALTER TABLE rencana_aksi
+ALTER COLUMN id_rekin TYPE INTEGER USING id_rekin::INTEGER;

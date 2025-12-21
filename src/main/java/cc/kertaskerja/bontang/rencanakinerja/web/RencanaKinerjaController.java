@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cc.kertaskerja.bontang.rencanakinerja.domain.RencanaKinerja;
 import cc.kertaskerja.bontang.rencanakinerja.domain.RencanaKinerjaService;
-import cc.kertaskerja.bontang.rencanakinerja.web.RencanaKinerjaRequest;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -59,6 +58,19 @@ public class RencanaKinerjaController {
             @PathVariable("kodeOpd") String kodeOpd,
             @PathVariable("tahun") Integer tahun) {
         Map<String, Object> response = rencanaKinerjaService.findByNipPegawaiAndKodeOpdAndTahun(nipPegawai, kodeOpd, tahun);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Ambil detail rencana kinerja berdasarkan id rencana kinerja dan nip pegawai
+     * @param idRencanaKinerja
+     * @param nipPegawai
+     */
+    @GetMapping("detail/rencana-kinerja/{idRencanaKinerja}/pegawai/{nipPegawai}/input-rincian")
+    public ResponseEntity<Map<String, Object>> getDetailByIdAndNipPegawai(
+            @PathVariable("idRencanaKinerja") Long idRencanaKinerja,
+            @PathVariable("nipPegawai") String nipPegawai) {
+        Map<String, Object> response = rencanaKinerjaService.findDetailByIdAndNipPegawai(idRencanaKinerja, nipPegawai);
         return ResponseEntity.ok(response);
     }
 

@@ -41,4 +41,8 @@ public class RencanaAksiService {
 
         rencanaAksiRepository.deleteById(id);
     }
+
+    public Iterable<RencanaAksi> findByIdRekinOrderByUrutan(Integer idRencanaKinerja) {
+        return rencanaAksiRepository.findByIdRekinOrderByUrutan(idRencanaKinerja);
+    }
 }

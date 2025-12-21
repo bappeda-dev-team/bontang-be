@@ -25,4 +25,9 @@ public interface RencanaKinerjaRepository extends CrudRepository<RencanaKinerja,
             @NonNull @Param("nipPegawai") String nipPegawai,
             @NonNull @Param("kodeOpd") String kodeOpd,
             @NonNull @Param("tahun") Integer tahun);
+
+    @NonNull
+    Optional<RencanaKinerja> findByIdAndNipPegawai(
+            @NonNull @Param("id") Long id,
+            @NonNull @Param("nipPegawai") String nipPegawai);
 }

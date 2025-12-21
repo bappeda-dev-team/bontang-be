@@ -20,4 +20,6 @@ public interface DasarHukumRepository extends CrudRepository<DasarHukum, Long> {
     @Transactional
     @Query("DELETE FROM dasar_hukum WHERE id = :id")
     void deleteByKodeOpd(@NonNull @Param("id") String id);
+    
+    Iterable<DasarHukum> findByKodeOpd(String kodeOpd);
 }

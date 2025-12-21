@@ -14,6 +14,10 @@ public class DasarHukumService {
         return dasarHukumRepository.findAll();
     }
 
+    public Iterable<DasarHukum> findByKodeOpd(String kodeOpd) {
+        return dasarHukumRepository.findByKodeOpd(kodeOpd);
+    }
+
     public DasarHukum detailDasarHukumById(Long id) {
         return dasarHukumRepository.findById(id)
                 .orElseThrow(() -> new DasarHukumNotFoundException(id));
