@@ -10,31 +10,41 @@ import org.springframework.data.relational.core.mapping.Table;
 
 @Table(name = "rencana_aksi")
 public record RencanaAksi(
-    @Id
-    Long id,
+        @Id
+        Long id,
 
-    @Column("rencana_aksi")
-    String rencanaAksi,
+        @Column("id_rekin")
+        Integer idRekin,
 
-    @Column("urutan")
-    Integer urutan,
+        @Column("kode_opd")
+        String kodeOpd,
 
-    @CreatedDate
-    Instant createdDate,
+        @Column("urutan")
+        Integer urutan,
 
-    @LastModifiedDate
-    Instant lastModifiedDate
+        @Column("nama_rencana_aksi")
+        String namaRencanaAksi,
+
+        @CreatedDate
+        Instant createdDate,
+
+        @LastModifiedDate
+        Instant lastModifiedDate
 ) {
     public static RencanaAksi of(
-            String rencanaAksi,
-            Integer urutan
+            Integer idRekin,
+            String kodeOpd,
+            Integer urutan,
+            String namaRencanaAksi
     ) {
         return new RencanaAksi(
-            null,
-            rencanaAksi,
-            urutan,
-            null,
-            null
+                null,
+                idRekin,
+                kodeOpd,
+                urutan,
+                namaRencanaAksi,
+                null,
+                null
         );
     }
 }

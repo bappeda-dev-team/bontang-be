@@ -17,6 +17,9 @@ public record Target(
 
         String satuan,
 
+        @Column("indikator_id")
+        Long indikatorId,
+
         @CreatedDate
         Instant createdDate,
 
@@ -25,12 +28,14 @@ public record Target(
 ) {
     public static Target of (
             String target,
-            String satuan
+            String satuan,
+            Long indikatorId
     ) {
         return new Target(
                 null,
                 target,
                 satuan,
+                indikatorId,
                 null,
                 null
         );

@@ -16,6 +16,9 @@ public record Indikator(
         @Column("nama_indikator")
         String namaIndikator,
 
+        @Column("rencana_kinerja_id")
+        Long rencanaKinerjaId,
+
         @CreatedDate
         Instant createdDate,
 
@@ -23,11 +26,13 @@ public record Indikator(
         Instant lastModifiedDate
 ) {
     public static Indikator of (
-            String namaIndikator
+            String namaIndikator,
+            Long rencanaKinerjaId
     ) {
         return new Indikator(
                 null,
                 namaIndikator,
+                rencanaKinerjaId,
                 null,
                 null
         );

@@ -19,4 +19,10 @@ public interface RencanaKinerjaRepository extends CrudRepository<RencanaKinerja,
     @Transactional
     @Query("DELETE FROM rencana_kinerja WHERE id = :id")
     void deleteById(@NonNull @Param("id") Long id);
+
+    @NonNull
+    Optional<RencanaKinerja> findByNipPegawaiAndKodeOpdAndTahun(
+            @NonNull @Param("nipPegawai") String nipPegawai,
+            @NonNull @Param("kodeOpd") String kodeOpd,
+            @NonNull @Param("tahun") Integer tahun);
 }

@@ -1,18 +1,22 @@
 package cc.kertaskerja.bontang.rencanaaksi.web;
 
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 public record RencanaAksiRequest(
-    @Nullable
-    Long idSumberDana,
+        @NotNull(message = "Id rencana kinerja tidak boleh kosong")
+        Integer idRencanaAksi,
 
-    @NotNull(message = "Rencana aksi lama tidak boleh kosong")
-    @NotEmpty(message = "Rencana aksi lama tidak boleh kosong")
-    String rencanaAksi,
+        @NotNull(message = "Kode opd tidak boleh kosong")
+        @NotEmpty(message = "Kode opd tidak boleh kosong")
+        String kodeOpd,
 
-    @NotNull(message = "Urutan tidak boleh kosong")
-    Integer urutan
+        @NotNull(message = "Urutan tidak boleh kosong")
+        Integer urutan,
+
+        @NotNull(message = "Nama rencana aksi lama tidak boleh kosong")
+        @NotEmpty(message = "Nama rencana aksi lama tidak boleh kosong")
+        String namaRencanaAksi
+
 ) {
 }

@@ -49,6 +49,7 @@ public class IndikatorController {
         Indikator indikator = new Indikator(
                 existingIndikator.id(),
                 request.namaIndikator(),
+                existingIndikator.rencanaKinerjaId(),
                 existingIndikator.createdDate(),
                 null
         );
@@ -62,10 +63,7 @@ public class IndikatorController {
      */
     @PostMapping
     public ResponseEntity<Indikator> post(@Valid @RequestBody IndikatorRequest request) {
-        Indikator indikator = Indikator.of(
-                request.namaIndikator()
-        );
-        Indikator saved = indikatorService.tambahIndikator(indikator);
+        Indikator saved = indikatorService.tambahIndikator(request);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")

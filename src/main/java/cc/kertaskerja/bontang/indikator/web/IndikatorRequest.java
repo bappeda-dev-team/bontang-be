@@ -10,6 +10,9 @@ public record IndikatorRequest(
 
         @NotNull(message = "Nama indikator tidak boleh kosong")
         @NotEmpty(message = "Nama indikator tidak boleh kosong")
-        String namaIndikator
+        String namaIndikator,
+
+        @NotNull(message = "Rencana Kinerja ID tidak boleh kosong")
+        Long rencanaKinerjaId
 ) {
 }

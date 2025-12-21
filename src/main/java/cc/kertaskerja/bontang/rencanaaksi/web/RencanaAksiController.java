@@ -31,51 +31,45 @@ public class RencanaAksiController {
         this.rencanaAksiService = rencanaAksiService;
     }
 
-    /**
-     * Ambil data berdasarkan id
-     * @param id
-     */
+    // Ambil data rencana aksi by id
     @GetMapping("detail/{id}")
     public RencanaAksi getById(@PathVariable("id") Long id) {
         return rencanaAksiService.detailRencanaAksiById(id);
     }
 
-    /**
-     * Ambil semua data rencana aksi
-     */
+    // Ambil semua data rencana aksi
     @GetMapping("detail/findall")
     public Iterable<RencanaAksi> findAll() {
         return rencanaAksiService.findAll();
     }
 
-    /**
-     * Ubah data rencana aksi berdasarkan id
-     * @param id
-     */
+    // Ubah by id
     @PutMapping("update/{id}")
     public RencanaAksi put(@PathVariable("id") Long id, @Valid @RequestBody RencanaAksiRequest request) {
         RencanaAksi existingRencanaAksi = rencanaAksiService.detailRencanaAksiById(id);
 
         RencanaAksi rencanaAksi = new RencanaAksi(
                 existingRencanaAksi.id(),
-                request.rencanaAksi(),
+                request.idRencanaAksi(),
+                request.kodeOpd(),
                 request.urutan(),
+                request.namaRencanaAksi(),
                 existingRencanaAksi.createdDate(),
                 null
         );
 
         return rencanaAksiService.ubahRencanaAksi(id, rencanaAksi);
     }
-
-    /**
-     * Tambah data rencana aksi
-     * @param request
-     */
-    @PostMapping
-    public ResponseEntity<RencanaAksi> post(@Valid @RequestBody RencanaAksiRequest request) {
+    
+    // Tambah by idRencanaAksi
+    @PostMapping("{idRencanaAksi}")
+    public ResponseEntity<RencanaAksi> post(@PathVariable("idRencanaAksi") Integer idRencanaAksi,
+                                             @Valid @RequestBody RencanaAksiRequest request) {
         RencanaAksi rencanaAksi = RencanaAksi.of(
-                request.rencanaAksi(),
-                request.urutan()
+                idRencanaAksi,
+                request.kodeOpd(),
+                request.urutan(),
+                request.namaRencanaAksi()
         );
         RencanaAksi saved = rencanaAksiService.tambahRencanaAksi(rencanaAksi);
         URI location = ServletUriComponentsBuilder
@@ -87,10 +81,7 @@ public class RencanaAksiController {
         return ResponseEntity.created(location).body(saved);
     }
 
-    /**
-     * Hapus rencana aksi berdasarkan id rencana aksi
-     * @param id
-     */
+    // Hapus by id
     @DeleteMapping("delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("id") Long id) {

@@ -1,0 +1,10 @@
+ALTER TABLE rencana_kinerja
+ADD COLUMN kode_opd VARCHAR(255),
+ADD COLUMN id_rekin VARCHAR(255),
+ADD COLUMN id_pegawai VARCHAR(255),
+ADD COLUMN created_by VARCHAR(255),
+ADD COLUMN bulan INTEGER,
+ADD COLUMN tahun INTEGER,
+ADD COLUMN status_rencana_kinerja VARCHAR(255),
+ADD COLUMN nama_opd VARCHAR(255),
+ADD COLUMN nama_pegawai VARCHAR(255);

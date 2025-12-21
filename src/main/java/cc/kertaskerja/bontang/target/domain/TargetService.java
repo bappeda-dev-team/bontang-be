@@ -3,6 +3,7 @@ package cc.kertaskerja.bontang.target.domain;
 import cc.kertaskerja.bontang.target.web.TargetRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -23,10 +24,20 @@ public class TargetService {
                 .orElseThrow(() -> new TargetNotFoundException(id));
     }
 
+    public Target tambahTarget(String target, String satuan, Long indikatorId) {
+        Target newTarget = Target.of(
+                target,
+                satuan,
+                indikatorId
+        );
+        return targetRepository.save(newTarget);
+    }
+
     public Target tambahTarget(TargetRequest request) {
         Target target = Target.of(
                 request.target(),
-                request.satuan()
+                request.satuan(),
+                request.indikatorId()
         );
         return targetRepository.save(target);
     }
@@ -41,6 +52,7 @@ public class TargetService {
                 existingTarget.id(),
                 request.target(),
                 request.satuan(),
+                existingTarget.indikatorId(),
                 existingTarget.createdDate(),
                 null
         );
@@ -58,5 +70,9 @@ public class TargetService {
 
     public Optional<Target> findFirstByTarget(String target) {
         return targetRepository.findFirstByTarget(target);
+    }
+
+    public List<Target> findByIndikatorId(Long indikatorId) {
+        return targetRepository.findByIndikatorId(indikatorId);
     }
 }

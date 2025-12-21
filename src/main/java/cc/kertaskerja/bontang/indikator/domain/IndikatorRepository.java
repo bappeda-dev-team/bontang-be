@@ -1,5 +1,6 @@
 package cc.kertaskerja.bontang.indikator.domain;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jdbc.repository.query.Modifying;
@@ -15,6 +16,8 @@ public interface IndikatorRepository extends CrudRepository<Indikator, Long> {
     Optional<Indikator> findById(@NonNull Long id);
 
     boolean existsById(@NonNull Long id);
+
+    List<Indikator> findByRencanaKinerjaId(Long rencanaKinerjaId);
 
     @Modifying
     @Transactional

@@ -1,6 +1,6 @@
 package cc.kertaskerja.bontang.rencanakinerja.web;
 
-import java.net.URI;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import cc.kertaskerja.bontang.rencanakinerja.domain.RencanaKinerja;
 import cc.kertaskerja.bontang.rencanakinerja.domain.RencanaKinerjaService;
+import cc.kertaskerja.bontang.rencanakinerja.web.RencanaKinerjaRequest;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -34,10 +34,10 @@ public class RencanaKinerjaController {
      * Ambil data berdasarkan id
      * @param id
      */
-    @GetMapping("detail/{id}")
-    public RencanaKinerja getById(@PathVariable("id") Long id) {
-        return rencanaKinerjaService.detailRencanaKinerjaById(id);
-    }
+    // @GetMapping("detail/{id}")
+    // public RencanaKinerja getById(@PathVariable("id") Long id) {
+    //     return rencanaKinerjaService.detailRencanaKinerjaById(id);
+    // }
 
     /**
      * Ambil semua data rencana kinerja
@@ -48,25 +48,29 @@ public class RencanaKinerjaController {
     }
 
     /**
-     * Ubah data rencana kinerja berdasarkan id
-     * @param id
+     * Ambil data rencana kinerja berdasarkan nip pegawai, kode opd, dan tahun
+     * @param nipPegawai
+     * @param kodeOpd
+     * @param tahun
      */
-    @PutMapping("update/{id}")
-    public RencanaKinerja put(@PathVariable("id") Long id, @Valid @RequestBody RencanaKinerjaRequest request) {
-        RencanaKinerja existingRencanaKinerja = rencanaKinerjaService.detailRencanaKinerjaById(id);
+    @GetMapping("detail/pegawai/{nipPegawai}/kodeopd/{kodeOpd}/tahun/{tahun}")
+    public ResponseEntity<Map<String, Object>> getByNipPegawaiAndKodeOpdAndTahun(
+            @PathVariable("nipPegawai") String nipPegawai,
+            @PathVariable("kodeOpd") String kodeOpd,
+            @PathVariable("tahun") Integer tahun) {
+        Map<String, Object> response = rencanaKinerjaService.findByNipPegawaiAndKodeOpdAndTahun(nipPegawai, kodeOpd, tahun);
+        return ResponseEntity.ok(response);
+    }
 
-        RencanaKinerja rencanaKinerja = new RencanaKinerja(
-                existingRencanaKinerja.id(),
-                request.rencanaKinerja(),
-                request.indikator(),
-                request.target(),
-                request.sumberDana(),
-                request.keterangan(),
-                existingRencanaKinerja.createdDate(),
-                null
-        );
-
-        return rencanaKinerjaService.ubahRencanaKinerja(id, rencanaKinerja);
+    /**
+     * Ubah data rencana kinerja berdasarkan id
+     * @param idRencanaKinerja
+     * @param request
+     */
+    @PutMapping("update/{idRencanaKinerja}")
+    public ResponseEntity<Map<String, Object>> put(@PathVariable("idRencanaKinerja") Long idRencanaKinerja, @Valid @RequestBody RencanaKinerjaRequest request) {
+        
+        return rencanaKinerjaService.ubahRencanaKinerja(idRencanaKinerja, request);
     }
 
     /**
@@ -74,31 +78,17 @@ public class RencanaKinerjaController {
      * @param request
      */
     @PostMapping
-    public ResponseEntity<RencanaKinerja> post(@Valid @RequestBody RencanaKinerjaRequest request) {
-        RencanaKinerja rencanaKinerja = RencanaKinerja.of(
-                request.rencanaKinerja(),
-                request.indikator(),
-                request.target(),
-                request.sumberDana(),
-                request.keterangan()
-        );
-        RencanaKinerja saved = rencanaKinerjaService.tambahRencanaKinerja(rencanaKinerja);
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(saved.id())
-                .toUri();
-
-        return ResponseEntity.created(location).body(saved);
+    public ResponseEntity<Map<String, Object>> post(@Valid @RequestBody RencanaKinerjaRequest request) {
+        return rencanaKinerjaService.tambahRencanaKinerja(request);
     }
 
     /**
      * Hapus rencana kinerja berdasarkan id rencana kinerja
      * @param id
      */
-    @DeleteMapping("delete/{id}")
+    @DeleteMapping("delete/{idRencanaKinerja}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("id") Long id) {
+    public void delete(@PathVariable("idRencanaKinerja") Long id) {
         rencanaKinerjaService.hapusRencanaKinerja(id);
     }
 }

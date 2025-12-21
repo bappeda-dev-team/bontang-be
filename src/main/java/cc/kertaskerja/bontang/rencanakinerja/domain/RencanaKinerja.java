@@ -16,11 +16,26 @@ public record RencanaKinerja(
     @Column("rencana_kinerja")
     String rencanaKinerja,
 
-    @Column("indikator")
-    String indikator,
+    @Column("kode_opd")
+    String kodeOpd,
 
-    @Column("target")
-    String target,
+    @Column("nip")
+    String nipPegawai,
+
+    @Column("created_by")
+    String createdBy,
+
+    @Column("tahun")
+    Integer tahun,
+
+    @Column("status_rencana_kinerja")
+    String statusRencanaKinerja,
+
+    @Column("nama_opd")
+    String namaOpd,
+
+    @Column("nama_pegawai")
+    String namaPegawai,
 
     @Column("sumber_dana")
     String sumberDana,
@@ -36,20 +51,48 @@ public record RencanaKinerja(
 ) {
     public static RencanaKinerja of (
             String rencanaKinerja,
-            String indikator,
-            String target,
+            String kodeOpd,
+            String nipPegawai,
+            String createdBy,
+            Integer tahun,
+            String statusRencanaKinerja,
+            String namaOpd,
+            String namaPegawai,
             String sumberDana,
             String keterangan
     ) {
         return new RencanaKinerja(
             null,
             rencanaKinerja,
-            indikator,
-            target,
+            kodeOpd,
+            nipPegawai,
+            createdBy,
+            tahun,
+            statusRencanaKinerja,
+            namaOpd,
+            namaPegawai,
             sumberDana,
             keterangan,
             null,
             null
+        );
+    }
+
+    public RencanaKinerja withId(Long id) {
+        return new RencanaKinerja(
+            id,
+            this.rencanaKinerja,
+            this.kodeOpd,
+            this.nipPegawai,
+            this.createdBy,
+            this.tahun,
+            this.statusRencanaKinerja,
+            this.namaOpd,
+            this.namaPegawai,
+            this.sumberDana,
+            this.keterangan,
+            this.createdDate,
+            this.lastModifiedDate
         );
     }
 }

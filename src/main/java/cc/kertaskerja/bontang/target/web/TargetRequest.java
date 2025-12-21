@@ -14,6 +14,9 @@ public record TargetRequest(
 
         @NotNull(message = "Satuan tidak boleh kosong")
         @NotEmpty(message = "Satuan tidak boleh kosong")
-        String satuan
+        String satuan,
+
+        @NotNull(message = "Indikator ID tidak boleh kosong")
+        Long indikatorId
 ) {
 }

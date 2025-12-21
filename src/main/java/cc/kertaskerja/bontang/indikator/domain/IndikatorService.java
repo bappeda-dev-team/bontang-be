@@ -1,6 +1,9 @@
 package cc.kertaskerja.bontang.indikator.domain;
 
+import cc.kertaskerja.bontang.indikator.web.IndikatorRequest;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class IndikatorService {
@@ -19,8 +22,24 @@ public class IndikatorService {
                 .orElseThrow(() -> new IndikatorNotFoundException(id));
     }
 
-    public Indikator tambahIndikator(Indikator indikator) {
+    public List<Indikator> findByRencanaKinerjaId(Long rencanaKinerjaId) {
+        return indikatorRepository.findByRencanaKinerjaId(rencanaKinerjaId);
+    }
 
+    public Indikator tambahIndikator(String namaIndikator, Long rencanaKinerjaId) {
+        Indikator indikator = Indikator.of(namaIndikator, rencanaKinerjaId);
+        return indikatorRepository.save(indikator);
+    }
+
+    public Indikator tambahIndikator(Indikator indikator) {
+        return indikatorRepository.save(indikator);
+    }
+
+    public Indikator tambahIndikator(IndikatorRequest request) {
+        Indikator indikator = Indikator.of(
+                request.namaIndikator(),
+                request.rencanaKinerjaId()
+        );
         return indikatorRepository.save(indikator);
     }
 
