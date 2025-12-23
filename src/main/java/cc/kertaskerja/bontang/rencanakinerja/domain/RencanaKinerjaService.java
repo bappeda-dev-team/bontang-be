@@ -75,45 +75,41 @@ public class RencanaKinerjaService {
     // Untuk endpoint getByNipPegawaiAndKodeOpdAndTahun yang hanya menampilkan data yang diperlukan
     private Map<String, Object> buildSimpleRencanaKinerjaResponse(RencanaKinerja rencanaKinerja) {
         Map<String, Object> response = new LinkedHashMap<>();
-        Map<String, Object> rencanaKinerjaResponse = new LinkedHashMap<>();
         
-        rencanaKinerjaResponse.put("nama_rencana_kinerja", rencanaKinerja.rencanaKinerja());
-        rencanaKinerjaResponse.put("tahun", rencanaKinerja.tahun().toString());
-        rencanaKinerjaResponse.put("status_rencana_kinerja", rencanaKinerja.statusRencanaKinerja());
+        response.put("idSumberDana", 0);
+        response.put("rencanaKinerja", rencanaKinerja.rencanaKinerja());
+        response.put("kodeOpd", rencanaKinerja.kodeOpd());
+        response.put("nipPegawai", rencanaKinerja.nipPegawai());
+        response.put("createdBy", rencanaKinerja.createdBy());
+        response.put("tahun", rencanaKinerja.tahun());
+        response.put("statusRencanaKinerja", rencanaKinerja.statusRencanaKinerja());
+        response.put("namaOpd", rencanaKinerja.namaOpd());
+        response.put("namaPegawai", rencanaKinerja.namaPegawai());
+        response.put("sumberDana", rencanaKinerja.sumberDana());
+        response.put("keterangan", rencanaKinerja.keterangan());
         
-        Map<String, Object> operasionalDaerah = new LinkedHashMap<>();
-        operasionalDaerah.put("kode_opd", rencanaKinerja.kodeOpd());
-        operasionalDaerah.put("nama_opd", rencanaKinerja.namaOpd());
-        rencanaKinerjaResponse.put("operasional_daerah", operasionalDaerah);
-        
-        rencanaKinerjaResponse.put("nip", rencanaKinerja.nipPegawai());
-        rencanaKinerjaResponse.put("nama_pegawai", rencanaKinerja.namaPegawai());
-        
-        List<Map<String, Object>> indikatorResponseList = new ArrayList<>();
+        List<Map<String, Object>> indikatorList = new ArrayList<>();
         List<Indikator> indikators = indikatorService.findByRencanaKinerjaId(rencanaKinerja.id());
         
         for (Indikator indikator : indikators) {
-            List<Map<String, Object>> targetsResponseList = new ArrayList<>();
+            List<Map<String, Object>> targetList = new ArrayList<>();
             List<Target> targets = targetService.findByIndikatorId(indikator.id());
             
             for (Target target : targets) {
                 Map<String, Object> targetResponse = new LinkedHashMap<>();
-                targetResponse.put("id_target", target.id());
                 targetResponse.put("target", target.target());
                 targetResponse.put("satuan", target.satuan());
-                targetsResponseList.add(targetResponse);
+                targetList.add(targetResponse);
             }
             
             Map<String, Object> indikatorResponse = new LinkedHashMap<>();
-            indikatorResponse.put("id_indikator", indikator.id());
-            indikatorResponse.put("nama_indikator", indikator.namaIndikator());
-            indikatorResponse.put("targets", targetsResponseList);
-            indikatorResponseList.add(indikatorResponse);
+            indikatorResponse.put("namaIndikator", indikator.namaIndikator());
+            indikatorResponse.put("targetList", targetList);
+            indikatorList.add(indikatorResponse);
         }
         
-        rencanaKinerjaResponse.put("indikator", indikatorResponseList);
-
-        response.put("rencana_kinerja", rencanaKinerjaResponse);
+        response.put("indikatorList", indikatorList);
+        
         return response;
     }
 
@@ -310,32 +306,29 @@ public class RencanaKinerjaService {
             List<RencanaKinerjaRequest.IndikatorData> indikatorList) {
         
         Map<String, Object> response = new LinkedHashMap<>();
-        Map<String, Object> rencanaKinerjaResponse = new LinkedHashMap<>();
         
-        // Build rencana kinerja response
+        response.put("idSumberDana", 0);
+        response.put("rencanaKinerja", savedRencanaKinerja.rencanaKinerja());
+        response.put("kodeOpd", savedRencanaKinerja.kodeOpd());
+        response.put("nipPegawai", savedRencanaKinerja.nipPegawai());
+        response.put("createdBy", savedRencanaKinerja.createdBy());
+        response.put("tahun", savedRencanaKinerja.tahun());
+        response.put("statusRencanaKinerja", savedRencanaKinerja.statusRencanaKinerja());
+        response.put("namaOpd", savedRencanaKinerja.namaOpd());
+        response.put("namaPegawai", savedRencanaKinerja.namaPegawai());
+        response.put("sumberDana", savedRencanaKinerja.sumberDana());
+        response.put("keterangan", savedRencanaKinerja.keterangan());
+        
+        // Process indikator list
+        List<Map<String, Object>> indikatorListResponse = new ArrayList<>();
         if (indikatorList != null && !indikatorList.isEmpty()) {
-            rencanaKinerjaResponse.put("nama_rencana_kinerja", savedRencanaKinerja.rencanaKinerja());
-            rencanaKinerjaResponse.put("tahun", savedRencanaKinerja.tahun().toString());
-            rencanaKinerjaResponse.put("status_rencana_kinerja", savedRencanaKinerja.statusRencanaKinerja());
-            
-            // Build OPD object
-            Map<String, Object> operasionalDaerah = new LinkedHashMap<>();
-            operasionalDaerah.put("kode_opd", savedRencanaKinerja.kodeOpd());
-            operasionalDaerah.put("nama_opd", savedRencanaKinerja.namaOpd());
-            rencanaKinerjaResponse.put("operasional_daerah", operasionalDaerah);
-            
-            rencanaKinerjaResponse.put("nip", savedRencanaKinerja.nipPegawai());
-            rencanaKinerjaResponse.put("nama_pegawai", savedRencanaKinerja.namaPegawai());
-            
-            // Process indikator list
-            List<Map<String, Object>> indikatorResponseList = new ArrayList<>();
             for (RencanaKinerjaRequest.IndikatorData indikatorData : indikatorList) {
                 Indikator savedIndikator = indikatorService.tambahIndikator(
                         indikatorData.namaIndikator(),
                         savedRencanaKinerja.id()
                 );
 
-                List<Map<String, Object>> targetsResponseList = new ArrayList<>();
+                List<Map<String, Object>> targetListResponse = new ArrayList<>();
                 List<RencanaKinerjaRequest.TargetData> targetList = indikatorData.targetList();
                 if (targetList != null && !targetList.isEmpty()) {
                     for (RencanaKinerjaRequest.TargetData targetData : targetList) {
@@ -346,38 +339,22 @@ public class RencanaKinerjaService {
                         );
                         
                         Map<String, Object> targetResponse = new LinkedHashMap<>();
-                        targetResponse.put("id_target", savedTarget.id());
                         targetResponse.put("target", savedTarget.target());
                         targetResponse.put("satuan", savedTarget.satuan());
-                        targetsResponseList.add(targetResponse);
+                        targetListResponse.add(targetResponse);
                     }
                 }
 
                 // Build indikator response
                 Map<String, Object> indikatorResponse = new LinkedHashMap<>();
-                indikatorResponse.put("id_indikator", savedIndikator.id());
-                indikatorResponse.put("nama_indikator", savedIndikator.namaIndikator());
-                indikatorResponse.put("targets", targetsResponseList);
-                indikatorResponseList.add(indikatorResponse);
+                indikatorResponse.put("namaIndikator", savedIndikator.namaIndikator());
+                indikatorResponse.put("targetList", targetListResponse);
+                indikatorListResponse.add(indikatorResponse);
             }
-            
-            rencanaKinerjaResponse.put("indikator", indikatorResponseList);
-        } else {
-            rencanaKinerjaResponse.put("id_rencana_kinerja", savedRencanaKinerja.id().toString());
-            rencanaKinerjaResponse.put("nama_rencana_kinerja", savedRencanaKinerja.rencanaKinerja());
-            rencanaKinerjaResponse.put("tahun", savedRencanaKinerja.tahun().toString());
-            rencanaKinerjaResponse.put("status_rencana_kinerja", savedRencanaKinerja.statusRencanaKinerja());
-            
-            Map<String, Object> operasionalDaerah = new LinkedHashMap<>();
-            operasionalDaerah.put("kode_opd", savedRencanaKinerja.kodeOpd());
-            operasionalDaerah.put("nama_opd", savedRencanaKinerja.namaOpd());
-            rencanaKinerjaResponse.put("operasional_daerah", operasionalDaerah);
-            
-            rencanaKinerjaResponse.put("pegawai_id", savedRencanaKinerja.nipPegawai());
-            rencanaKinerjaResponse.put("nama_pegawai", savedRencanaKinerja.namaPegawai());
         }
         
-        response.put("rencana_kinerja", rencanaKinerjaResponse);
+        response.put("indikatorList", indikatorListResponse);
+        
         return ResponseEntity.ok(response);
     }
 
