@@ -62,7 +62,7 @@ public class RencanaKinerjaService {
         RencanaKinerja rencanaKinerja = rencanaKinerjaRepository.findByNipPegawaiAndKodeOpdAndTahun(nipPegawai, kodeOpd, tahun)
                 .orElseThrow(() -> new RencanaKinerjaNotFoundException(nipPegawai, kodeOpd, tahun));
 
-        return buildRencanaKinerjaDetailResponse(rencanaKinerja);
+        return buildSimpleRencanaKinerjaResponse(rencanaKinerja);
     }
 
     public Map<String, Object> findDetailByIdAndNipPegawai(Long idRencanaKinerja, String nipPegawai) {
@@ -70,6 +70,51 @@ public class RencanaKinerjaService {
                 .orElseThrow(() -> new RencanaKinerjaNotFoundException("Rencana Kinerja dengan id " + idRencanaKinerja + " dan nip " + nipPegawai + " tidak ditemukan"));
 
         return buildRencanaKinerjaDetailResponse(rencanaKinerja);
+    }
+
+    // Untuk endpoint getByNipPegawaiAndKodeOpdAndTahun yang hanya menampilkan data yang diperlukan
+    private Map<String, Object> buildSimpleRencanaKinerjaResponse(RencanaKinerja rencanaKinerja) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        Map<String, Object> rencanaKinerjaResponse = new LinkedHashMap<>();
+        
+        rencanaKinerjaResponse.put("nama_rencana_kinerja", rencanaKinerja.rencanaKinerja());
+        rencanaKinerjaResponse.put("tahun", rencanaKinerja.tahun().toString());
+        rencanaKinerjaResponse.put("status_rencana_kinerja", rencanaKinerja.statusRencanaKinerja());
+        
+        Map<String, Object> operasionalDaerah = new LinkedHashMap<>();
+        operasionalDaerah.put("kode_opd", rencanaKinerja.kodeOpd());
+        operasionalDaerah.put("nama_opd", rencanaKinerja.namaOpd());
+        rencanaKinerjaResponse.put("operasional_daerah", operasionalDaerah);
+        
+        rencanaKinerjaResponse.put("nip", rencanaKinerja.nipPegawai());
+        rencanaKinerjaResponse.put("nama_pegawai", rencanaKinerja.namaPegawai());
+        
+        List<Map<String, Object>> indikatorResponseList = new ArrayList<>();
+        List<Indikator> indikators = indikatorService.findByRencanaKinerjaId(rencanaKinerja.id());
+        
+        for (Indikator indikator : indikators) {
+            List<Map<String, Object>> targetsResponseList = new ArrayList<>();
+            List<Target> targets = targetService.findByIndikatorId(indikator.id());
+            
+            for (Target target : targets) {
+                Map<String, Object> targetResponse = new LinkedHashMap<>();
+                targetResponse.put("id_target", target.id());
+                targetResponse.put("target", target.target());
+                targetResponse.put("satuan", target.satuan());
+                targetsResponseList.add(targetResponse);
+            }
+            
+            Map<String, Object> indikatorResponse = new LinkedHashMap<>();
+            indikatorResponse.put("id_indikator", indikator.id());
+            indikatorResponse.put("nama_indikator", indikator.namaIndikator());
+            indikatorResponse.put("targets", targetsResponseList);
+            indikatorResponseList.add(indikatorResponse);
+        }
+        
+        rencanaKinerjaResponse.put("indikator", indikatorResponseList);
+
+        response.put("rencana_kinerja", rencanaKinerjaResponse);
+        return response;
     }
 
     // Untuk method findByNipPegawaiAndKodeOpdAndTahun
