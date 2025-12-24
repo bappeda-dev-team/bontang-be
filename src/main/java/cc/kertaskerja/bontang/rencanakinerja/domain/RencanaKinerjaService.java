@@ -74,19 +74,19 @@ public class RencanaKinerjaService {
 
     // Untuk endpoint getByNipPegawaiAndKodeOpdAndTahun yang hanya menampilkan data yang diperlukan
     private Map<String, Object> buildSimpleRencanaKinerjaResponse(RencanaKinerja rencanaKinerja) {
-        Map<String, Object> response = new LinkedHashMap<>();
+        Map<String, Object> rencanaKinerjaData = new LinkedHashMap<>();
         
-        response.put("idSumberDana", 0);
-        response.put("rencanaKinerja", rencanaKinerja.rencanaKinerja());
-        response.put("kodeOpd", rencanaKinerja.kodeOpd());
-        response.put("nipPegawai", rencanaKinerja.nipPegawai());
-        response.put("createdBy", rencanaKinerja.createdBy());
-        response.put("tahun", rencanaKinerja.tahun());
-        response.put("statusRencanaKinerja", rencanaKinerja.statusRencanaKinerja());
-        response.put("namaOpd", rencanaKinerja.namaOpd());
-        response.put("namaPegawai", rencanaKinerja.namaPegawai());
-        response.put("sumberDana", rencanaKinerja.sumberDana());
-        response.put("keterangan", rencanaKinerja.keterangan());
+        rencanaKinerjaData.put("id_rencana_kinerja", rencanaKinerja.id());
+        rencanaKinerjaData.put("rencanaKinerja", rencanaKinerja.rencanaKinerja());
+        rencanaKinerjaData.put("kodeOpd", rencanaKinerja.kodeOpd());
+        rencanaKinerjaData.put("nipPegawai", rencanaKinerja.nipPegawai());
+        rencanaKinerjaData.put("createdBy", rencanaKinerja.createdBy());
+        rencanaKinerjaData.put("tahun", rencanaKinerja.tahun());
+        rencanaKinerjaData.put("statusRencanaKinerja", rencanaKinerja.statusRencanaKinerja());
+        rencanaKinerjaData.put("namaOpd", rencanaKinerja.namaOpd());
+        rencanaKinerjaData.put("namaPegawai", rencanaKinerja.namaPegawai());
+        rencanaKinerjaData.put("sumberDana", rencanaKinerja.sumberDana());
+        rencanaKinerjaData.put("keterangan", rencanaKinerja.keterangan());
         
         List<Map<String, Object>> indikatorList = new ArrayList<>();
         List<Indikator> indikators = indikatorService.findByRencanaKinerjaId(rencanaKinerja.id());
@@ -97,18 +97,26 @@ public class RencanaKinerjaService {
             
             for (Target target : targets) {
                 Map<String, Object> targetResponse = new LinkedHashMap<>();
+                rencanaKinerjaData.put("id_target", target.id());
                 targetResponse.put("target", target.target());
                 targetResponse.put("satuan", target.satuan());
                 targetList.add(targetResponse);
             }
             
             Map<String, Object> indikatorResponse = new LinkedHashMap<>();
+            rencanaKinerjaData.put("id_indikator", indikator.id());
             indikatorResponse.put("namaIndikator", indikator.namaIndikator());
             indikatorResponse.put("targetList", targetList);
             indikatorList.add(indikatorResponse);
         }
         
-        response.put("indikatorList", indikatorList);
+        rencanaKinerjaData.put("indikatorList", indikatorList);
+        
+        List<Map<String, Object>> rencanaKinerjaList = new ArrayList<>();
+        rencanaKinerjaList.add(rencanaKinerjaData);
+        
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("rencana_kinerja", rencanaKinerjaList);
         
         return response;
     }
