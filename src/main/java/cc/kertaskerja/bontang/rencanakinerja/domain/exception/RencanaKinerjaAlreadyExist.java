@@ -1,7 +1,7 @@
 package cc.kertaskerja.bontang.rencanakinerja.domain.exception;
 
 public class RencanaKinerjaAlreadyExist extends RuntimeException {
-    public RencanaKinerjaAlreadyExist(Long id) {
-        super("Rencana kinerja dengan id " + id + " sudah ada.");
+    public RencanaKinerjaAlreadyExist(String nip, String kodeOpd, Integer tahun) {
+        super("Rencana kinerja dengan nip " + nip + " kode opd" + kodeOpd +  " tahun" + tahun +  " sudah ada.");
     }
 }

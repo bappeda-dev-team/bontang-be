@@ -1,5 +1,6 @@
 package cc.kertaskerja.bontang.rencanakinerja.domain;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jdbc.repository.query.Modifying;
@@ -20,11 +21,10 @@ public interface RencanaKinerjaRepository extends CrudRepository<RencanaKinerja,
     @Query("DELETE FROM rencana_kinerja WHERE id = :id")
     void deleteById(@NonNull @Param("id") Long id);
 
-    @NonNull
-    Optional<RencanaKinerja> findByNipPegawaiAndKodeOpdAndTahun(
-            @NonNull @Param("nipPegawai") String nipPegawai,
-            @NonNull @Param("kodeOpd") String kodeOpd,
-            @NonNull @Param("tahun") Integer tahun);
+    List<RencanaKinerja> findByNipPegawaiAndKodeOpdAndTahun(
+            @Param("nipPegawai") String nipPegawai,
+            @Param("kodeOpd") String kodeOpd,
+            @Param("tahun") Integer tahun);
 
     @NonNull
     Optional<RencanaKinerja> findByIdAndNipPegawai(
