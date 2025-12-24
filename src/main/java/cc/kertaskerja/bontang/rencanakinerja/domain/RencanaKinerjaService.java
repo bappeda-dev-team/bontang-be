@@ -8,6 +8,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import cc.kertaskerja.bontang.rencanakinerja.domain.exception.RencanaKinerjaNotFoundException;
 import cc.kertaskerja.bontang.rencanakinerja.web.RencanaKinerjaRequest;
@@ -66,7 +70,7 @@ public class RencanaKinerjaService {
         }
         
         return buildSimpleRencanaKinerjaResponse(rencanaKinerjas);
-    }
+        }
 
     public Map<String, Object> findDetailByIdAndNipPegawai(Long idRencanaKinerja, String nipPegawai) {
         RencanaKinerja rencanaKinerja = rencanaKinerjaRepository.findByIdAndNipPegawai(idRencanaKinerja, nipPegawai)
@@ -320,6 +324,7 @@ public class RencanaKinerjaService {
         
         Map<String, Object> response = new LinkedHashMap<>();
         
+        response.put("id_rencana_kinerja", savedRencanaKinerja.id());
         response.put("idSumberDana", 0);
         response.put("rencanaKinerja", savedRencanaKinerja.rencanaKinerja());
         response.put("kodeOpd", savedRencanaKinerja.kodeOpd());
@@ -352,6 +357,7 @@ public class RencanaKinerjaService {
                         );
                         
                         Map<String, Object> targetResponse = new LinkedHashMap<>();
+                        targetResponse.put("id_target", savedTarget.id());
                         targetResponse.put("target", savedTarget.target());
                         targetResponse.put("satuan", savedTarget.satuan());
                         targetListResponse.add(targetResponse);
@@ -360,6 +366,7 @@ public class RencanaKinerjaService {
 
                 // Build indikator response
                 Map<String, Object> indikatorResponse = new LinkedHashMap<>();
+                indikatorResponse.put("id_indikator", savedIndikator.id());
                 indikatorResponse.put("namaIndikator", savedIndikator.namaIndikator());
                 indikatorResponse.put("targetList", targetListResponse);
                 indikatorListResponse.add(indikatorResponse);
@@ -429,6 +436,133 @@ public class RencanaKinerjaService {
         return indikatorResponse;
     }
 
+    // Method untuk memproses update target
+    private List<Map<String, Object>> processTargetForUpdate(
+            Long indikatorId,
+            List<RencanaKinerjaRequest.TargetData> targetList) {
+        
+        List<Map<String, Object>> targetsResponseList = new ArrayList<>();
+        
+        List<Target> existingTargets = targetService.findByIndikatorId(indikatorId);
+        
+        // Hapus target yang tidak ada di request
+        Set<Long> requestTargetIds = new HashSet<>();
+        if (targetList != null) {
+            requestTargetIds = targetList.stream()
+                .map(RencanaKinerjaRequest.TargetData::idTarget)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        }
+        
+        for (Target existing : existingTargets) {
+            if (!requestTargetIds.contains(existing.id())) {
+                targetService.hapusTarget(existing.id());
+            }
+        }
+        
+        // Proses target dari request
+        if (targetList != null && !targetList.isEmpty()) {
+            for (RencanaKinerjaRequest.TargetData targetData : targetList) {
+                Target target;
+                
+                if (targetData.idTarget() != null) {
+                    Target existing = targetService.detailTargetById(targetData.idTarget());
+                    target = new Target(
+                        existing.id(),
+                        targetData.target() != null ? targetData.target() : existing.target(),
+                        targetData.satuan() != null ? targetData.satuan() : existing.satuan(),
+                        existing.indikatorId(),
+                        existing.createdDate(),
+                        null
+                    );
+                    target = targetService.ubahTarget(existing.id(), new cc.kertaskerja.bontang.target.web.TargetRequest(
+                        existing.id(),
+                        target.target(),
+                        target.satuan(),
+                        target.indikatorId()
+                    ));
+                } else {
+                    target = targetService.tambahTarget(
+                        targetData.target(),
+                        targetData.satuan(),
+                        indikatorId
+                    );
+                }
+                
+                Map<String, Object> targetResponse = new LinkedHashMap<>();
+                targetResponse.put("id_target", target.id());
+                targetResponse.put("target", target.target());
+                targetResponse.put("satuan", target.satuan());
+                targetsResponseList.add(targetResponse);
+            }
+        }
+        
+        return targetsResponseList;
+    }
+
+    // Method untuk memproses update indikator
+    private List<Map<String, Object>> processIndikatorForUpdate(
+            RencanaKinerja savedRencanaKinerja,
+            List<RencanaKinerjaRequest.IndikatorData> indikatorList) {
+        
+        List<Map<String, Object>> indikatorResponseList = new ArrayList<>();
+        
+        List<Indikator> existingIndikators = indikatorService.findByRencanaKinerjaId(savedRencanaKinerja.id());
+        
+        Set<Long> requestIndikatorIds = new HashSet<>();
+        if (indikatorList != null) {
+            requestIndikatorIds = indikatorList.stream()
+                .map(RencanaKinerjaRequest.IndikatorData::idIndikator)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        }
+        
+        for (Indikator existing : existingIndikators) {
+            if (!requestIndikatorIds.contains(existing.id())) {
+                // Hapus indikator dan target terkait
+                indikatorService.hapusIndikator(existing.id());
+            }
+        }
+        
+        // Proses indikator dari request
+        if (indikatorList != null && !indikatorList.isEmpty()) {
+            for (RencanaKinerjaRequest.IndikatorData indikatorData : indikatorList) {
+                Indikator indikator;
+                
+                if (indikatorData.idIndikator() != null) {
+                    Indikator existing = indikatorService.detailIndikatorById(indikatorData.idIndikator());
+                    indikator = new Indikator(
+                        existing.id(),
+                        indikatorData.namaIndikator() != null ? indikatorData.namaIndikator() : existing.namaIndikator(),
+                        existing.rencanaKinerjaId(),
+                        existing.createdDate(),
+                        null
+                    );
+                    indikator = indikatorService.ubahIndikator(existing.id(), indikator);
+                } else {
+                    indikator = indikatorService.tambahIndikator(
+                        indikatorData.namaIndikator(),
+                        savedRencanaKinerja.id()
+                    );
+                }
+                
+                // Proses target
+                List<Map<String, Object>> targetsResponse = processTargetForUpdate(
+                    indikator.id(),
+                    indikatorData.targetList()
+                );
+                
+                Map<String, Object> indikatorResponse = new LinkedHashMap<>();
+                indikatorResponse.put("id_indikator", indikator.id());
+                indikatorResponse.put("nama_indikator", indikator.namaIndikator());
+                indikatorResponse.put("targets", targetsResponse);
+                indikatorResponseList.add(indikatorResponse);
+            }
+        }
+        
+        return indikatorResponseList;
+    }
+
     private Map<String, Object> buildRencanaKinerjaResponse(RencanaKinerja rencanaKinerja, boolean includeId) {
         Map<String, Object> response = new LinkedHashMap<>();
 
@@ -475,7 +609,23 @@ public class RencanaKinerjaService {
         
         RencanaKinerja savedRencanaKinerja = rencanaKinerjaRepository.save(updatedRencanaKinerja);
 
-        return buildResponse(savedRencanaKinerja, request.indikatorList());
+        // Build response untuk update
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("id_rencana_kinerja", savedRencanaKinerja.id());
+        response.put("idSumberDana", 0);
+        response.put("rencanaKinerja", savedRencanaKinerja.rencanaKinerja());
+        response.put("kodeOpd", savedRencanaKinerja.kodeOpd());
+        response.put("nipPegawai", savedRencanaKinerja.nipPegawai());
+        response.put("createdBy", savedRencanaKinerja.createdBy());
+        response.put("tahun", savedRencanaKinerja.tahun());
+        response.put("statusRencanaKinerja", savedRencanaKinerja.statusRencanaKinerja());
+        response.put("namaOpd", savedRencanaKinerja.namaOpd());
+        response.put("namaPegawai", savedRencanaKinerja.namaPegawai());
+        response.put("sumberDana", savedRencanaKinerja.sumberDana());
+        response.put("keterangan", savedRencanaKinerja.keterangan());
+        response.put("indikatorList", processIndikatorForUpdate(savedRencanaKinerja, request.indikatorList()));
+        
+        return ResponseEntity.ok(response);
     }
 
     public void hapusRencanaKinerja(Long id) {

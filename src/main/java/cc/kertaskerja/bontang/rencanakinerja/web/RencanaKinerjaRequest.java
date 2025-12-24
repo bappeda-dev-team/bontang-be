@@ -47,6 +47,9 @@ public record RencanaKinerjaRequest(
 ) {
     public record IndikatorData(
         @Nullable
+        Long idIndikator,
+        
+        @Nullable
         String namaIndikator,
         
         @Nullable
@@ -55,6 +58,9 @@ public record RencanaKinerjaRequest(
     }
     
     public record TargetData(
+        @Nullable
+        Long idTarget,
+        
         @Nullable
         String target,
         
