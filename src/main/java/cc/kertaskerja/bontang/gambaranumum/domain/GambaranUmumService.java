@@ -23,13 +23,22 @@ public class GambaranUmumService {
         return gambaranUmumRepository.findByKodeOpd(kodeOpd);
     }
 
+    public Iterable<GambaranUmum> findByIdRencanaKinerja(Long idRencanaKinerja) {
+        return gambaranUmumRepository.findByIdRencanaKinerja(idRencanaKinerja);
+    }
+
+    public GambaranUmum detailGambaranUmumByIdRencanaKinerja(Long idRencanaKinerja, Long id) {
+        return gambaranUmumRepository.findByIdRencanaKinerjaAndId(idRencanaKinerja, id)
+                .orElseThrow(() -> new GambaranUmumNotFoundException(id));
+    }
+
     public GambaranUmum tambahGambaranUmum(GambaranUmum gambaranUmum) {
 
         return gambaranUmumRepository.save(gambaranUmum);
     }
 
-    public GambaranUmum ubahGambaranUmum(Long id, GambaranUmum gambaranUmum) {
-        if (!gambaranUmumRepository.existsById(id)) {
+    public GambaranUmum ubahGambaranUmum(Long idRencanaKinerja, Long id, GambaranUmum gambaranUmum) {
+        if (!gambaranUmumRepository.findByIdRencanaKinerjaAndId(idRencanaKinerja, id).isPresent()) {
             throw new GambaranUmumNotFoundException(id);
         }
 

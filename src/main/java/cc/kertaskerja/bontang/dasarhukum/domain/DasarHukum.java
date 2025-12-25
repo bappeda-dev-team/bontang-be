@@ -13,6 +13,9 @@ public record DasarHukum(
         @Id
         Long id,
 
+        @Column("id_rencana_kinerja")
+        Long idRencanaKinerja,
+
         @Column("peraturan_terkait")
         String peraturanTerkait,
 
@@ -32,6 +35,7 @@ public record DasarHukum(
         Instant lastModifiedDate
 ) {
     public static DasarHukum of (
+            Long idRencanaKinerja,
             String peraturanTerkait,
             String uraian,
             String kodeOpd,
@@ -39,6 +43,7 @@ public record DasarHukum(
     ) {
         return new DasarHukum(
                 null,
+                idRencanaKinerja,
                 peraturanTerkait,
                 uraian,
                 kodeOpd,

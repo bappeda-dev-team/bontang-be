@@ -22,4 +22,8 @@ public interface DasarHukumRepository extends CrudRepository<DasarHukum, Long> {
     void deleteByKodeOpd(@NonNull @Param("id") String id);
     
     Iterable<DasarHukum> findByKodeOpd(String kodeOpd);
+
+    Iterable<DasarHukum> findByIdRencanaKinerja(Long idRencanaKinerja);
+
+    Optional<DasarHukum> findByIdRencanaKinerjaAndId(Long idRencanaKinerja, Long id);
 }

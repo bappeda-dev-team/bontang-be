@@ -39,15 +39,41 @@ public class DasarHukumController {
     }
 
     /**
-     * Ubah data berdasarkan idRencanaKinerja
+     * Ambil data berdasarkan idRencanaKinerja
      * @param idRencanaKinerja
      */
-    @PutMapping("update/{idRencanaKinerja}")
-    public DasarHukum put(@PathVariable("idRencanaKinerja") Long idRencanaKinerja, @Valid @RequestBody DasarHukumRequest request) {
-        DasarHukum existingDasarHukum = dasarHukumService.detailDasarHukumById(idRencanaKinerja);
+    @GetMapping("rencanakinerja/{idRencanaKinerja}")
+    public Iterable<DasarHukum> getByIdRencanaKinerja(@PathVariable("idRencanaKinerja") Long idRencanaKinerja) {
+        return dasarHukumService.findByIdRencanaKinerja(idRencanaKinerja);
+    }
+
+    /**
+     * Ambil data berdasarkan idRencanaKinerja dan id
+     * @param idRencanaKinerja
+     * @param id
+     */
+    @GetMapping("rencanakinerja/{idRencanaKinerja}/detail/{id}")
+    public DasarHukum getByIdRencanaKinerjaAndId(
+            @PathVariable("idRencanaKinerja") Long idRencanaKinerja,
+            @PathVariable("id") Long id) {
+        return dasarHukumService.detailDasarHukumByIdRencanaKinerja(idRencanaKinerja, id);
+    }
+
+    /**
+     * Ubah data berdasarkan idRencanaKinerja dan id
+     * @param idRencanaKinerja
+     * @param id
+     */
+    @PutMapping("rencanakinerja/{idRencanaKinerja}/update/{id}")
+    public DasarHukum put(
+            @PathVariable("idRencanaKinerja") Long idRencanaKinerja,
+            @PathVariable("id") Long id,
+            @Valid @RequestBody DasarHukumRequest request) {
+        DasarHukum existingDasarHukum = dasarHukumService.detailDasarHukumByIdRencanaKinerja(idRencanaKinerja, id);
 
         DasarHukum dasarHukum = new DasarHukum(
                 existingDasarHukum.id(),
+                existingDasarHukum.idRencanaKinerja(),
                 request.peraturanTerkait(),
                 request.uraian(),
                 request.kodeOpd(),
@@ -56,7 +82,7 @@ public class DasarHukumController {
                 null
         );
 
-        return dasarHukumService.ubahDasarHukum(idRencanaKinerja, dasarHukum);
+        return dasarHukumService.ubahDasarHukum(idRencanaKinerja, id, dasarHukum);
     }
 
     /**
@@ -64,9 +90,12 @@ public class DasarHukumController {
      * @param idRencanaKinerja
      * @param request
      */
-    @PostMapping("{idRencanaKinerja}")
-    public ResponseEntity<DasarHukum> post(@PathVariable("idRencanaKinerja") Long idRencanaKinerja, @Valid @RequestBody DasarHukumRequest request) {
+    @PostMapping("rencanakinerja/{idRencanaKinerja}")
+    public ResponseEntity<DasarHukum> post(
+            @PathVariable("idRencanaKinerja") Long idRencanaKinerja,
+            @Valid @RequestBody DasarHukumRequest request) {
         DasarHukum dasarHukum = DasarHukum.of(
+                idRencanaKinerja,
                 request.peraturanTerkait(),
                 request.uraian(),
                 request.kodeOpd(),

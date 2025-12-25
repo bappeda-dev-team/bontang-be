@@ -23,4 +23,8 @@ public interface GambaranUmumRepository extends CrudRepository<GambaranUmum, Lon
     
     @Query("SELECT * FROM gambaran_umum WHERE kode_opd = :kodeOpd ORDER BY id")
     Iterable<GambaranUmum> findByKodeOpd(@NonNull @Param("kodeOpd") String kodeOpd);
+
+    Iterable<GambaranUmum> findByIdRencanaKinerja(Long idRencanaKinerja);
+
+    Optional<GambaranUmum> findByIdRencanaKinerjaAndId(Long idRencanaKinerja, Long id);
 }

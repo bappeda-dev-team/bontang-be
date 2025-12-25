@@ -39,15 +39,41 @@ public class GambaranUmumController {
     }
 
     /**
-     * Ubah data berdasarkan idRencanaKinerja
+     * Ambil data berdasarkan idRencanaKinerja
      * @param idRencanaKinerja
      */
-    @PutMapping("update/{idRencanaKinerja}")
-    public GambaranUmum put(@PathVariable("idRencanaKinerja") Long idRencanaKinerja, @Valid @RequestBody GambaranUmumRequest request) {
-        GambaranUmum existingGambaranUmum = gambaranUmumService.detailGambaranUmumById(idRencanaKinerja);
+    @GetMapping("rencanakinerja/{idRencanaKinerja}")
+    public Iterable<GambaranUmum> getByIdRencanaKinerja(@PathVariable("idRencanaKinerja") Long idRencanaKinerja) {
+        return gambaranUmumService.findByIdRencanaKinerja(idRencanaKinerja);
+    }
+
+    /**
+     * Ambil data berdasarkan idRencanaKinerja dan id
+     * @param idRencanaKinerja
+     * @param id
+     */
+    @GetMapping("rencanakinerja/{idRencanaKinerja}/detail/{id}")
+    public GambaranUmum getByIdRencanaKinerjaAndId(
+            @PathVariable("idRencanaKinerja") Long idRencanaKinerja,
+            @PathVariable("id") Long id) {
+        return gambaranUmumService.detailGambaranUmumByIdRencanaKinerja(idRencanaKinerja, id);
+    }
+
+    /**
+     * Ubah data berdasarkan idRencanaKinerja dan id
+     * @param idRencanaKinerja
+     * @param id
+     */
+    @PutMapping("rencanakinerja/{idRencanaKinerja}/update/{id}")
+    public GambaranUmum put(
+            @PathVariable("idRencanaKinerja") Long idRencanaKinerja,
+            @PathVariable("id") Long id,
+            @Valid @RequestBody GambaranUmumRequest request) {
+        GambaranUmum existingGambaranUmum = gambaranUmumService.detailGambaranUmumByIdRencanaKinerja(idRencanaKinerja, id);
 
         GambaranUmum gambaranUmum = new GambaranUmum(
                 existingGambaranUmum.id(),
+                existingGambaranUmum.idRencanaKinerja(),
                 request.gambaranUmum(),
                 request.uraian(),
                 request.kodeOpd(),
@@ -56,7 +82,7 @@ public class GambaranUmumController {
                 null
         );
 
-        return gambaranUmumService.ubahGambaranUmum(idRencanaKinerja, gambaranUmum);
+        return gambaranUmumService.ubahGambaranUmum(idRencanaKinerja, id, gambaranUmum);
     }
 
     /**
@@ -64,9 +90,12 @@ public class GambaranUmumController {
      * @param idRencanaKinerja
      * @param request
      */
-    @PostMapping("{idRencanaKinerja}")
-    public ResponseEntity<GambaranUmum> post(@PathVariable("idRencanaKinerja") Long idRencanaKinerja, @Valid @RequestBody GambaranUmumRequest request) {
+    @PostMapping("rencanakinerja/{idRencanaKinerja}")
+    public ResponseEntity<GambaranUmum> post(
+            @PathVariable("idRencanaKinerja") Long idRencanaKinerja,
+            @Valid @RequestBody GambaranUmumRequest request) {
         GambaranUmum gambaranUmum = GambaranUmum.of(
+                idRencanaKinerja,
                 request.gambaranUmum(),
                 request.uraian(),
                 request.kodeOpd(),

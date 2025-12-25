@@ -18,8 +18,17 @@ public class DasarHukumService {
         return dasarHukumRepository.findByKodeOpd(kodeOpd);
     }
 
+    public Iterable<DasarHukum> findByIdRencanaKinerja(Long idRencanaKinerja) {
+        return dasarHukumRepository.findByIdRencanaKinerja(idRencanaKinerja);
+    }
+
     public DasarHukum detailDasarHukumById(Long id) {
         return dasarHukumRepository.findById(id)
+                .orElseThrow(() -> new DasarHukumNotFoundException(id));
+    }
+
+    public DasarHukum detailDasarHukumByIdRencanaKinerja(Long idRencanaKinerja, Long id) {
+        return dasarHukumRepository.findByIdRencanaKinerjaAndId(idRencanaKinerja, id)
                 .orElseThrow(() -> new DasarHukumNotFoundException(id));
     }
 
@@ -28,8 +37,8 @@ public class DasarHukumService {
         return dasarHukumRepository.save(dasarHukum);
     }
 
-    public DasarHukum ubahDasarHukum(Long id, DasarHukum dasarHukum) {
-        if (!dasarHukumRepository.existsById(id)) {
+    public DasarHukum ubahDasarHukum(Long idRencanaKinerja, Long id, DasarHukum dasarHukum) {
+        if (!dasarHukumRepository.findByIdRencanaKinerjaAndId(idRencanaKinerja, id).isPresent()) {
             throw new DasarHukumNotFoundException(id);
         }
 

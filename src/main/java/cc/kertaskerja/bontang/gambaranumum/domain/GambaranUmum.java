@@ -13,6 +13,9 @@ public record GambaranUmum(
         @Id
         Long id,
 
+        @Column("id_rencana_kinerja")
+        Long idRencanaKinerja,
+
         @Column("gambaran_umum")
         String gambaranUmum,
 
@@ -32,6 +35,7 @@ public record GambaranUmum(
         Instant lastModifiedDate
 ) {
     public static GambaranUmum of (
+            Long idRencanaKinerja,
             String gambaranUmum,
             String uraian,
             String kodeOpd,
@@ -39,6 +43,7 @@ public record GambaranUmum(
     ) {
         return new GambaranUmum(
                 null,
+                idRencanaKinerja,
                 gambaranUmum,
                 uraian,
                 kodeOpd,
