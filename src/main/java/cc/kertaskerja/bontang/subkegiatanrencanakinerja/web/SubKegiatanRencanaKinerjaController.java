@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @Tag(name = "subkegiatan rencana kinerja")
@@ -39,21 +40,22 @@ public class SubKegiatanRencanaKinerjaController {
     }
 
     /**
+     * Ambil data berdasarkan idRencanaKinerja
+     * @param idRencanaKinerja
+     */
+    @GetMapping("detail/{idRencanaKinerja}")
+    public List<SubKegiatanRencanaKinerja> getByIdRencanaKinerja(@PathVariable("idRencanaKinerja") Long idRencanaKinerja) {
+        return subKegiatanRencanaKinerjaService.findByIdRekin(idRencanaKinerja.intValue());
+    }
+
+    /**
      * Tambah data
      * @param request
      * @param idRencanaKinerja
      */
     @PostMapping("{idRencanaKinerja}")
     public ResponseEntity<SubKegiatanRencanaKinerja> post(@PathVariable("idRencanaKinerja") Long idRencanaKinerja, @Valid @RequestBody SubKegiatanRencanaKinerjaRequest request) {
-        // Buat request baru dengan idRencanaKinerja dari path variable
-        SubKegiatanRencanaKinerjaRequest newRequest = new SubKegiatanRencanaKinerjaRequest(
-            request.subKegiatanRencanaKinerjaId(),
-            idRencanaKinerja.intValue(),
-            request.kodeSubKegiatanRencanaKinerja(),
-            request.namaSubKegiatanRencanaKinerja()
-        );
-        
-        SubKegiatanRencanaKinerja saved = subKegiatanRencanaKinerjaService.tambahSubKegiatanRencanaKinerja(newRequest);
+        SubKegiatanRencanaKinerja saved = subKegiatanRencanaKinerjaService.tambahSubKegiatanRencanaKinerja(request, idRencanaKinerja.intValue());
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")

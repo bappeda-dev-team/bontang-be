@@ -35,9 +35,9 @@ public class SubKegiatanRencanaKinerjaService {
         return subKegiatanRencanaKinerjaRepository.save(subKegiatanRencanaKinerja);
     }
 
-    public SubKegiatanRencanaKinerja tambahSubKegiatanRencanaKinerja(SubKegiatanRencanaKinerjaRequest request) {
+    public SubKegiatanRencanaKinerja tambahSubKegiatanRencanaKinerja(SubKegiatanRencanaKinerjaRequest request, Integer idRekin) {
         SubKegiatanRencanaKinerja subKegiatanRencanaKinerja = SubKegiatanRencanaKinerja.of(
-                request.idRencanaKinerja(),
+                idRekin,
                 request.kodeSubKegiatanRencanaKinerja(),
                 request.namaSubKegiatanRencanaKinerja()
         );
