@@ -136,18 +136,19 @@ public class RencanaKinerjaService {
         Map<String, Object> rencanaKinerjaResponse = new LinkedHashMap<>();
         
         // Build rencana kinerja response
-        rencanaKinerjaResponse.put("nama_rencana_kinerja", rencanaKinerja.rencanaKinerja());
+        rencanaKinerjaResponse.put("id_rencana_kinerja", rencanaKinerja.id());
+        rencanaKinerjaResponse.put("namaRencanaKinerja", rencanaKinerja.rencanaKinerja());
         rencanaKinerjaResponse.put("tahun", rencanaKinerja.tahun().toString());
-        rencanaKinerjaResponse.put("status_rencana_kinerja", rencanaKinerja.statusRencanaKinerja());
+        rencanaKinerjaResponse.put("statusRencanaKinerja", rencanaKinerja.statusRencanaKinerja());
         
         // Build OPD object
         Map<String, Object> operasionalDaerah = new LinkedHashMap<>();
-        operasionalDaerah.put("kode_opd", rencanaKinerja.kodeOpd());
-        operasionalDaerah.put("nama_opd", rencanaKinerja.namaOpd());
-        rencanaKinerjaResponse.put("operasional_daerah", operasionalDaerah);
+        operasionalDaerah.put("kodeOpd", rencanaKinerja.kodeOpd());
+        operasionalDaerah.put("namaOpd", rencanaKinerja.namaOpd());
+        rencanaKinerjaResponse.put("operasionalDaerah", operasionalDaerah);
         
         rencanaKinerjaResponse.put("nip", rencanaKinerja.nipPegawai());
-        rencanaKinerjaResponse.put("nama_pegawai", rencanaKinerja.namaPegawai());
+        rencanaKinerjaResponse.put("namaPegawai", rencanaKinerja.namaPegawai());
         
         // Process indikator list
         List<Map<String, Object>> indikatorResponseList = new ArrayList<>();
@@ -168,7 +169,7 @@ public class RencanaKinerjaService {
             // Build indikator response
             Map<String, Object> indikatorResponse = new LinkedHashMap<>();
             indikatorResponse.put("id_indikator", indikator.id());
-            indikatorResponse.put("nama_indikator", indikator.namaIndikator());
+            indikatorResponse.put("namaIndikator", indikator.namaIndikator());
             indikatorResponse.put("targets", targetsResponseList);
             indikatorResponseList.add(indikatorResponse);
         }
@@ -181,10 +182,10 @@ public class RencanaKinerjaService {
         
         for (SubKegiatanRencanaKinerja subkegiatan : subkegiatans) {
             Map<String, Object> subkegiatanResponse = new LinkedHashMap<>();
-            subkegiatanResponse.put("subkegiatanterpilih_id", subkegiatan.id());
+            subkegiatanResponse.put("subkegiatanTerpilihId", subkegiatan.id());
             subkegiatanResponse.put("id_rekin", subkegiatan.idRekin());
-            subkegiatanResponse.put("kode_subkegiatan", subkegiatan.kodeSubKegiatan());
-            subkegiatanResponse.put("nama_sub_kegiatan", subkegiatan.namaSubKegiatan());
+            subkegiatanResponse.put("kodeSubkegiatan", subkegiatan.kodeSubKegiatan());
+            subkegiatanResponse.put("namaSubKegiatan", subkegiatan.namaSubKegiatan());
             subkegiatanResponseList.add(subkegiatanResponse);
         }
         
@@ -192,35 +193,35 @@ public class RencanaKinerjaService {
 
         // Process dasar hukum list
         List<Map<String, Object>> dasarHukumResponseList = new ArrayList<>();
-        Iterable<DasarHukum> dasarHukums = dasarHukumService.findByKodeOpd(rencanaKinerja.kodeOpd());
+        Iterable<DasarHukum> dasarHukums = dasarHukumService.findByIdRencanaKinerja(rencanaKinerja.id());
         
         for (DasarHukum dasarHukum : dasarHukums) {
             Map<String, Object> dasarHukumResponse = new LinkedHashMap<>();
             dasarHukumResponse.put("id", dasarHukum.id());
             dasarHukumResponse.put("rencana_kinerja_id", rencanaKinerja.id());
-            dasarHukumResponse.put("kode_opd", dasarHukum.kodeOpd());
+            dasarHukumResponse.put("kodeOpd", dasarHukum.kodeOpd());
             dasarHukumResponse.put("uraian", dasarHukum.uraian());
-            dasarHukumResponse.put("peraturan_terkait", dasarHukum.peraturanTerkait());
+            dasarHukumResponse.put("peraturanTerkait", dasarHukum.peraturanTerkait());
             dasarHukumResponseList.add(dasarHukumResponse);
         }
         
-        rencanaKinerjaResponse.put("dasar_hukum", dasarHukumResponseList);
+        rencanaKinerjaResponse.put("dasarHukum", dasarHukumResponseList);
 
         // Process gambaran umum list
         List<Map<String, Object>> gambaranUmumResponseList = new ArrayList<>();
-        Iterable<GambaranUmum> gambaranUmums = gambaranUmumService.findByKodeOpd(rencanaKinerja.kodeOpd());
+        Iterable<GambaranUmum> gambaranUmums = gambaranUmumService.findByIdRencanaKinerja(rencanaKinerja.id());
         
         for (GambaranUmum gambaranUmum : gambaranUmums) {
             Map<String, Object> gambaranUmumResponse = new LinkedHashMap<>();
             gambaranUmumResponse.put("id", gambaranUmum.id());
             gambaranUmumResponse.put("rencana_kinerja_id", rencanaKinerja.id());
-            gambaranUmumResponse.put("kode_opd", gambaranUmum.kodeOpd());
+            gambaranUmumResponse.put("kodeOpd", gambaranUmum.kodeOpd());
             gambaranUmumResponse.put("uraian", gambaranUmum.uraian());
-            gambaranUmumResponse.put("gambaran_umum", gambaranUmum.gambaranUmum());
+            gambaranUmumResponse.put("gambaranUmum", gambaranUmum.gambaranUmum());
             gambaranUmumResponseList.add(gambaranUmumResponse);
         }
         
-        rencanaKinerjaResponse.put("gambaran_umum", gambaranUmumResponseList);
+        rencanaKinerjaResponse.put("gambaranUmum", gambaranUmumResponseList);
 
         // Process rencana aksi list
         List<Map<String, Object>> rencanaAksiResponseList = new ArrayList<>();
@@ -254,11 +255,11 @@ public class RencanaKinerjaService {
             Map<String, Object> rencanaAksiResponse = new LinkedHashMap<>();
             rencanaAksiResponse.put("id", rencanaAksi.id());
             rencanaAksiResponse.put("rekin_id", rencanaKinerja.id());
-            rencanaAksiResponse.put("kode_opd", rencanaAksi.kodeOpd());
+            rencanaAksiResponse.put("kodeOpd", rencanaAksi.kodeOpd());
             rencanaAksiResponse.put("urutan", rencanaAksi.urutan());
-            rencanaAksiResponse.put("nama_rencana_aksi", rencanaAksi.namaRencanaAksi());
+            rencanaAksiResponse.put("namaRencanaAksi", rencanaAksi.namaRencanaAksi());
             rencanaAksiResponse.put("pelaksanaan", pelaksanaanList);
-            rencanaAksiResponse.put("jumlah_bobot", jumlahBobot);
+            rencanaAksiResponse.put("jumlahBobot", jumlahBobot);
 
             rencanaAksiResponseList.add(rencanaAksiResponse);
         }
@@ -268,12 +269,12 @@ public class RencanaKinerjaService {
         for (int bulan = 1; bulan <= 12; bulan++) {
             Map<String, Object> totalBulan = new LinkedHashMap<>();
             totalBulan.put("bulan", bulan);
-            totalBulan.put("total_bobot", totalBobotPerBulan[bulan - 1]);
+            totalBulan.put("totalBobot", totalBobotPerBulan[bulan - 1]);
             totalPerBulanList.add(totalBulan);
         }
 
-        rencanaKinerjaResponse.put("rencana_aksi", rencanaAksiResponseList);
-        rencanaKinerjaResponse.put("total_per_bulan", totalPerBulanList);
+        rencanaKinerjaResponse.put("rencanaAksi", rencanaAksiResponseList);
+        rencanaKinerjaResponse.put("totalPerBulan", totalPerBulanList);
 
         int totalKeseluruhan = 0;
         for (int bobot : totalBobotPerBulan) {
@@ -287,10 +288,10 @@ public class RencanaKinerjaService {
             }
         }
 
-        rencanaKinerjaResponse.put("total_keseluruhan", totalKeseluruhan);
-        rencanaKinerjaResponse.put("waktu_dibutuhkan", waktuDibutuhkan);
+        rencanaKinerjaResponse.put("totalKeseluruhan", totalKeseluruhan);
+        rencanaKinerjaResponse.put("waktuDibutuhkan", waktuDibutuhkan);
 
-        response.put("rencana_kinerja", rencanaKinerjaResponse);
+        response.put("rencanaKinerja", rencanaKinerjaResponse);
         return response;
     }
 
