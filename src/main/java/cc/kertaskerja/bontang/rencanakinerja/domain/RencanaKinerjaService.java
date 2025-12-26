@@ -194,15 +194,13 @@ public class RencanaKinerjaService {
         List<Map<String, Object>> dasarHukumResponseList = new ArrayList<>();
         Iterable<DasarHukum> dasarHukums = dasarHukumService.findByKodeOpd(rencanaKinerja.kodeOpd());
         
-        int urutan = 1;
         for (DasarHukum dasarHukum : dasarHukums) {
             Map<String, Object> dasarHukumResponse = new LinkedHashMap<>();
             dasarHukumResponse.put("id", dasarHukum.id());
             dasarHukumResponse.put("rencana_kinerja_id", rencanaKinerja.id());
             dasarHukumResponse.put("kode_opd", dasarHukum.kodeOpd());
-            dasarHukumResponse.put("urutan", urutan++);
-            dasarHukumResponse.put("peraturan_terkait", dasarHukum.peraturanTerkait());
             dasarHukumResponse.put("uraian", dasarHukum.uraian());
+            dasarHukumResponse.put("peraturan_terkait", dasarHukum.peraturanTerkait());
             dasarHukumResponseList.add(dasarHukumResponse);
         }
         
@@ -212,13 +210,12 @@ public class RencanaKinerjaService {
         List<Map<String, Object>> gambaranUmumResponseList = new ArrayList<>();
         Iterable<GambaranUmum> gambaranUmums = gambaranUmumService.findByKodeOpd(rencanaKinerja.kodeOpd());
         
-        int urutanGambaran = 1;
         for (GambaranUmum gambaranUmum : gambaranUmums) {
             Map<String, Object> gambaranUmumResponse = new LinkedHashMap<>();
             gambaranUmumResponse.put("id", gambaranUmum.id());
             gambaranUmumResponse.put("rencana_kinerja_id", rencanaKinerja.id());
             gambaranUmumResponse.put("kode_opd", gambaranUmum.kodeOpd());
-            gambaranUmumResponse.put("urutan", urutanGambaran++);
+            gambaranUmumResponse.put("uraian", gambaranUmum.uraian());
             gambaranUmumResponse.put("gambaran_umum", gambaranUmum.gambaranUmum());
             gambaranUmumResponseList.add(gambaranUmumResponse);
         }
