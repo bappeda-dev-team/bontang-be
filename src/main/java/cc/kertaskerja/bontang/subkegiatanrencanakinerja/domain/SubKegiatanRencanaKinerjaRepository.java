@@ -19,6 +19,8 @@ public interface SubKegiatanRencanaKinerjaRepository extends CrudRepository<SubK
 
     List<SubKegiatanRencanaKinerja> findByIdRekin(Integer idRekin);
 
+    Optional<SubKegiatanRencanaKinerja> findByIdRekinAndId(Integer idRekin, Long id);
+
     @Modifying
     @Transactional
     @Query("DELETE FROM subkegiatan_rencana_kinerja WHERE id = :id")

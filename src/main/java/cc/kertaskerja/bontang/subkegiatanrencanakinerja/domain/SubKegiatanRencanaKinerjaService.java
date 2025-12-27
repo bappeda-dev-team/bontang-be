@@ -26,6 +26,11 @@ public class SubKegiatanRencanaKinerjaService {
         return subKegiatanRencanaKinerjaRepository.findByIdRekin(idRekin);
     }
 
+    public SubKegiatanRencanaKinerja findByIdRekinAndId(Integer idRekin, Long id) {
+        return subKegiatanRencanaKinerjaRepository.findByIdRekinAndId(idRekin, id)
+                .orElseThrow(() -> new SubKegiatanRencanaKinerjaNotFoundException(id));
+    }
+
     public SubKegiatanRencanaKinerja tambahSubKegiatanRencanaKinerja(String kodeSubKegiatan, String namaSubKegiatan, Integer idRekin) {
         SubKegiatanRencanaKinerja subKegiatanRencanaKinerja = SubKegiatanRencanaKinerja.of(idRekin, kodeSubKegiatan, namaSubKegiatan);
         return subKegiatanRencanaKinerjaRepository.save(subKegiatanRencanaKinerja);

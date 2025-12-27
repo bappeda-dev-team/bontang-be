@@ -23,15 +23,6 @@ public class SubKegiatanRencanaKinerjaController {
     }
 
     /**
-     * Ambil data berdasarkan id
-     * @param id
-     */
-    @GetMapping("detail/{id}")
-    public SubKegiatanRencanaKinerja getById(@PathVariable("id") Long id) {
-        return subKegiatanRencanaKinerjaService.detailSubKegiatanRencanaKinerjaById(id);
-    }
-
-    /**
      * Ambil semua data
      */
     @GetMapping("detail/findall")
@@ -40,7 +31,7 @@ public class SubKegiatanRencanaKinerjaController {
     }
 
     /**
-     * Ambil data berdasarkan idRencanaKinerja
+     * Ambil semua data berdasarkan idRencanaKinerja
      * @param idRencanaKinerja
      */
     @GetMapping("detail/{idRencanaKinerja}")
@@ -49,29 +40,42 @@ public class SubKegiatanRencanaKinerjaController {
     }
 
     /**
+     * Ambil data berdasarkan idRencanaKinerja dan idSubKegiatanRencanaKinerja
+     * @param idRencanaKinerja
+     * @param idSubKegiatanRencanaKinerja
+     */
+    @GetMapping("rencanakinerja/{idRencanaKinerja}/detail/{idSubKegiatanRencanaKinerja}")
+    public SubKegiatanRencanaKinerjaResponse getByIdRencanaKinerjaAndId(@PathVariable("idRencanaKinerja") Long idRencanaKinerja,
+                                                                          @PathVariable("idSubKegiatanRencanaKinerja") Long idSubKegiatanRencanaKinerja) {
+        SubKegiatanRencanaKinerja data = subKegiatanRencanaKinerjaService.findByIdRekinAndId(idRencanaKinerja.intValue(), idSubKegiatanRencanaKinerja);
+        return SubKegiatanRencanaKinerjaResponse.from(data);
+    }
+
+    /**
      * Tambah data
      * @param request
      * @param idRencanaKinerja
      */
     @PostMapping("{idRencanaKinerja}")
-    public ResponseEntity<SubKegiatanRencanaKinerja> post(@PathVariable("idRencanaKinerja") Long idRencanaKinerja, @Valid @RequestBody SubKegiatanRencanaKinerjaRequest request) {
+    public ResponseEntity<SubKegiatanRencanaKinerjaResponse> post(@PathVariable("idRencanaKinerja") Long idRencanaKinerja, @Valid @RequestBody SubKegiatanRencanaKinerjaRequest request) {
         SubKegiatanRencanaKinerja saved = subKegiatanRencanaKinerjaService.tambahSubKegiatanRencanaKinerja(request, idRencanaKinerja.intValue());
+        SubKegiatanRencanaKinerjaResponse response = SubKegiatanRencanaKinerjaResponse.from(saved);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(saved.id())
                 .toUri();
 
-        return ResponseEntity.created(location).body(saved);
+        return ResponseEntity.created(location).body(response);
     }
 
     /**
-     * Hapus berdasarkan id
-     * @param id
+     * Hapus berdasarkan idSubKegiatanRencanaKinerja
+     * @param idSubKegiatanRencanaKinerja
      */
-    @DeleteMapping("delete/{id}")
+    @DeleteMapping("delete/{idSubKegiatanRencanaKinerja}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("id") Long id) {
-        subKegiatanRencanaKinerjaService.hapusSubKegiatanRencanaKinerja(id);
+    public void delete(@PathVariable("idSubKegiatanRencanaKinerja") Long idSubKegiatanRencanaKinerja) {
+        subKegiatanRencanaKinerjaService.hapusSubKegiatanRencanaKinerja(idSubKegiatanRencanaKinerja);
     }
 }

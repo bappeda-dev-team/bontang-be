@@ -182,8 +182,8 @@ public class RencanaKinerjaService {
         
         for (SubKegiatanRencanaKinerja subkegiatan : subkegiatans) {
             Map<String, Object> subkegiatanResponse = new LinkedHashMap<>();
-            subkegiatanResponse.put("subkegiatanTerpilihId", subkegiatan.id());
-            subkegiatanResponse.put("id_rekin", subkegiatan.idRekin());
+            subkegiatanResponse.put("id", subkegiatan.id());
+            subkegiatanResponse.put("rencana_kinerja_id", subkegiatan.idRekin());
             subkegiatanResponse.put("kodeSubkegiatan", subkegiatan.kodeSubKegiatan());
             subkegiatanResponse.put("namaSubKegiatan", subkegiatan.namaSubKegiatan());
             subkegiatanResponseList.add(subkegiatanResponse);
