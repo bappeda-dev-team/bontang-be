@@ -2,6 +2,8 @@ package cc.kertaskerja.bontang.rencanaaksi.domain;
 
 import java.time.Instant;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -14,16 +16,15 @@ public record RencanaAksi(
         Long id,
 
         @Column("id_rekin")
-        Integer idRencanaKinerja,
-
-        @Column("kode_opd")
-        String kodeOpd,
+        @JsonProperty("rencana_kinerja_id")
+        Integer idRekin,
 
         @Column("urutan")
         Integer urutan,
 
         @Column("nama_rencana_aksi")
         String namaRencanaAksi,
+
 
         @CreatedDate
         Instant createdDate,
@@ -32,15 +33,13 @@ public record RencanaAksi(
         Instant lastModifiedDate
 ) {
     public static RencanaAksi of(
-            Integer idRencanaKinerja,
-            String kodeOpd,
+            Integer idRekin,
             Integer urutan,
             String namaRencanaAksi
     ) {
         return new RencanaAksi(
                 null,
-                idRencanaKinerja,
-                kodeOpd,
+                idRekin,
                 urutan,
                 namaRencanaAksi,
                 null,

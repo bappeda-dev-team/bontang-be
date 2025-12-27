@@ -1,9 +1,10 @@
 package cc.kertaskerja.bontang.rencanaaksi.pelaksanaan.web;
 
+import io.micrometer.common.lang.Nullable;
 import jakarta.validation.constraints.NotNull;
 
 public record PelaksanaanRequest(
-        @NotNull(message = "Id rencana aksi tidak boleh kosong")
+        @Nullable
         Integer idRencanaAksi,
 
         @NotNull(message = "Bulan tidak boleh kosong")

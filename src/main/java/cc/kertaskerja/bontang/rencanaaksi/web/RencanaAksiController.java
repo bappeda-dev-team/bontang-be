@@ -43,6 +43,12 @@ public class RencanaAksiController {
         return rencanaAksiService.findAll();
     }
 
+    // Ambil data rencana aksi by rencana kinerja
+    @GetMapping("detail/rencanakinerja/{idRencanaKinerja}")
+    public Iterable<RencanaAksi> findByRencanaKinerja(@PathVariable("idRencanaKinerja") Integer idRencanaKinerja) {
+        return rencanaAksiService.findByIdRekinOrderByUrutan(idRencanaKinerja);
+    }
+
     // Ubah by id
     @PutMapping("update/{id}")
     public RencanaAksi put(@PathVariable("id") Long id, @Valid @RequestBody RencanaAksiRequest request) {
@@ -50,8 +56,7 @@ public class RencanaAksiController {
 
         RencanaAksi rencanaAksi = new RencanaAksi(
                 existingRencanaAksi.id(),
-                request.idRencanaKinerja(),
-                request.kodeOpd(),
+                existingRencanaAksi.idRekin(),
                 request.urutan(),
                 request.namaRencanaAksi(),
                 existingRencanaAksi.createdDate(),
@@ -67,7 +72,6 @@ public class RencanaAksiController {
                                              @Valid @RequestBody RencanaAksiRequest request) {
         RencanaAksi rencanaAksi = RencanaAksi.of(
                 idRencanaKinerja,
-                request.kodeOpd(),
                 request.urutan(),
                 request.namaRencanaAksi()
         );

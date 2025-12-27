@@ -35,6 +35,14 @@ public class PelaksanaanController {
     }
 
     /**
+     * Ambil data berdasarkan rencana aksi
+     */
+    @GetMapping("detail/rencanaaksi/{idRencanaAksi}")
+    public Iterable<Pelaksanaan> findByRencanaAksi(@PathVariable("idRencanaAksi") Integer idRencanaAksi) {
+        return pelaksanaanService.findByIdRencanaAksiOrderByBulan(idRencanaAksi);
+    }
+
+    /**
      * Ubah data berdasarkan id rencana aksi
      * @param idRencanaAksi
      */

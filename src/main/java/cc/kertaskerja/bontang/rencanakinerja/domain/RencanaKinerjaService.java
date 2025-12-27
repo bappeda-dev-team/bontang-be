@@ -254,8 +254,7 @@ public class RencanaKinerjaService {
             // Build rencana aksi response
             Map<String, Object> rencanaAksiResponse = new LinkedHashMap<>();
             rencanaAksiResponse.put("id", rencanaAksi.id());
-            rencanaAksiResponse.put("rekin_id", rencanaKinerja.id());
-            rencanaAksiResponse.put("kodeOpd", rencanaAksi.kodeOpd());
+            rencanaAksiResponse.put("rencana_kinerja_id", rencanaKinerja.id());
             rencanaAksiResponse.put("urutan", rencanaAksi.urutan());
             rencanaAksiResponse.put("namaRencanaAksi", rencanaAksi.namaRencanaAksi());
             rencanaAksiResponse.put("pelaksanaan", pelaksanaanList);
