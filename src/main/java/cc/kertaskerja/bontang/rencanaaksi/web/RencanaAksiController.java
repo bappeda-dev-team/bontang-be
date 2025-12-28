@@ -50,9 +50,32 @@ public class RencanaAksiController {
     }
 
     // Ubah by id
-    @PutMapping("update/{id}")
-    public RencanaAksi put(@PathVariable("id") Long id, @Valid @RequestBody RencanaAksiRequest request) {
+    // @PutMapping("update/{id}")
+    // public RencanaAksi put(@PathVariable("id") Long id, @Valid @RequestBody RencanaAksiRequest request) {
+    //     RencanaAksi existingRencanaAksi = rencanaAksiService.detailRencanaAksiById(id);
+
+    //     RencanaAksi rencanaAksi = new RencanaAksi(
+    //             existingRencanaAksi.id(),
+    //             existingRencanaAksi.idRekin(),
+    //             request.urutan(),
+    //             request.namaRencanaAksi(),
+    //             existingRencanaAksi.createdDate(),
+    //             null
+    //     );
+
+    //     return rencanaAksiService.ubahRencanaAksi(id, rencanaAksi);
+    // }
+
+    // Ubah by id rencana kinerja dan id rencana aksi
+    @PutMapping("rencanaKinerja/{idRencanaKinerja}/update/{id}")
+    public RencanaAksi put(@PathVariable("idRencanaKinerja") Integer idRencanaKinerja,
+                                                  @PathVariable("id") Long id,
+                                                  @Valid @RequestBody RencanaAksiRequest request) {
         RencanaAksi existingRencanaAksi = rencanaAksiService.detailRencanaAksiById(id);
+
+        if (!existingRencanaAksi.idRekin().equals(idRencanaKinerja)) {
+            throw new cc.kertaskerja.bontang.rencanaaksi.domain.exception.RencanaAksiNotFoundException(id);
+        }
 
         RencanaAksi rencanaAksi = new RencanaAksi(
                 existingRencanaAksi.id(),
