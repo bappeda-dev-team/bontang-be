@@ -59,6 +59,26 @@ public class PelaksanaanService {
         return pelaksanaanRepository.save(withBobotTersedia);
     }
 
+    public Pelaksanaan ubahPelaksanaanById(Long id, PelaksanaanRequest request) {
+        Pelaksanaan existingPelaksanaan = pelaksanaanRepository.findById(id)
+                .orElseThrow(() -> new PelaksanaanNotFoundException(id));
+
+        Pelaksanaan pelaksanaan = new Pelaksanaan(
+                existingPelaksanaan.id(),
+                existingPelaksanaan.idRencanaAksi(),
+                request.bulan(),
+                request.bobot(),
+                null,
+                existingPelaksanaan.createdDate(),
+                null
+        );
+
+        Integer bobotTersedia = hitungBobotTersedia(pelaksanaan.idRencanaAksi(), pelaksanaan.bobot(), existingPelaksanaan.id());
+        Pelaksanaan withBobotTersedia = pelaksanaan.withBobotTersedia(bobotTersedia);
+
+        return pelaksanaanRepository.save(withBobotTersedia);
+    }
+
     public void hapusPelaksanaan(Long id) {
         if (!pelaksanaanRepository.existsById(id)) {
             throw new PelaksanaanNotFoundException(id);

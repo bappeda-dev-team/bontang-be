@@ -43,12 +43,13 @@ public class PelaksanaanController {
     }
 
     /**
-     * Ubah data berdasarkan id rencana aksi
+     * Ubah data berdasarkan id rencana aksi dan id pelaksanaan
      * @param idRencanaAksi
+     * @param idPelaksanaan
      */
-    @PutMapping("update/{idRencanaAksi}")
-    public Pelaksanaan put(@PathVariable("idRencanaAksi") Integer idRencanaAksi, @Valid @RequestBody PelaksanaanRequest request) {
-        return pelaksanaanService.ubahPelaksanaan(idRencanaAksi, request);
+    @PutMapping("rencanaaksi/{idRencanaAksi}/update/{id}")
+    public Pelaksanaan put(@PathVariable("idRencanaAksi") Integer idRencanaAksi, @PathVariable("id") Long id, @Valid @RequestBody PelaksanaanRequest request) {
+        return pelaksanaanService.ubahPelaksanaanById(id, request);
     }
 
     /**
