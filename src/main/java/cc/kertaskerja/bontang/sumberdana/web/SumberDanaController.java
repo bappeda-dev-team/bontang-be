@@ -33,7 +33,7 @@ public class SumberDanaController {
     /**
      * Ambil semua data sumber dana
      */
-    @GetMapping("detail/findall")
+    @GetMapping("detail/get-all-sumberdanas")
     public Iterable<SumberDana> findAll() {
         return sumberDanaService.findAll();
     }

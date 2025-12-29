@@ -33,7 +33,7 @@ public class ProgramPrioritasController {
     /**
      * Ambil semua data program prioritas
      */
-    @GetMapping("detail/findall")
+    @GetMapping("detail/get-all-programprioritas")
     public Iterable<ProgramPrioritas> findAll() {
         return programPrioritasService.findAll();
     }

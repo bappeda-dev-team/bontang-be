@@ -36,7 +36,7 @@ public class KodeRekeningController {
     /**
      * Ambil semua data kode rekening
      */
-    @GetMapping("detail/findall")
+    @GetMapping("detail/get-all-koderekenings")
     public Iterable<KodeRekening> findAll() {
         return kodeRekeningService.findAll();
     }
