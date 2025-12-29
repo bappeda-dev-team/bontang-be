@@ -57,10 +57,6 @@ public class OpdService {
             throw new OpdDeleteForbiddenException(kodeOpd);
         }
 
-        if (pegawaiRepository.existsByOpdId(opd.id())) {
-            throw new OpdDeleteForbiddenException(kodeOpd);
-        }
-
         opdRepository.deleteByKodeOpd(kodeOpd);
     }
 }

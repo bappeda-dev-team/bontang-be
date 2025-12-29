@@ -1,12 +1,9 @@
 package cc.kertaskerja.bontang.pegawai.web;
 
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 public record PegawaiRequest(
-        @Nullable
-        Long idPegawai,
 
         @NotNull(message = "Nama pegawai tidak boleh kosong")
         @NotEmpty(message = "Nama pegawai tidak boleh kosong")
@@ -26,10 +23,6 @@ public record PegawaiRequest(
 
         @NotNull(message = "Jabatan tim tidak boleh kosong")
         @NotEmpty(message = "Jabatan tim tidak boleh kosong")
-        String jabatanTim,
-
-        @NotNull(message = "Kode OPD tidak boleh kosong")
-        @NotEmpty(message = "Kode OPD tidak boleh kosong")
-        String kodeOpd
+        String jabatanTim
 ) {
 }

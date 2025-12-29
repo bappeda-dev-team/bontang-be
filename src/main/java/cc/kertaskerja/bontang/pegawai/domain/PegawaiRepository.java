@@ -15,8 +15,6 @@ public interface PegawaiRepository extends CrudRepository<Pegawai, Long> {
 
     boolean existsByNip(@NonNull String nip);
 
-    boolean existsByOpdId(@NonNull Long opdId);
-
     @NonNull
     Optional<Pegawai> findByNip(@NonNull String nip);
 

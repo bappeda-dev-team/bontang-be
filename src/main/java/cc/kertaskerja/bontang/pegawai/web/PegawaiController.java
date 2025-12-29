@@ -33,7 +33,7 @@ public class PegawaiController {
     /**
      * Ambil semua data pegawai
      */
-    @GetMapping("detail/findall")
+    @GetMapping("detail/get-all-pegawais")
     public Iterable<Pegawai> findAll() {
         return pegawaiService.findAll();
     }
@@ -48,7 +48,8 @@ public class PegawaiController {
 
         Pegawai pegawai = new Pegawai(
                 existingPegawai.id(),
-                null,
+                existingPegawai.kodeOpd(),
+                existingPegawai.tahun(),
                 request.namaPegawai(),
                 request.nip(),
                 request.email(),
@@ -58,7 +59,7 @@ public class PegawaiController {
                 null
         );
 
-        return pegawaiService.ubahPegawai(nip, pegawai, request.kodeOpd());
+        return pegawaiService.ubahPegawai(nip, pegawai);
     }
 
     /**
@@ -68,14 +69,15 @@ public class PegawaiController {
     @PostMapping
     public ResponseEntity<Pegawai> post(@Valid @RequestBody PegawaiRequest request) {
         Pegawai pegawai = Pegawai.of(
+                null,
+                null,
                 request.namaPegawai(),
                 request.nip(),
                 request.email(),
                 request.jabatanDinas(),
-                request.jabatanTim(),
-                null
+                request.jabatanTim()
         );
-        Pegawai saved = pegawaiService.tambahPegawai(pegawai, request.kodeOpd());
+        Pegawai saved = pegawaiService.tambahPegawai(pegawai);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")

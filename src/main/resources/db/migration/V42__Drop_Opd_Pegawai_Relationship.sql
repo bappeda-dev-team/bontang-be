@@ -1,0 +1,3 @@
+ALTER TABLE pegawai DROP CONSTRAINT IF EXISTS fk_pegawai_opd;
+
+ALTER TABLE pegawai DROP COLUMN IF EXISTS opd_id;
