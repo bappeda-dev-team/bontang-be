@@ -1,6 +1,7 @@
 package cc.kertaskerja.bontang.pegawai.domain;
 
 import cc.kertaskerja.bontang.pegawai.domain.exception.PegawaiNotFoundException;
+import cc.kertaskerja.bontang.pegawai.web.PegawaiRequest;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,14 +21,34 @@ public class PegawaiService {
                 .orElseThrow(() -> new PegawaiNotFoundException(nip));
     }
 
-    public Pegawai tambahPegawai(Pegawai pegawai) {
+    public Pegawai tambahPegawai(PegawaiRequest request) {
+        Pegawai pegawai = Pegawai.of(
+                null,
+                null,
+                request.namaPegawai(),
+                request.nip(),
+                request.email(),
+                request.jabatanDinas(),
+                request.jabatanTim()
+        );
         return pegawaiRepository.save(pegawai);
     }
 
-    public Pegawai ubahPegawai(String nip, Pegawai pegawai) {
-        if (!pegawaiRepository.existsByNip(nip)) {
-            throw new PegawaiNotFoundException(nip);
-        }
+    public Pegawai ubahPegawai(String nip, PegawaiRequest request) {
+        Pegawai existingPegawai = detailPegawaiByNip(nip);
+
+        Pegawai pegawai = new Pegawai(
+                existingPegawai.id(),
+                existingPegawai.kodeOpd(),
+                existingPegawai.tahun(),
+                request.namaPegawai(),
+                request.nip(),
+                request.email(),
+                request.jabatanDinas(),
+                request.jabatanTim(),
+                existingPegawai.createdDate(),
+                null
+        );
 
         return pegawaiRepository.save(pegawai);
     }

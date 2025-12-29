@@ -44,22 +44,7 @@ public class PegawaiController {
      */
     @PutMapping("update/{nip}")
     public Pegawai put(@PathVariable("nip") String nip, @Valid @RequestBody PegawaiRequest request) {
-        Pegawai existingPegawai = pegawaiService.detailPegawaiByNip(nip);
-
-        Pegawai pegawai = new Pegawai(
-                existingPegawai.id(),
-                existingPegawai.kodeOpd(),
-                existingPegawai.tahun(),
-                request.namaPegawai(),
-                request.nip(),
-                request.email(),
-                request.jabatanDinas(),
-                request.jabatanTim(),
-                existingPegawai.createdDate(),
-                null
-        );
-
-        return pegawaiService.ubahPegawai(nip, pegawai);
+        return pegawaiService.ubahPegawai(nip, request);
     }
 
     /**
@@ -68,16 +53,7 @@ public class PegawaiController {
      */
     @PostMapping
     public ResponseEntity<Pegawai> post(@Valid @RequestBody PegawaiRequest request) {
-        Pegawai pegawai = Pegawai.of(
-                null,
-                null,
-                request.namaPegawai(),
-                request.nip(),
-                request.email(),
-                request.jabatanDinas(),
-                request.jabatanTim()
-        );
-        Pegawai saved = pegawaiService.tambahPegawai(pegawai);
+        Pegawai saved = pegawaiService.tambahPegawai(request);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
