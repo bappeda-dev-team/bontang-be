@@ -5,8 +5,6 @@ import cc.kertaskerja.bontang.kegiatan.domain.KegiatanService;
 import cc.kertaskerja.bontang.kegiatan.web.request.KegiatanBatchRequest;
 import cc.kertaskerja.bontang.kegiatan.web.request.KegiatanRequest;
 import cc.kertaskerja.bontang.kegiatan.web.response.KegiatanResponse;
-import cc.kertaskerja.bontang.subkegiatan.domain.SubKegiatan;
-import cc.kertaskerja.bontang.subkegiatan.web.response.SubKegiatanResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -40,7 +38,7 @@ public class KegiatanController {
     /**
      * Ambil semua data kegiatan
      */
-    @GetMapping("detail/findall")
+    @GetMapping("detail/get-all-kegiatans")
     public List<KegiatanResponse> findAll() {
         Iterable<Kegiatan> kegiatans = kegiatanService.findAll();
         return StreamSupport.stream(kegiatans.spliterator(), false)

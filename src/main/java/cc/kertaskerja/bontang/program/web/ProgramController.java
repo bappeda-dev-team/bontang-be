@@ -49,7 +49,7 @@ public class ProgramController {
     /**
      * Ambil semua data program
      */
-    @GetMapping("detail/findall")
+    @GetMapping("detail/get-all-programs")
     public List<ProgramResponse> findAll() {
         Iterable<Program> programs = programService.findAll();
         return StreamSupport.stream(programs.spliterator(), false)

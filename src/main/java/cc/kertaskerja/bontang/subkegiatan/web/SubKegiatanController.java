@@ -38,7 +38,7 @@ public class SubKegiatanController {
     /**
      * Ambil semua data sub kegiatan
      */
-    @GetMapping("detail/findall")
+    @GetMapping("detail/get-all-subkegiatans")
     public List<SubKegiatanResponse> findAll() {
         Iterable<SubKegiatan> subKegiatans = subKegiatanService.findAll();
         return StreamSupport.stream(subKegiatans.spliterator(), false)
