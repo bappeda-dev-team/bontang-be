@@ -8,7 +8,6 @@ import cc.kertaskerja.bontang.pegawai.domain.PegawaiRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -133,36 +132,18 @@ public class OpdServiceTest {
     }
 
     @Test
-    void hapusOpd_deletesOpd_whenKodeOpdExistsAndNoPegawai() {
+    void hapusOpd_deletesOpd_whenKodeOpdExistsAndNoBidangUrusan() {
         String kodeOpd = "OPD-001";
         Opd opd = new Opd(1L, kodeOpd, "BAPPEDA", Instant.now(), Instant.now());
 
         when(opdRepository.findByKodeOpd(kodeOpd)).thenReturn(Optional.of(opd));
         when(bidangUrusanRepository.existsByKodeOpd(kodeOpd)).thenReturn(false);
-        when(pegawaiRepository.existsByOpdId(opd.id())).thenReturn(false);
 
         opdService.hapusOpd(kodeOpd);
 
         verify(opdRepository).findByKodeOpd(kodeOpd);
         verify(bidangUrusanRepository).existsByKodeOpd(kodeOpd);
-        verify(pegawaiRepository).existsByOpdId(opd.id());
         verify(opdRepository).deleteByKodeOpd(kodeOpd);
-    }
-
-    @Test
-    void hapusOpd_checksBidangBeforePegawai() {
-        String kodeOpd = "OPD-001";
-        Opd opd = new Opd(1L, kodeOpd, "BAPPEDA", Instant.now(), Instant.now());
-
-        when(opdRepository.findByKodeOpd(kodeOpd)).thenReturn(Optional.of(opd));
-        when(bidangUrusanRepository.existsByKodeOpd(kodeOpd)).thenReturn(false);
-        when(pegawaiRepository.existsByOpdId(opd.id())).thenReturn(false);
-
-        opdService.hapusOpd(kodeOpd);
-
-        InOrder inOrder = inOrder(bidangUrusanRepository, pegawaiRepository);
-        inOrder.verify(bidangUrusanRepository).existsByKodeOpd(kodeOpd);
-        inOrder.verify(pegawaiRepository).existsByOpdId(opd.id());
     }
 
     @Test
@@ -174,23 +155,6 @@ public class OpdServiceTest {
         assertThrows(OpdNotFoundException.class, () -> opdService.hapusOpd(kodeOpd));
         verify(opdRepository).findByKodeOpd(kodeOpd);
         verify(bidangUrusanRepository, never()).existsByKodeOpd(any());
-        verify(pegawaiRepository, never()).existsByOpdId(any());
-        verify(opdRepository, never()).deleteByKodeOpd(any());
-    }
-
-    @Test
-    void hapusOpd_throwsException_whenPegawaiExists() {
-        String kodeOpd = "OPD-001";
-        Opd opd = new Opd(1L, kodeOpd, "BAPPEDA", Instant.now(), Instant.now());
-
-        when(opdRepository.findByKodeOpd(kodeOpd)).thenReturn(Optional.of(opd));
-        when(bidangUrusanRepository.existsByKodeOpd(kodeOpd)).thenReturn(false);
-        when(pegawaiRepository.existsByOpdId(opd.id())).thenReturn(true);
-
-        assertThrows(OpdDeleteForbiddenException.class, () -> opdService.hapusOpd(kodeOpd));
-        verify(opdRepository).findByKodeOpd(kodeOpd);
-        verify(bidangUrusanRepository).existsByKodeOpd(kodeOpd);
-        verify(pegawaiRepository).existsByOpdId(opd.id());
         verify(opdRepository, never()).deleteByKodeOpd(any());
     }
 
@@ -206,7 +170,6 @@ public class OpdServiceTest {
 
         verify(opdRepository).findByKodeOpd(kodeOpd);
         verify(bidangUrusanRepository).existsByKodeOpd(kodeOpd);
-        verify(pegawaiRepository, never()).existsByOpdId(any());
         verify(opdRepository, never()).deleteByKodeOpd(any());
     }
 }
