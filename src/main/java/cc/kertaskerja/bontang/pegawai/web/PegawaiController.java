@@ -34,8 +34,8 @@ public class PegawaiController {
      * Ambil semua data pegawai berdasarkan kode OPD dan tahun
      */
     @GetMapping("detail/kodeOpd/{kodeOpd}/tahun/{tahun}")
-    public Iterable<Pegawai> findByKodeOpdAndTahun(@RequestParam("kodeOpd") String kodeOpd,
-                                                    @RequestParam("tahun") Integer tahun) {
+    public Iterable<Pegawai> findByKodeOpdAndTahun(@PathVariable("kodeOpd") String kodeOpd,
+                                                    @PathVariable("tahun") Integer tahun) {
         return pegawaiService.findByKodeOpdAndTahun(kodeOpd, tahun);
     }
 
