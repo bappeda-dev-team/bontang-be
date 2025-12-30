@@ -17,9 +17,12 @@ public interface PegawaiRepository extends CrudRepository<Pegawai, Long> {
 
     @NonNull
     Optional<Pegawai> findByNip(@NonNull String nip);
+    
+    Iterable<Pegawai> findByKodeOpdAndTahun(@NonNull String kodeOpd, @NonNull Integer tahun);
 
     @Modifying
     @Transactional
     @Query("DELETE FROM pegawai WHERE nip = :nip")
     void deleteByNip(@NonNull @Param("nip") String nip);
+
 }

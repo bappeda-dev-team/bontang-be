@@ -12,8 +12,8 @@ public class PegawaiService {
         this.pegawaiRepository = pegawaiRepository;
     }
 
-    public Iterable<Pegawai> findAll() {
-        return pegawaiRepository.findAll();
+    public Iterable<Pegawai> findByKodeOpdAndTahun(String kodeOpd, Integer tahun) {
+        return pegawaiRepository.findByKodeOpdAndTahun(kodeOpd, tahun);
     }
 
     public Pegawai detailPegawaiByNip(String nip) {
@@ -23,8 +23,8 @@ public class PegawaiService {
 
     public Pegawai tambahPegawai(PegawaiRequest request) {
         Pegawai pegawai = Pegawai.of(
-                null,
-                null,
+                request.kodeOpd(),
+                request.tahun(),
                 request.namaPegawai(),
                 request.nip(),
                 request.email(),
@@ -39,8 +39,8 @@ public class PegawaiService {
 
         Pegawai pegawai = new Pegawai(
                 existingPegawai.id(),
-                existingPegawai.kodeOpd(),
-                existingPegawai.tahun(),
+                request.kodeOpd(),
+                request.tahun(),
                 request.namaPegawai(),
                 request.nip(),
                 request.email(),
