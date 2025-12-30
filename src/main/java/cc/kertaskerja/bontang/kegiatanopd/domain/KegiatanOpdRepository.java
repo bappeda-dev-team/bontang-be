@@ -17,7 +17,10 @@ public interface KegiatanOpdRepository extends CrudRepository<KegiatanOpd, Long>
 
     @NonNull
     Optional<KegiatanOpd> findByKodeKegiatanOpd(@NonNull String kodeKegiatanOpd);
-
+    
+    @NonNull
+    Iterable<KegiatanOpd> findByKodeOpdAndTahun(@NonNull String kodeOpd, @NonNull Integer tahun);
+    
     @Modifying
     @Transactional
     @Query("DELETE FROM kegiatan_opd WHERE kode_kegiatan = :kodeKegiatanOpd")

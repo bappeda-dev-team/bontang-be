@@ -17,6 +17,10 @@ public class KegiatanOpdService {
         return kegiatanOpdRepository.findAll();
     }
 
+    public Iterable<KegiatanOpd> findByKodeOpdAndTahun(String kodeOpd, Integer tahun) {
+        return kegiatanOpdRepository.findByKodeOpdAndTahun(kodeOpd, tahun);
+    }
+
     public KegiatanOpd detailKegiatanOpdByKodeKegiatan(String kodeKegiatanOpd) {
         return kegiatanOpdRepository.findByKodeKegiatanOpd(kodeKegiatanOpd)
                 .orElseThrow(() -> new KegiatanOpdNotFoundException(kodeKegiatanOpd));

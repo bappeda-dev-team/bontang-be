@@ -34,10 +34,12 @@ public class KegiatanOpdController {
         return kegiatanOpdService.detailKegiatanOpdByKodeKegiatan(kodeKegiatanOpd);
     }
 
-    // get findall kegiatan opd
-    @GetMapping("detail/findall")
-    public List<KegiatanOpdResponse> findAll() {
-        Iterable<KegiatanOpd> kegiatanOpds = kegiatanOpdService.findAll();
+    // get kegiatan opd by kode opd dan tahun
+    @GetMapping("detail/kodeOpd/{kodeOpd}/tahun/{tahun}")
+    public List<KegiatanOpdResponse> findByKodeOpdAndTahun(
+            @PathVariable("kodeOpd") String kodeOpd,
+            @PathVariable("tahun") Integer tahun) {
+        Iterable<KegiatanOpd> kegiatanOpds = kegiatanOpdService.findByKodeOpdAndTahun(kodeOpd, tahun);
         return StreamSupport.stream(kegiatanOpds.spliterator(), false)
                 .map(this::map)
                 .toList();

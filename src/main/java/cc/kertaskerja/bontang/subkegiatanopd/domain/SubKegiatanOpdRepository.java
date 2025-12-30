@@ -18,6 +18,9 @@ public interface SubKegiatanOpdRepository extends CrudRepository<SubKegiatanOpd,
 
     @NonNull
     Optional<SubKegiatanOpd> findByKodeSubKegiatanOpd(@NonNull String kodeSubKegiatanOpd);
+    
+    @NonNull
+    Iterable<SubKegiatanOpd> findByKodeOpdAndTahun(@NonNull String kodeOpd, @NonNull Integer tahun);
 
     @Modifying
     @Transactional
