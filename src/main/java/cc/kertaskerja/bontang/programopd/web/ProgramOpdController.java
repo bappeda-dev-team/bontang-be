@@ -5,7 +5,6 @@ import cc.kertaskerja.bontang.program.domain.ProgramService;
 import cc.kertaskerja.bontang.program.web.request.ProgramBatchRequest;
 import cc.kertaskerja.bontang.programopd.domain.ProgramOpd;
 import cc.kertaskerja.bontang.programopd.domain.ProgramOpdService;
-import cc.kertaskerja.bontang.programopd.web.ProgramOpdResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -35,10 +34,12 @@ public class ProgramOpdController {
         return programOpdService.detailProgramOpdByKodeProgram(kodeProgramOpd);
     }
 
-    // get findall program opd
-    @GetMapping("detail/findall")
-    public List<ProgramOpdResponse> findAll() {
-        Iterable<ProgramOpd> programOpds = programOpdService.findAll();
+    // get program opd by kode opd and tahun
+    @GetMapping("detail/kodeOpd/{kodeOpd}/tahun/{tahun}")
+    public List<ProgramOpdResponse> findByKodeOpdAndTahun(
+            @PathVariable("kodeOpd") String kodeOpd,
+            @PathVariable("tahun") Integer tahun) {
+        Iterable<ProgramOpd> programOpds = programOpdService.findByKodeOpdAndTahun(kodeOpd, tahun);
         return StreamSupport.stream(programOpds.spliterator(), false)
                 .map(this::map)
                 .toList();

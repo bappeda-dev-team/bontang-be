@@ -17,6 +17,10 @@ public class ProgramOpdService {
         return programOpdRepository.findAll();
     }
 
+    public Iterable<ProgramOpd> findByKodeOpdAndTahun(String kodeOpd, Integer tahun) {
+        return programOpdRepository.findByKodeOpdAndTahun(kodeOpd, tahun);
+    }
+
     public ProgramOpd detailProgramOpdByKodeProgram(String kodeProgramOpd) {
         return programOpdRepository.findByKodeProgramOpd(kodeProgramOpd)
                 .orElseThrow(() -> new ProgramOpdNotFoundException(kodeProgramOpd));

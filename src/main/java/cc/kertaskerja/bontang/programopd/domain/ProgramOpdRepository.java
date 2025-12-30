@@ -18,6 +18,8 @@ public interface ProgramOpdRepository extends CrudRepository<ProgramOpd, Long> {
     @NonNull
     Optional<ProgramOpd> findByKodeProgramOpd(@NonNull String kodeProgramOpd);
 
+    Iterable<ProgramOpd> findByKodeOpdAndTahun(@NonNull String kodeOpd, @NonNull Integer tahun);
+
     @Modifying
     @Transactional
     @Query("DELETE FROM program_opd WHERE kode_program = :kodeProgramOpd")
