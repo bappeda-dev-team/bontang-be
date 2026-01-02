@@ -30,4 +30,9 @@ public interface RencanaKinerjaRepository extends CrudRepository<RencanaKinerja,
     Optional<RencanaKinerja> findByIdAndNipPegawai(
             @NonNull @Param("id") Long id,
             @NonNull @Param("nipPegawai") String nipPegawai);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE rencana_kinerja SET id_sumber_dana = NULL, sumber_dana = NULL WHERE id_sumber_dana = :idSumberDana")
+    void updateSumberDanaToNullByIdSumberDana(@NonNull @Param("idSumberDana") Long idSumberDana);
 }

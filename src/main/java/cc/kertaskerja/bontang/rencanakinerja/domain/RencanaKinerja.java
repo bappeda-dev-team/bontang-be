@@ -13,6 +13,9 @@ public record RencanaKinerja(
     @Id
     Long id,
 
+    @Column("id_sumber_dana")
+    Long idSumberDana,
+
     @Column("rencana_kinerja")
     String rencanaKinerja,
 
@@ -50,6 +53,7 @@ public record RencanaKinerja(
     Instant lastModifiedDate
 ) {
     public static RencanaKinerja of (
+            Long idSumberDana,
             String rencanaKinerja,
             String kodeOpd,
             String nipPegawai,
@@ -63,6 +67,7 @@ public record RencanaKinerja(
     ) {
         return new RencanaKinerja(
             null,
+            idSumberDana,
             rencanaKinerja,
             kodeOpd,
             nipPegawai,
@@ -81,6 +86,7 @@ public record RencanaKinerja(
     public RencanaKinerja withId(Long id) {
         return new RencanaKinerja(
             id,
+            this.idSumberDana,
             this.rencanaKinerja,
             this.kodeOpd,
             this.nipPegawai,

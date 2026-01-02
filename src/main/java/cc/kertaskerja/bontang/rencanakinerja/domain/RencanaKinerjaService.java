@@ -297,6 +297,7 @@ public class RencanaKinerjaService {
     @Transactional
     public ResponseEntity<Map<String, Object>> tambahRencanaKinerja(RencanaKinerjaRequest request) {
         RencanaKinerja rencanaKinerja = RencanaKinerja.of(
+                request.idSumberDana(),
                 request.rencanaKinerja(),
                 request.kodeOpd(),
                 request.nipPegawai(),
@@ -322,7 +323,7 @@ public class RencanaKinerjaService {
         Map<String, Object> response = new LinkedHashMap<>();
         
         response.put("id_rencana_kinerja", savedRencanaKinerja.id());
-        response.put("idSumberDana", 0);
+        response.put("idSumberDana", savedRencanaKinerja.idSumberDana());
         response.put("rencanaKinerja", savedRencanaKinerja.rencanaKinerja());
         response.put("kodeOpd", savedRencanaKinerja.kodeOpd());
         response.put("nipPegawai", savedRencanaKinerja.nipPegawai());
@@ -590,6 +591,7 @@ public class RencanaKinerjaService {
         
         RencanaKinerja updatedRencanaKinerja = new RencanaKinerja(
                 id,
+                request.idSumberDana() != null ? request.idSumberDana() : existingRencanaKinerja.idSumberDana(),
                 request.rencanaKinerja(),
                 request.kodeOpd() != null ? request.kodeOpd() : existingRencanaKinerja.kodeOpd(),
                 request.nipPegawai() != null ? request.nipPegawai() : existingRencanaKinerja.nipPegawai(),
@@ -609,7 +611,7 @@ public class RencanaKinerjaService {
         // Build response untuk update
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("id_rencana_kinerja", savedRencanaKinerja.id());
-        response.put("idSumberDana", 0);
+        response.put("idSumberDana", savedRencanaKinerja.idSumberDana());
         response.put("rencanaKinerja", savedRencanaKinerja.rencanaKinerja());
         response.put("kodeOpd", savedRencanaKinerja.kodeOpd());
         response.put("nipPegawai", savedRencanaKinerja.nipPegawai());

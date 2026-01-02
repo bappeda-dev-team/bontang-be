@@ -44,19 +44,7 @@ public class SumberDanaController {
      */
     @PutMapping("update/{id}")
     public SumberDana put(@PathVariable("id") Long id, @Valid @RequestBody SumberDanaRequest request) {
-        SumberDana existingSumberDana = sumberDanaService.detailSumberDanaById(id);
-
-        SumberDana sumberDana = new SumberDana(
-                existingSumberDana.id(),
-                request.kodeDanaLama(),
-                request.sumberDana(),
-                request.kodeDanaBaru(),
-                request.setInput(),
-                existingSumberDana.createdDate(),
-                null
-        );
-
-        return sumberDanaService.ubahSumberDana(id, sumberDana);
+        return sumberDanaService.ubahSumberDanaFromRequest(id, request);
     }
 
     /**
@@ -65,13 +53,7 @@ public class SumberDanaController {
      */
     @PostMapping
     public ResponseEntity<SumberDana> post(@Valid @RequestBody SumberDanaRequest request) {
-        SumberDana sumberDana = SumberDana.of(
-                request.kodeDanaLama(),
-                request.sumberDana(),
-                request.kodeDanaBaru(),
-                request.setInput()
-        );
-        SumberDana saved = sumberDanaService.tambahSumberDana(sumberDana);
+        SumberDana saved = sumberDanaService.tambahSumberDanaFromRequest(request);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
