@@ -140,6 +140,8 @@ public class RencanaKinerjaService {
         rencanaKinerjaResponse.put("namaRencanaKinerja", rencanaKinerja.rencanaKinerja());
         rencanaKinerjaResponse.put("tahun", rencanaKinerja.tahun().toString());
         rencanaKinerjaResponse.put("statusRencanaKinerja", rencanaKinerja.statusRencanaKinerja());
+        rencanaKinerjaResponse.put("id_sumber_dana", rencanaKinerja.idSumberDana());
+        rencanaKinerjaResponse.put("sumberDana", rencanaKinerja.sumberDana());
         
         // Build OPD object
         Map<String, Object> operasionalDaerah = new LinkedHashMap<>();
