@@ -69,7 +69,7 @@ public class RencanaKinerjaService {
             throw new RencanaKinerjaNotFoundException(nipPegawai, kodeOpd, tahun);
         }
         
-        return buildSimpleRencanaKinerjaResponse(rencanaKinerjas);
+            return buildSimpleRencanaKinerjaResponse(rencanaKinerjas);
         }
 
     public Map<String, Object> findDetailByIdAndNipPegawai(Long idRencanaKinerja, String nipPegawai) {
@@ -95,6 +95,7 @@ public class RencanaKinerjaService {
             rencanaKinerjaData.put("statusRencanaKinerja", rencanaKinerja.statusRencanaKinerja());
             rencanaKinerjaData.put("namaOpd", rencanaKinerja.namaOpd());
             rencanaKinerjaData.put("namaPegawai", rencanaKinerja.namaPegawai());
+            rencanaKinerjaData.put("id_sumber_dana", rencanaKinerja.idSumberDana());
             rencanaKinerjaData.put("sumberDana", rencanaKinerja.sumberDana());
             rencanaKinerjaData.put("keterangan", rencanaKinerja.keterangan());
             
