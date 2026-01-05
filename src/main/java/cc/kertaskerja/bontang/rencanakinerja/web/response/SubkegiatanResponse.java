@@ -5,8 +5,8 @@ import cc.kertaskerja.bontang.subkegiatanrencanakinerja.domain.SubKegiatanRencan
 public record SubkegiatanResponse(
     Long id,
     Integer rencanaKinerjaId,
-    String kodeSubkegiatan,
-    String namaSubkegiatan
+    String kodeSubKegiatan,
+    String namaSubKegiatan
 ) {
     public static SubkegiatanResponse from(SubKegiatanRencanaKinerja data) {
         return new SubkegiatanResponse(
