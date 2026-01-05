@@ -108,8 +108,8 @@ public record RencanaKinerjaDetailResponse(
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("id", subkegiatan.id());
         map.put("rencana_kinerja_id", subkegiatan.rencanaKinerjaId());
-        map.put("kodeSubkegiatan", subkegiatan.kodeSubkegiatan());
-        map.put("namaSubkegiatan", subkegiatan.namaSubkegiatan());
+        map.put("kodeSubkegiatan", subkegiatan.kodeSubKegiatan());
+        map.put("namaSubkegiatan", subkegiatan.namaSubKegiatan());
         return map;
     }
 
