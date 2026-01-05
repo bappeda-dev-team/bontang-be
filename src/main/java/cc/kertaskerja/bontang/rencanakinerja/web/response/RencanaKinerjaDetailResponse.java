@@ -79,7 +79,7 @@ public record RencanaKinerjaDetailResponse(
         map.put("nip", nip);
         map.put("namaPegawai", namaPegawai);
         map.put("indikator", indikator.stream().map(this::indikatorToMap).toList());
-        map.put("subkegiatan", subkegiatan.stream().map(this::subkegiatanToMap).toList());
+        map.put("subKegiatan", subkegiatan.stream().map(this::subkegiatanToMap).toList());
         map.put("dasarHukum", dasarHukum.stream().map(this::dasarHukumToMap).toList());
         map.put("gambaranUmum", gambaranUmum.stream().map(this::gambaranUmumToMap).toList());
         map.put("rencanaAksi", rencanaAksi.stream().map(this::rencanaAksiToMap).toList());
@@ -108,8 +108,8 @@ public record RencanaKinerjaDetailResponse(
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("id", subkegiatan.id());
         map.put("rencana_kinerja_id", subkegiatan.rencanaKinerjaId());
-        map.put("kodeSubkegiatan", subkegiatan.kodeSubKegiatan());
-        map.put("namaSubkegiatan", subkegiatan.namaSubKegiatan());
+        map.put("kodeSubKegiatan", subkegiatan.kodeSubKegiatan());
+        map.put("namaSubKegiatan", subkegiatan.namaSubKegiatan());
         return map;
     }
 
