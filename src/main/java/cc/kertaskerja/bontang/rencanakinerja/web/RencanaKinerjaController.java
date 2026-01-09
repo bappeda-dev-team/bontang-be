@@ -41,7 +41,7 @@ public class RencanaKinerjaController {
     /**
      * Ambil semua data rencana kinerja
      */
-    @GetMapping("detail/findall")
+    @GetMapping("detail/get-all-rencanakinerjas")
     public Iterable<RencanaKinerja> findAll() {
         return rencanaKinerjaService.findAll();
     }
@@ -81,7 +81,7 @@ public class RencanaKinerjaController {
      */
     @PutMapping("update/{idRencanaKinerja}")
     public ResponseEntity<Map<String, Object>> put(@PathVariable("idRencanaKinerja") Long idRencanaKinerja, @Valid @RequestBody RencanaKinerjaRequest request) {
-        
+
         return rencanaKinerjaService.ubahRencanaKinerja(idRencanaKinerja, request);
     }
 

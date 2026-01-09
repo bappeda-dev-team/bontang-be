@@ -38,7 +38,7 @@ public class RencanaAksiController {
     }
 
     // Ambil semua data rencana aksi
-    @GetMapping("detail/findall")
+    @GetMapping("detail/get-all-rencanaaksis")
     public Iterable<RencanaAksi> findAll() {
         return rencanaAksiService.findAll();
     }
@@ -88,7 +88,7 @@ public class RencanaAksiController {
 
         return rencanaAksiService.ubahRencanaAksi(id, rencanaAksi);
     }
-    
+
     // Tambah by idRencanaKinerja
     @PostMapping("{idRencanaKinerja}")
     public ResponseEntity<RencanaAksi> post(@PathVariable("idRencanaKinerja") Integer idRencanaKinerja,
