@@ -26,7 +26,7 @@ public class RincianBelanjaController {
     }
 
     @GetMapping("detail/pegawai/{nipPegawai}/{kodeOpd}/{tahun}")
-    public RincianBelanjaResponse getByNipPegawaiKodeOpdAndTahun(
+    public List<RincianBelanjaResponse> getByNipPegawaiKodeOpdAndTahun(
             @PathVariable("nipPegawai") String nipPegawai,
             @PathVariable("kodeOpd") String kodeOpd,
             @PathVariable("tahun") Integer tahun) {
@@ -54,5 +54,4 @@ public class RincianBelanjaController {
         return ResponseEntity.ok(response);
     }
 
-    
 }
