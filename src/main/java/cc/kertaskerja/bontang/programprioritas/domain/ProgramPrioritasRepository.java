@@ -1,6 +1,5 @@
 package cc.kertaskerja.bontang.programprioritas.domain;
 
-import cc.kertaskerja.bontang.program.domain.Program;
 import org.springframework.data.jdbc.repository.query.Modifying;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -15,6 +14,11 @@ public interface ProgramPrioritasRepository extends CrudRepository<ProgramPriori
     Optional<ProgramPrioritas> findById(@NonNull Long id);
 
     boolean existsById(@NonNull Long id);
+
+    Iterable<ProgramPrioritas> findByPeriodeTahunAwalGreaterThanEqualAndPeriodeTahunAkhirLessThanEqual(
+            Integer periodeTahunAwal,
+            Integer periodeTahunAkhir
+    );
 
     @Modifying
     @Transactional

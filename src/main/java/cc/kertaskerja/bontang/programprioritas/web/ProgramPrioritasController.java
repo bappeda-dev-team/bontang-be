@@ -34,7 +34,13 @@ public class ProgramPrioritasController {
      * Ambil semua data program prioritas
      */
     @GetMapping("detail/get-all-programprioritas")
-    public Iterable<ProgramPrioritas> findAll() {
+    public Iterable<ProgramPrioritas> findAll(
+            @RequestParam(value = "tahun_awal", required = false) Integer periodeTahunAwal,
+            @RequestParam(value = "tahun_akhir", required = false) Integer periodeTahunAkhir
+    ) {
+        if (periodeTahunAwal != null && periodeTahunAkhir != null) {
+            return programPrioritasService.findByPeriodeTahunRange(periodeTahunAwal, periodeTahunAkhir);
+        }
         return programPrioritasService.findAll();
     }
 
@@ -44,16 +50,7 @@ public class ProgramPrioritasController {
      */
     @PutMapping("update/{id}")
     public ProgramPrioritas put(@PathVariable("id") Long id, @Valid @RequestBody ProgramPrioritasRequest request) {
-        ProgramPrioritas existingProgramPrioritas = programPrioritasService.detailProgramPrioritasById(id);
-
-        ProgramPrioritas programPrioritas = new ProgramPrioritas(
-                existingProgramPrioritas.id(),
-                request.programPrioritas(),
-                existingProgramPrioritas.createdDate(),
-                null
-        );
-
-        return programPrioritasService.ubahProgramPrioritas(id, programPrioritas);
+        return programPrioritasService.ubahProgramPrioritas(id, request);
     }
 
     /**
@@ -62,10 +59,7 @@ public class ProgramPrioritasController {
      */
     @PostMapping
     public ResponseEntity<ProgramPrioritas> post(@Valid @RequestBody ProgramPrioritasRequest request) {
-        ProgramPrioritas programPrioritas = ProgramPrioritas.of(
-                request.programPrioritas()
-        );
-        ProgramPrioritas saved = programPrioritasService.tambahProgramPrioritas(programPrioritas);
+        ProgramPrioritas saved = programPrioritasService.tambahProgramPrioritas(request);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")

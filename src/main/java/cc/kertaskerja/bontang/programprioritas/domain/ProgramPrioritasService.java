@@ -1,6 +1,7 @@
 package cc.kertaskerja.bontang.programprioritas.domain;
 
 import cc.kertaskerja.bontang.programprioritas.domain.exception.ProgramPrioritasNotFoundException;
+import cc.kertaskerja.bontang.programprioritas.web.ProgramPrioritasRequest;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,8 +21,31 @@ public class ProgramPrioritasService{
                 .orElseThrow(() -> new ProgramPrioritasNotFoundException(id));
     }
 
+    public Iterable<ProgramPrioritas> findByPeriodeTahunRange(Integer periodeTahunAwal, Integer periodeTahunAkhir) {
+        return programPrioritasRepository.findByPeriodeTahunAwalGreaterThanEqualAndPeriodeTahunAkhirLessThanEqual(
+                periodeTahunAwal,
+                periodeTahunAkhir
+        );
+    }
+
     public ProgramPrioritas tambahProgramPrioritas(ProgramPrioritas programPrioritas) {
         return programPrioritasRepository.save(programPrioritas);
+    }
+
+    public ProgramPrioritas tambahProgramPrioritas(ProgramPrioritasRequest request) {
+        ProgramPrioritas programPrioritas = ProgramPrioritas.of(
+                request.idSubKegiatanOpd(),
+                request.programPrioritas(),
+                request.tahun(),
+                request.keterangan(),
+                request.periodeTahunAwal(),
+                request.periodeTahunAkhir(),
+                request.status(),
+                request.kodeOpd(),
+                request.kodeSubKegiatanOpd()
+        );
+
+        return tambahProgramPrioritas(programPrioritas);
     }
 
     public ProgramPrioritas ubahProgramPrioritas(Long id, ProgramPrioritas programPrioritas) {
@@ -30,6 +54,27 @@ public class ProgramPrioritasService{
         }
 
         return programPrioritasRepository.save(programPrioritas);
+    }
+
+    public ProgramPrioritas ubahProgramPrioritas(Long id, ProgramPrioritasRequest request) {
+        ProgramPrioritas existingProgramPrioritas = detailProgramPrioritasById(id);
+
+        ProgramPrioritas programPrioritas = new ProgramPrioritas(
+                existingProgramPrioritas.id(),
+                existingProgramPrioritas.idSubKegiatanOpd(),
+                request.programPrioritas(),
+                request.tahun(),
+                request.keterangan(),
+                request.periodeTahunAwal(),
+                request.periodeTahunAkhir(),
+                request.status(),
+                request.kodeOpd(),
+                request.kodeSubKegiatanOpd(),
+                existingProgramPrioritas.createdDate(),
+                null
+        );
+
+        return ubahProgramPrioritas(id, programPrioritas);
     }
 
     public void hapusProgramPrioritas(Long id) {
