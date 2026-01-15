@@ -497,8 +497,7 @@ public class RincianBelanjaService {
                     }
                 }
                 
-                RincianBelanja newRecord = new RincianBelanja(
-                    null,
+                RincianBelanja newRecord = RincianBelanja.of(
                     idSubkegiatanRencanaKinerja, 
                     idRencanaAksi,
                     rencanaKinerja.nipPegawai(),
@@ -511,14 +510,12 @@ public class RincianBelanjaService {
                     indikator,
                     target,
                     satuan,
-                    rencanaKinerja.sumberDana(),
+                    null,
                     rencanaAksi.namaRencanaAksi(),
                     null,
                     null,
                     anggaran,
-                    anggaran,
-                    null,
-                    null
+                    anggaran
                 );
                 
                 RincianBelanja savedRecord = rincianBelanjaRepository.save(newRecord);

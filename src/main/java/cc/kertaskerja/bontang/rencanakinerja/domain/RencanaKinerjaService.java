@@ -294,7 +294,6 @@ public class RencanaKinerjaService {
                 request.statusRencanaKinerja(),
                 request.namaOpd(),
                 request.namaPegawai(),
-                request.sumberDana(),
                 request.keterangan()
         );
         RencanaKinerja savedRencanaKinerja = rencanaKinerjaRepository.save(rencanaKinerja);
@@ -494,7 +493,6 @@ public class RencanaKinerjaService {
                 request.statusRencanaKinerja() != null ? request.statusRencanaKinerja() : existingRencanaKinerja.statusRencanaKinerja(),
                 request.namaOpd() != null ? request.namaOpd() : existingRencanaKinerja.namaOpd(),
                 request.namaPegawai() != null ? request.namaPegawai() : existingRencanaKinerja.namaPegawai(),
-                request.sumberDana() != null ? request.sumberDana() : existingRencanaKinerja.sumberDana(),
                 request.keterangan() != null ? request.keterangan() : existingRencanaKinerja.keterangan(),
                 existingRencanaKinerja.createdDate(),
                 existingRencanaKinerja.lastModifiedDate()

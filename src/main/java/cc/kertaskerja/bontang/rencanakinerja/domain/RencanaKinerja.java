@@ -40,9 +40,6 @@ public record RencanaKinerja(
     @Column("nama_pegawai")
     String namaPegawai,
 
-    @Column("sumber_dana")
-    String sumberDana,
-
     @Column("keterangan")
     String keterangan,
 
@@ -62,7 +59,6 @@ public record RencanaKinerja(
             String statusRencanaKinerja,
             String namaOpd,
             String namaPegawai,
-            String sumberDana,
             String keterangan
     ) {
         return new RencanaKinerja(
@@ -76,7 +72,6 @@ public record RencanaKinerja(
             statusRencanaKinerja,
             namaOpd,
             namaPegawai,
-            sumberDana,
             keterangan,
             null,
             null
@@ -95,7 +90,6 @@ public record RencanaKinerja(
             this.statusRencanaKinerja,
             this.namaOpd,
             this.namaPegawai,
-            this.sumberDana,
             this.keterangan,
             this.createdDate,
             this.lastModifiedDate

@@ -16,7 +16,6 @@ public record RencanaKinerjaUpdateResponse(
     String statusRencanaKinerja,
     String namaOpd,
     String namaPegawai,
-    String sumberDana,
     String keterangan,
     List<IndikatorUpdateResponse> indikatorList
 ) {
@@ -35,7 +34,6 @@ public record RencanaKinerjaUpdateResponse(
             rencanaKinerja.statusRencanaKinerja(),
             rencanaKinerja.namaOpd(),
             rencanaKinerja.namaPegawai(),
-            rencanaKinerja.sumberDana(),
             rencanaKinerja.keterangan(),
             indikatorList
         );
@@ -53,7 +51,6 @@ public record RencanaKinerjaUpdateResponse(
         map.put("statusRencanaKinerja", statusRencanaKinerja);
         map.put("namaOpd", namaOpd);
         map.put("namaPegawai", namaPegawai);
-        map.put("sumberDana", sumberDana);
         map.put("keterangan", keterangan);
 
         List<Map<String, Object>> indikatorListMap = indikatorList.stream().map(indikator -> {

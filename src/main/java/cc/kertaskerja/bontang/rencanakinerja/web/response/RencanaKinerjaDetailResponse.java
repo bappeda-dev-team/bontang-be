@@ -11,7 +11,6 @@ public record RencanaKinerjaDetailResponse(
     String tahun,
     String statusRencanaKinerja,
     Long idSumberDana,
-    String sumberDana,
     OperasionalDaerahResponse operasionalDaerah,
     String nip,
     String namaPegawai,
@@ -46,7 +45,6 @@ public record RencanaKinerjaDetailResponse(
             rencanaKinerja.tahun().toString(),
             rencanaKinerja.statusRencanaKinerja(),
             rencanaKinerja.idSumberDana(),
-            rencanaKinerja.sumberDana(),
             operasionalDaerah,
             rencanaKinerja.nipPegawai(),
             rencanaKinerja.namaPegawai(),
@@ -69,7 +67,6 @@ public record RencanaKinerjaDetailResponse(
         map.put("tahun", tahun);
         map.put("statusRencanaKinerja", statusRencanaKinerja);
         map.put("id_sumber_dana", idSumberDana);
-        map.put("sumberDana", sumberDana);
 
         Map<String, Object> operasionalDaerahMap = new LinkedHashMap<>();
         operasionalDaerahMap.put("kodeOpd", operasionalDaerah.kodeOpd());

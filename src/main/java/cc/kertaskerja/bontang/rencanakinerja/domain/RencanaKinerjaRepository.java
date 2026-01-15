@@ -33,6 +33,6 @@ public interface RencanaKinerjaRepository extends CrudRepository<RencanaKinerja,
 
     @Modifying
     @Transactional
-    @Query("UPDATE rencana_kinerja SET id_sumber_dana = NULL, sumber_dana = NULL WHERE id_sumber_dana = :idSumberDana")
+    @Query("UPDATE rencana_kinerja SET id_sumber_dana = NULL WHERE id_sumber_dana = :idSumberDana")
     void updateSumberDanaToNullByIdSumberDana(@NonNull @Param("idSumberDana") Long idSumberDana);
 }

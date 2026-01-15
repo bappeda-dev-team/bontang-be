@@ -16,7 +16,6 @@ public record RencanaKinerjaCreateResponse(
     String statusRencanaKinerja,
     String namaOpd,
     String namaPegawai,
-    String sumberDana,
     String keterangan,
     List<IndikatorCreateResponse> indikatorList
 ) {
@@ -35,7 +34,6 @@ public record RencanaKinerjaCreateResponse(
             rencanaKinerja.statusRencanaKinerja(),
             rencanaKinerja.namaOpd(),
             rencanaKinerja.namaPegawai(),
-            rencanaKinerja.sumberDana(),
             rencanaKinerja.keterangan(),
             indikatorList
         );
@@ -44,7 +42,7 @@ public record RencanaKinerjaCreateResponse(
     public Map<String, Object> toMap() {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("id_rencana_kinerja", id);
-        map.put("idSumberDana", idSumberDana);
+        map.put("id_sumber_dana", idSumberDana);
         map.put("rencanaKinerja", rencanaKinerja);
         map.put("kodeOpd", kodeOpd);
         map.put("nipPegawai", nipPegawai);
@@ -53,7 +51,6 @@ public record RencanaKinerjaCreateResponse(
         map.put("statusRencanaKinerja", statusRencanaKinerja);
         map.put("namaOpd", namaOpd);
         map.put("namaPegawai", namaPegawai);
-        map.put("sumberDana", sumberDana);
         map.put("keterangan", keterangan);
 
         List<Map<String, Object>> indikatorListMap = indikatorList.stream().map(indikator -> {

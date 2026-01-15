@@ -34,12 +34,7 @@ public record RencanaKinerjaRequest(
     @Nullable
     String namaPegawai,
 
-    @NotNull(message = "Sumber dana baru tidak boleh kosong")
-    @NotEmpty(message = "Sumber dana baru tidak boleh kosong")
-    String sumberDana,
-
-    @NotNull(message = "Keterangan baru tidak boleh kosong")
-    @NotEmpty(message = "Keterangan baru tidak boleh kosong")
+    @Nullable
     String keterangan,
 
     @Nullable

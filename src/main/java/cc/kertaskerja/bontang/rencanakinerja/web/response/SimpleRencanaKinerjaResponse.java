@@ -16,7 +16,6 @@ public record SimpleRencanaKinerjaResponse(
     String statusRencanaKinerja,
     String namaOpd,
     String namaPegawai,
-    String sumberDana,
     String keterangan,
     List<SimpleIndikatorResponse> indikatorList
 ) {
@@ -35,7 +34,6 @@ public record SimpleRencanaKinerjaResponse(
             rencanaKinerja.statusRencanaKinerja(),
             rencanaKinerja.namaOpd(),
             rencanaKinerja.namaPegawai(),
-            rencanaKinerja.sumberDana(),
             rencanaKinerja.keterangan(),
             indikatorList
         );
@@ -53,7 +51,6 @@ public record SimpleRencanaKinerjaResponse(
         map.put("namaOpd", namaOpd);
         map.put("namaPegawai", namaPegawai);
         map.put("id_sumber_dana", idSumberDana);
-        map.put("sumberDana", sumberDana);
         map.put("keterangan", keterangan);
         map.put("indikatorList", indikatorList.stream()
             .map(SimpleIndikatorResponse::toMap)
