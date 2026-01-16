@@ -59,7 +59,7 @@ public class ProgramPrioritasService{
 
         ProgramPrioritas programPrioritas = new ProgramPrioritas(
                 existingProgramPrioritas.id(),
-                existingProgramPrioritas.idSubkegiatan(),
+                request.idSubkegiatan(),
                 request.programPrioritas(),
                 request.tahun(),
                 request.keterangan(),
