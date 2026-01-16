@@ -34,15 +34,13 @@ public class ProgramPrioritasService{
 
     public ProgramPrioritas tambahProgramPrioritas(ProgramPrioritasRequest request) {
         ProgramPrioritas programPrioritas = ProgramPrioritas.of(
-                request.idSubKegiatanOpd(),
+                request.idSubkegiatan(),
                 request.programPrioritas(),
                 request.tahun(),
                 request.keterangan(),
                 request.periodeTahunAwal(),
                 request.periodeTahunAkhir(),
-                request.status(),
-                request.kodeOpd(),
-                request.kodeSubKegiatanOpd()
+                request.status()
         );
 
         return tambahProgramPrioritas(programPrioritas);
@@ -61,15 +59,13 @@ public class ProgramPrioritasService{
 
         ProgramPrioritas programPrioritas = new ProgramPrioritas(
                 existingProgramPrioritas.id(),
-                existingProgramPrioritas.idSubKegiatanOpd(),
+                existingProgramPrioritas.idSubkegiatan(),
                 request.programPrioritas(),
                 request.tahun(),
                 request.keterangan(),
                 request.periodeTahunAwal(),
                 request.periodeTahunAkhir(),
                 request.status(),
-                request.kodeOpd(),
-                request.kodeSubKegiatanOpd(),
                 existingProgramPrioritas.createdDate(),
                 null
         );

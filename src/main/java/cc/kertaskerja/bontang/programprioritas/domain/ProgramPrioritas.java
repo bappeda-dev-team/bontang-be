@@ -13,8 +13,8 @@ public record ProgramPrioritas(
         @Id
         Long id,
 
-        @Column("id_sub_kegiatan_opd")
-        Integer idSubKegiatanOpd,
+        @Column("id_subkegiatan")
+        Long idSubkegiatan,
 
         @Column("program_prioritas")
         String programPrioritas,
@@ -31,12 +31,6 @@ public record ProgramPrioritas(
 
         String status,
 
-        @Column("kode_opd")
-        String kodeOpd,
-
-        @Column("kode_sub_kegiatan_opd")
-        String kodeSubKegiatanOpd,
-
         @CreatedDate
         Instant createdDate,
 
@@ -44,27 +38,23 @@ public record ProgramPrioritas(
         Instant lastModifiedDate
 ) {
     public static ProgramPrioritas of (
-            Integer idSubKegiatanOpd,
+            Long idSubkegiatan,
             String programPrioritas,
             Integer tahun,
             String keterangan,
             Integer periodeTahunAwal,
             Integer periodeTahunAkhir,
-            String status,
-            String kodeOpd,
-            String kodeSubKegiatanOpd
+            String status
     ) {
         return new ProgramPrioritas(
                 null,
-                idSubKegiatanOpd,
+                idSubkegiatan,
                 programPrioritas,
                 tahun,
                 keterangan,
                 periodeTahunAwal,
                 periodeTahunAkhir,
                 status,
-                kodeOpd,
-                kodeSubKegiatanOpd,
                 null,
                 null
         );

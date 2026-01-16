@@ -7,7 +7,7 @@ import io.micrometer.common.lang.Nullable;
 
 public record ProgramPrioritasRequest(
         @Nullable
-        Integer idSubKegiatanOpd,
+        Long idSubkegiatan,
 
         @NotNull(message = "Program prioritas tidak boleh kosong")
         @NotEmpty(message = "Program prioritas tidak boleh kosong")
@@ -26,12 +26,6 @@ public record ProgramPrioritasRequest(
         Integer periodeTahunAkhir,
 
         @Nullable
-        String status,
-
-        @Nullable
-        String kodeOpd,
-
-        @Nullable
-        String kodeSubKegiatanOpd
+        String status
 ) {
 }
