@@ -24,4 +24,6 @@ public interface ProgramPrioritasRepository extends CrudRepository<ProgramPriori
     @Transactional
     @Query("DELETE FROM program_prioritas WHERE id = :id")
     void deleteById(@NonNull @Param("id") Long id);
+
+    Iterable<ProgramPrioritas> findByIdSubkegiatan(Long idSubkegiatan);
 }

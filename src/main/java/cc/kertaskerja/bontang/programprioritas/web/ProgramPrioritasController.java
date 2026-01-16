@@ -31,6 +31,15 @@ public class ProgramPrioritasController {
     }
 
     /**
+     * Ambil data program prioritas berdasarkan id subkegiatan
+     * @param idSubkegiatan
+     */
+    @GetMapping("detail/subkegiatan/{idSubkegiatan}")
+    public Iterable<ProgramPrioritas> getByIdSubkegiatan(@PathVariable("idSubkegiatan") Long idSubkegiatan) {
+        return programPrioritasService.getByIdSubkegiatan(idSubkegiatan);
+    }
+
+    /**
      * Ambil semua data program prioritas
      */
     @GetMapping("detail/get-all-programprioritas")

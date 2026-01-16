@@ -21,6 +21,10 @@ public class ProgramPrioritasService{
                 .orElseThrow(() -> new ProgramPrioritasNotFoundException(id));
     }
 
+    public Iterable<ProgramPrioritas> getByIdSubkegiatan(Long idSubkegiatan) {
+        return programPrioritasRepository.findByIdSubkegiatan(idSubkegiatan);
+    }
+
     public Iterable<ProgramPrioritas> findByPeriodeTahunRange(Integer periodeTahunAwal, Integer periodeTahunAkhir) {
         return programPrioritasRepository.findByPeriodeTahunAwalGreaterThanEqualAndPeriodeTahunAkhirLessThanEqual(
                 periodeTahunAwal,
