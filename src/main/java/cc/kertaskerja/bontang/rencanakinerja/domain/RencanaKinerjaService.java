@@ -46,6 +46,8 @@ import java.util.stream.StreamSupport;
 
 @Service
 public class RencanaKinerjaService {
+    private static final int TOTAL_BOBOT_AWAL = 100;
+
     private RencanaKinerjaRepository rencanaKinerjaRepository;
     private TargetService targetService;
     private IndikatorService indikatorService;
@@ -205,17 +207,30 @@ public class RencanaKinerjaService {
         boolean[] bulanMemilikiData = new boolean[12];
         List<RencanaAksiResponse> rencanaAksiResponses = new ArrayList<>();
 
+        // Inisialisasi sisa bobot dengan nilai awal 100
+        int sisaBobot = TOTAL_BOBOT_AWAL;
+
         for (RencanaAksi rencanaAksi : rencanaAksis) {
             List<Map<String, Object>> pelaksanaanList =
                 pelaksanaanService.buildPelaksanaanResponseList(rencanaAksi.id().intValue());
 
-            int jumlahBobot = calculateJumlahBobot(pelaksanaanList, totalBobotPerBulan, bulanMemilikiData);
+            // Hitung jumlah bobot dan update sisa bobot
+            BobotCalculationResult calculationResult = calculateJumlahBobot(
+                pelaksanaanList,
+                totalBobotPerBulan,
+                bulanMemilikiData,
+                sisaBobot
+            );
+
+            int jumlahBobot = calculationResult.jumlahBobot();
+            sisaBobot = calculationResult.sisaBobotBaru();
 
             RencanaAksiResponse response = RencanaAksiResponse.from(
                 rencanaAksi,
                 rencanaKinerja.id(),
                 pelaksanaanList,
-                jumlahBobot
+                jumlahBobot,
+                sisaBobot
             );
             rencanaAksiResponses.add(response);
         }
@@ -223,10 +238,11 @@ public class RencanaKinerjaService {
         return new RencanaAksiCalculationResult(rencanaAksiResponses, totalBobotPerBulan, bulanMemilikiData);
     }
 
-    private int calculateJumlahBobot(
+    private BobotCalculationResult calculateJumlahBobot(
         List<Map<String, Object>> pelaksanaanList,
         int[] totalBobotPerBulan,
-        boolean[] bulanMemilikiData
+        boolean[] bulanMemilikiData,
+        int sisaBobot
     ) {
         int jumlahBobot = 0;
 
@@ -242,9 +258,14 @@ public class RencanaKinerjaService {
                     bulanMemilikiData[bulan - 1] = true;
                 }
             }
+
+            // Kurangi sisaBobot
+            if (bobot != null && bobot > 0) {
+                sisaBobot -= bobot;
+            }
         }
 
-        return jumlahBobot;
+        return new BobotCalculationResult(jumlahBobot, sisaBobot);
     }
 
     private List<TotalPerBulanResponse> buildTotalPerBulanResponses(int[] totalBobotPerBulan) {
@@ -281,6 +302,9 @@ public class RencanaKinerjaService {
         int[] totalBobotPerBulan,
         boolean[] bulanMemilikiData
     ) {}
+
+    // Helper record untuk hasil kalkulasi bobot
+    private record BobotCalculationResult(int jumlahBobot, int sisaBobotBaru) {}
 
     @Transactional
     public ResponseEntity<Map<String, Object>> tambahRencanaKinerja(RencanaKinerjaRequest request) {

@@ -10,13 +10,15 @@ public record RencanaAksiResponse(
     Integer urutan,
     String namaRencanaAksi,
     List<Map<String, Object>> pelaksanaan,
-    int jumlahBobot
+    int jumlahBobot,
+    int sisaBobot
 ) {
     public static RencanaAksiResponse from(
         RencanaAksi rencanaAksi,
         Long rencanaKinerjaId,
         List<Map<String, Object>> pelaksanaanList,
-        int jumlahBobot
+        int jumlahBobot,
+        int sisaBobot
     ) {
         return new RencanaAksiResponse(
             rencanaAksi.id(),
@@ -24,7 +26,8 @@ public record RencanaAksiResponse(
             rencanaAksi.urutan(),
             rencanaAksi.namaRencanaAksi(),
             pelaksanaanList,
-            jumlahBobot
+            jumlahBobot,
+            sisaBobot
         );
     }
 }

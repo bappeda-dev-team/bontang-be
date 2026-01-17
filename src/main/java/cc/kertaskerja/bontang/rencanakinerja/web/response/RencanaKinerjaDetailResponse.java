@@ -138,6 +138,7 @@ public record RencanaKinerjaDetailResponse(
         map.put("namaRencanaAksi", rencanaAksi.namaRencanaAksi());
         map.put("pelaksanaan", rencanaAksi.pelaksanaan());
         map.put("jumlahBobot", rencanaAksi.jumlahBobot());
+        map.put("sisaBobot", rencanaAksi.sisaBobot());
         return map;
     }
 
