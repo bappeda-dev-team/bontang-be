@@ -1,6 +1,7 @@
 package cc.kertaskerja.bontang.rencanaaksi.pelaksanaan.domain;
 
 import cc.kertaskerja.bontang.rencanaaksi.pelaksanaan.web.PelaksanaanRequest;
+import cc.kertaskerja.bontang.rencanaaksi.pelaksanaan.domain.exception.BobotExceededException;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -33,6 +34,12 @@ public class PelaksanaanService {
                 request.bulan(),
                 request.bobot()
         );
+
+        Integer bobotTersediaSaatIni = pelaksanaanRepository.findMinBobotTersediaByIdRencanaAksi(idRencanaAksi, TOTAL_BOBOT);
+        if (pelaksanaan.bobot() != null && pelaksanaan.bobot() > bobotTersediaSaatIni) {
+            throw new BobotExceededException(idRencanaAksi, pelaksanaan.bobot(), bobotTersediaSaatIni);
+        }
+
         Integer bobotTersedia = hitungBobotTersedia(pelaksanaan.idRencanaAksi(), pelaksanaan.bobot(), null);
         Pelaksanaan withBobotTersedia = pelaksanaan.withBobotTersedia(bobotTersedia);
 
@@ -53,6 +60,11 @@ public class PelaksanaanService {
                 null
         );
 
+        Integer bobotTersediaSaatIni = pelaksanaanRepository.findBobotTersediaById(idRencanaAksi, existingPelaksanaan.id(), TOTAL_BOBOT);
+        if (pelaksanaan.bobot() != null && pelaksanaan.bobot() > bobotTersediaSaatIni) {
+            throw new BobotExceededException(idRencanaAksi, pelaksanaan.bobot(), bobotTersediaSaatIni);
+        }
+
         Integer bobotTersedia = hitungBobotTersedia(pelaksanaan.idRencanaAksi(), pelaksanaan.bobot(), existingPelaksanaan.id());
         Pelaksanaan withBobotTersedia = pelaksanaan.withBobotTersedia(bobotTersedia);
 
@@ -72,6 +84,15 @@ public class PelaksanaanService {
                 existingPelaksanaan.createdDate(),
                 null
         );
+
+        Integer bobotTersediaSaatIni = pelaksanaanRepository.findBobotTersediaById(
+                existingPelaksanaan.idRencanaAksi(),
+                existingPelaksanaan.id(),
+                TOTAL_BOBOT
+        );
+        if (pelaksanaan.bobot() != null && pelaksanaan.bobot() > bobotTersediaSaatIni) {
+            throw new BobotExceededException(existingPelaksanaan.idRencanaAksi(), pelaksanaan.bobot(), bobotTersediaSaatIni);
+        }
 
         Integer bobotTersedia = hitungBobotTersedia(pelaksanaan.idRencanaAksi(), pelaksanaan.bobot(), existingPelaksanaan.id());
         Pelaksanaan withBobotTersedia = pelaksanaan.withBobotTersedia(bobotTersedia);

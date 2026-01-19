@@ -1,6 +1,7 @@
 package cc.kertaskerja.bontang.rencanaaksi.pelaksanaan.web;
 
 import cc.kertaskerja.bontang.rencanaaksi.pelaksanaan.domain.PelaksanaanNotFoundException;
+import cc.kertaskerja.bontang.rencanaaksi.pelaksanaan.domain.exception.BobotExceededException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -16,6 +17,12 @@ public class PelaksanaanControllerAdvice {
     @ExceptionHandler(PelaksanaanNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     String rencanaAksiNotFoundHandler(PelaksanaanNotFoundException ex) {
+        return ex.getMessage();
+    }
+
+    @ExceptionHandler(BobotExceededException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    String bobotExceededHandler(BobotExceededException ex) {
         return ex.getMessage();
     }
 
