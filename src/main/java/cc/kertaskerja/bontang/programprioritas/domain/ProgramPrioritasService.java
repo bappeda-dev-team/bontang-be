@@ -21,9 +21,7 @@ public class ProgramPrioritasService{
                 .orElseThrow(() -> new ProgramPrioritasNotFoundException(id));
     }
 
-    public Iterable<ProgramPrioritas> getByIdSubkegiatan(Long idSubkegiatan) {
-        return programPrioritasRepository.findByIdSubkegiatan(idSubkegiatan);
-    }
+    
 
     public Iterable<ProgramPrioritas> findByPeriodeTahunRange(Integer periodeTahunAwal, Integer periodeTahunAkhir) {
         return programPrioritasRepository.findByPeriodeTahunAwalGreaterThanEqualAndPeriodeTahunAkhirLessThanEqual(
@@ -38,7 +36,6 @@ public class ProgramPrioritasService{
 
     public ProgramPrioritas tambahProgramPrioritas(ProgramPrioritasRequest request) {
         ProgramPrioritas programPrioritas = ProgramPrioritas.of(
-                request.idSubkegiatan(),
                 request.programPrioritas(),
                 request.tahun(),
                 request.keterangan(),
@@ -63,7 +60,6 @@ public class ProgramPrioritasService{
 
         ProgramPrioritas programPrioritas = new ProgramPrioritas(
                 existingProgramPrioritas.id(),
-                request.idSubkegiatan(),
                 request.programPrioritas(),
                 request.tahun(),
                 request.keterangan(),

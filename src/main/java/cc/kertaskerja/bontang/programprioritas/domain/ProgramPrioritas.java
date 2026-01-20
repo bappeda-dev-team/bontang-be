@@ -13,9 +13,6 @@ public record ProgramPrioritas(
         @Id
         Long id,
 
-        @Column("id_subkegiatan")
-        Long idSubkegiatan,
-
         @Column("program_prioritas")
         String programPrioritas,
 
@@ -38,7 +35,6 @@ public record ProgramPrioritas(
         Instant lastModifiedDate
 ) {
     public static ProgramPrioritas of (
-            Long idSubkegiatan,
             String programPrioritas,
             Integer tahun,
             String keterangan,
@@ -48,7 +44,6 @@ public record ProgramPrioritas(
     ) {
         return new ProgramPrioritas(
                 null,
-                idSubkegiatan,
                 programPrioritas,
                 tahun,
                 keterangan,

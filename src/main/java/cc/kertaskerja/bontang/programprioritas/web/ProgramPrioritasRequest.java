@@ -1,14 +1,10 @@
 package cc.kertaskerja.bontang.programprioritas.web;
 
+import io.micrometer.common.lang.Nullable;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-import io.micrometer.common.lang.Nullable;
-
 public record ProgramPrioritasRequest(
-        @Nullable
-        Long idSubkegiatan,
-
         @NotNull(message = "Program prioritas tidak boleh kosong")
         @NotEmpty(message = "Program prioritas tidak boleh kosong")
         String programPrioritas,
