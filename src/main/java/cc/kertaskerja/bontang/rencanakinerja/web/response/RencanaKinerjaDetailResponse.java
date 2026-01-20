@@ -10,7 +10,7 @@ public record RencanaKinerjaDetailResponse(
     String namaRencanaKinerja,
     String tahun,
     String statusRencanaKinerja,
-    Long idSumberDana,
+    List<SumberDanaResponse> sumberDanaList,
     OperasionalDaerahResponse operasionalDaerah,
     String nip,
     String namaPegawai,
@@ -25,6 +25,7 @@ public record RencanaKinerjaDetailResponse(
 ) {
     public static RencanaKinerjaDetailResponse from(
         RencanaKinerja rencanaKinerja,
+        List<SumberDanaResponse> sumberDanaList,
         List<IndikatorDetailResponse> indikatorList,
         List<SubkegiatanResponse> subkegiatanList,
         List<DasarHukumResponse> dasarHukumList,
@@ -44,7 +45,7 @@ public record RencanaKinerjaDetailResponse(
             rencanaKinerja.rencanaKinerja(),
             rencanaKinerja.tahun().toString(),
             rencanaKinerja.statusRencanaKinerja(),
-            rencanaKinerja.idSumberDana(),
+            sumberDanaList,
             operasionalDaerah,
             rencanaKinerja.nipPegawai(),
             rencanaKinerja.namaPegawai(),
@@ -66,7 +67,9 @@ public record RencanaKinerjaDetailResponse(
         map.put("namaRencanaKinerja", namaRencanaKinerja);
         map.put("tahun", tahun);
         map.put("statusRencanaKinerja", statusRencanaKinerja);
-        map.put("id_sumber_dana", idSumberDana);
+        map.put("sumberDanaList", sumberDanaList.stream()
+            .map(SumberDanaResponse::toMap)
+            .toList());
 
         Map<String, Object> operasionalDaerahMap = new LinkedHashMap<>();
         operasionalDaerahMap.put("kodeOpd", operasionalDaerah.kodeOpd());

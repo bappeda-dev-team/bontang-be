@@ -7,7 +7,6 @@ import cc.kertaskerja.bontang.rencanakinerja.domain.RencanaKinerja;
 
 public record RencanaKinerjaUpdateResponse(
     Long id,
-    Long idSumberDana,
     String rencanaKinerja,
     String kodeOpd,
     String nipPegawai,
@@ -17,15 +16,16 @@ public record RencanaKinerjaUpdateResponse(
     String namaOpd,
     String namaPegawai,
     String keterangan,
+    List<SumberDanaResponse> sumberDanaList,
     List<IndikatorUpdateResponse> indikatorList
 ) {
     public static RencanaKinerjaUpdateResponse from(
         RencanaKinerja rencanaKinerja,
+        List<SumberDanaResponse> sumberDanaList,
         List<IndikatorUpdateResponse> indikatorList
     ) {
         return new RencanaKinerjaUpdateResponse(
             rencanaKinerja.id(),
-            rencanaKinerja.idSumberDana(),
             rencanaKinerja.rencanaKinerja(),
             rencanaKinerja.kodeOpd(),
             rencanaKinerja.nipPegawai(),
@@ -35,6 +35,7 @@ public record RencanaKinerjaUpdateResponse(
             rencanaKinerja.namaOpd(),
             rencanaKinerja.namaPegawai(),
             rencanaKinerja.keterangan(),
+            sumberDanaList,
             indikatorList
         );
     }
@@ -42,7 +43,6 @@ public record RencanaKinerjaUpdateResponse(
     public Map<String, Object> toMap() {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("id_rencana_kinerja", id);
-        map.put("idSumberDana", idSumberDana);
         map.put("rencanaKinerja", rencanaKinerja);
         map.put("kodeOpd", kodeOpd);
         map.put("nipPegawai", nipPegawai);
@@ -52,6 +52,9 @@ public record RencanaKinerjaUpdateResponse(
         map.put("namaOpd", namaOpd);
         map.put("namaPegawai", namaPegawai);
         map.put("keterangan", keterangan);
+        map.put("sumberDanaList", sumberDanaList.stream()
+            .map(SumberDanaResponse::toMap)
+            .toList());
 
         List<Map<String, Object>> indikatorListMap = indikatorList.stream().map(indikator -> {
             Map<String, Object> indikatorMap = new LinkedHashMap<>();

@@ -7,7 +7,7 @@ import java.util.List;
 
 public record RencanaKinerjaRequest(
     @Nullable
-    Long idSumberDana,
+    List<Long> sumberDanaIds,
 
     @NotNull(message = "Rencana kinerja lama tidak boleh kosong")
     @NotEmpty(message = "Rencana kinerja lama tidak boleh kosong")

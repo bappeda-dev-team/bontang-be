@@ -7,7 +7,6 @@ import java.util.Map;
 
 public record SimpleRencanaKinerjaResponse(
     Long id,
-    Long idSumberDana,
     String rencanaKinerja,
     String kodeOpd,
     String nipPegawai,
@@ -17,15 +16,16 @@ public record SimpleRencanaKinerjaResponse(
     String namaOpd,
     String namaPegawai,
     String keterangan,
+    List<SumberDanaResponse> sumberDanaList,
     List<SimpleIndikatorResponse> indikatorList
 ) {
     public static SimpleRencanaKinerjaResponse from(
         RencanaKinerja rencanaKinerja,
+        List<SumberDanaResponse> sumberDanaList,
         List<SimpleIndikatorResponse> indikatorList
     ) {
         return new SimpleRencanaKinerjaResponse(
             rencanaKinerja.id(),
-            rencanaKinerja.idSumberDana(),
             rencanaKinerja.rencanaKinerja(),
             rencanaKinerja.kodeOpd(),
             rencanaKinerja.nipPegawai(),
@@ -35,6 +35,7 @@ public record SimpleRencanaKinerjaResponse(
             rencanaKinerja.namaOpd(),
             rencanaKinerja.namaPegawai(),
             rencanaKinerja.keterangan(),
+            sumberDanaList,
             indikatorList
         );
     }
@@ -50,7 +51,9 @@ public record SimpleRencanaKinerjaResponse(
         map.put("statusRencanaKinerja", statusRencanaKinerja);
         map.put("namaOpd", namaOpd);
         map.put("namaPegawai", namaPegawai);
-        map.put("id_sumber_dana", idSumberDana);
+        map.put("sumberDanaList", sumberDanaList.stream()
+            .map(SumberDanaResponse::toMap)
+            .toList());
         map.put("keterangan", keterangan);
         map.put("indikatorList", indikatorList.stream()
             .map(SimpleIndikatorResponse::toMap)

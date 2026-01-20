@@ -41,6 +41,10 @@ import cc.kertaskerja.bontang.rencanakinerja.web.response.RencanaKinerjaCreateRe
 import cc.kertaskerja.bontang.rencanakinerja.web.response.SimpleRencanaKinerjaResponse;
 import cc.kertaskerja.bontang.rencanakinerja.web.response.SimpleIndikatorResponse;
 import cc.kertaskerja.bontang.rencanakinerja.web.response.SimpleTargetResponse;
+import cc.kertaskerja.bontang.rencanakinerja.web.response.SumberDanaResponse;
+
+import cc.kertaskerja.bontang.sumberdana.domain.SumberDana;
+import cc.kertaskerja.bontang.sumberdana.domain.SumberDanaRepository;
 
 import java.util.stream.StreamSupport;
 
@@ -49,6 +53,8 @@ public class RencanaKinerjaService {
     private static final int TOTAL_BOBOT_AWAL = 100;
 
     private RencanaKinerjaRepository rencanaKinerjaRepository;
+    private RencanaKinerjaSumberDanaRepository rencanaKinerjaSumberDanaRepository;
+    private SumberDanaRepository sumberDanaRepository;
     private TargetService targetService;
     private IndikatorService indikatorService;
     private RencanaAksiService rencanaAksiService;
@@ -58,6 +64,8 @@ public class RencanaKinerjaService {
     private GambaranUmumService gambaranUmumService;
 
     public RencanaKinerjaService(RencanaKinerjaRepository rencanaKinerjaRepository,
+                           RencanaKinerjaSumberDanaRepository rencanaKinerjaSumberDanaRepository,
+                           SumberDanaRepository sumberDanaRepository,
                            TargetService targetService,
                            IndikatorService indikatorService,
                            RencanaAksiService rencanaAksiService,
@@ -66,6 +74,8 @@ public class RencanaKinerjaService {
                            DasarHukumService dasarHukumService,
                            GambaranUmumService gambaranUmumService) {
         this.rencanaKinerjaRepository = rencanaKinerjaRepository;
+        this.rencanaKinerjaSumberDanaRepository = rencanaKinerjaSumberDanaRepository;
+        this.sumberDanaRepository = sumberDanaRepository;
         this.targetService = targetService;
         this.indikatorService = indikatorService;
         this.rencanaAksiService = rencanaAksiService;
@@ -73,6 +83,43 @@ public class RencanaKinerjaService {
         this.subKegiatanRencanaKinerjaService = subKegiatanRencanaKinerjaService;
         this.dasarHukumService = dasarHukumService;
         this.gambaranUmumService = gambaranUmumService;
+    }
+
+    private List<SumberDanaResponse> buildSumberDanaResponses(Long rencanaKinerjaId) {
+        List<RencanaKinerjaSumberDana> relasiList = rencanaKinerjaSumberDanaRepository.findByIdRencanaKinerja(rencanaKinerjaId);
+
+        return relasiList.stream()
+            .map(relasi -> {
+                SumberDana sumberDana = sumberDanaRepository.findById(relasi.idSumberDana())
+                    .orElse(null);
+                return sumberDana != null ? SumberDanaResponse.from(sumberDana) : null;
+            })
+            .filter(Objects::nonNull)
+            .toList();
+    }
+
+    private void syncSumberDana(Long rencanaKinerjaId, List<Long> sumberDanaIds) {
+        rencanaKinerjaSumberDanaRepository.deleteByIdRencanaKinerja(rencanaKinerjaId);
+
+        if (sumberDanaIds != null && !sumberDanaIds.isEmpty()) {
+            List<RencanaKinerjaSumberDana> relasiList = sumberDanaIds.stream()
+                .map(sumberDanaId -> RencanaKinerjaSumberDana.of(rencanaKinerjaId, sumberDanaId))
+                .toList();
+
+            rencanaKinerjaSumberDanaRepository.saveAll(relasiList);
+        }
+    }
+
+    private void validateSumberDanaIds(List<Long> sumberDanaIds) {
+        if (sumberDanaIds == null || sumberDanaIds.isEmpty()) {
+            return;
+        }
+
+        for (Long sumberDanaId : sumberDanaIds) {
+            if (!sumberDanaRepository.existsById(sumberDanaId)) {
+                throw new IllegalArgumentException("Sumber dana dengan id " + sumberDanaId + " tidak ditemukan");
+            }
+        }
     }
 
     public Iterable<RencanaKinerja> findAll() {
@@ -109,7 +156,9 @@ public class RencanaKinerjaService {
                     })
                     .toList();
 
-                return SimpleRencanaKinerjaResponse.from(rencanaKinerja, indikatorResponses);
+                List<SumberDanaResponse> sumberDanaList = buildSumberDanaResponses(rencanaKinerja.id());
+
+                return SimpleRencanaKinerjaResponse.from(rencanaKinerja, sumberDanaList, indikatorResponses);
             })
             .toList();
 
@@ -131,6 +180,8 @@ public class RencanaKinerjaService {
 
         List<GambaranUmumResponse> gambaranUmumList = buildGambaranUmumResponses(rencanaKinerja.id());
 
+        List<SumberDanaResponse> sumberDanaList = buildSumberDanaResponses(rencanaKinerja.id());
+
         RencanaAksiCalculationResult calculationResult = buildRencanaAksiResponses(rencanaKinerja);
         List<RencanaAksiResponse> rencanaAksiList = calculationResult.rencanaAksiResponses();
 
@@ -144,6 +195,7 @@ public class RencanaKinerjaService {
         // Build main response
         RencanaKinerjaDetailResponse detailResponse = RencanaKinerjaDetailResponse.from(
             rencanaKinerja,
+            sumberDanaList,
             indikatorList,
             subkegiatanList,
             dasarHukumList,
@@ -308,8 +360,10 @@ public class RencanaKinerjaService {
 
     @Transactional
     public ResponseEntity<Map<String, Object>> tambahRencanaKinerja(RencanaKinerjaRequest request) {
+        validateSumberDanaIds(request.sumberDanaIds());
+
         RencanaKinerja rencanaKinerja = RencanaKinerja.of(
-                request.idSumberDana(),
+                null,
                 request.rencanaKinerja(),
                 request.kodeOpd(),
                 request.nipPegawai(),
@@ -322,24 +376,36 @@ public class RencanaKinerjaService {
         );
         RencanaKinerja savedRencanaKinerja = rencanaKinerjaRepository.save(rencanaKinerja);
 
-        // Cek jika data provider dibutuhkan
-        return buildResponse(savedRencanaKinerja, request.indikatorList());
+        syncSumberDana(savedRencanaKinerja.id(), request.sumberDanaIds());
+
+        return buildResponse(savedRencanaKinerja, request.indikatorList(), request.sumberDanaIds());
     }
 
     // Untuk method tambahRencanaKinerja
     private ResponseEntity<Map<String, Object>> buildResponse(
             RencanaKinerja savedRencanaKinerja,
-            List<RencanaKinerjaRequest.IndikatorData> indikatorList) {
+            List<RencanaKinerjaRequest.IndikatorData> indikatorList,
+            List<Long> sumberDanaIds) {
 
-        // Build indikator responses with targets
+        List<SumberDanaResponse> sumberDanaList = List.of();
+        if (sumberDanaIds != null && !sumberDanaIds.isEmpty()) {
+            sumberDanaList = sumberDanaIds.stream()
+                .map(sumberDanaId -> {
+                    SumberDana sumberDana = sumberDanaRepository.findById(sumberDanaId).orElse(null);
+                    return sumberDana != null ? SumberDanaResponse.from(sumberDana) : null;
+                })
+                .filter(Objects::nonNull)
+                .toList();
+        }
+
         List<IndikatorCreateResponse> indikatorResponses = buildIndikatorWithTargetsForCreate(
             indikatorList,
             savedRencanaKinerja.id()
         );
 
-        // Build main response
         RencanaKinerjaCreateResponse createResponse = RencanaKinerjaCreateResponse.from(
             savedRencanaKinerja,
+            sumberDanaList,
             indikatorResponses
         );
 
@@ -503,12 +569,14 @@ public class RencanaKinerjaService {
 
     @Transactional
     public ResponseEntity<Map<String, Object>> ubahRencanaKinerja(Long id, RencanaKinerjaRequest request) {
+        validateSumberDanaIds(request.sumberDanaIds());
+
         RencanaKinerja existingRencanaKinerja = rencanaKinerjaRepository.findById(id)
                 .orElseThrow(() -> new RencanaKinerjaNotFoundException(id));
 
         RencanaKinerja updatedRencanaKinerja = new RencanaKinerja(
                 id,
-                request.idSumberDana() != null ? request.idSumberDana() : existingRencanaKinerja.idSumberDana(),
+                null,
                 request.rencanaKinerja(),
                 request.kodeOpd() != null ? request.kodeOpd() : existingRencanaKinerja.kodeOpd(),
                 request.nipPegawai() != null ? request.nipPegawai() : existingRencanaKinerja.nipPegawai(),
@@ -524,14 +592,17 @@ public class RencanaKinerjaService {
 
         RencanaKinerja savedRencanaKinerja = rencanaKinerjaRepository.save(updatedRencanaKinerja);
 
-        // Build indikator responses
+        syncSumberDana(savedRencanaKinerja.id(), request.sumberDanaIds());
+
         List<cc.kertaskerja.bontang.rencanakinerja.web.response.IndikatorUpdateResponse> indikatorResponses =
             buildIndikatorWithTargetsForUpdate(savedRencanaKinerja, request.indikatorList());
 
-        // Build response using response class
+        List<SumberDanaResponse> sumberDanaList = buildSumberDanaResponses(savedRencanaKinerja.id());
+
         cc.kertaskerja.bontang.rencanakinerja.web.response.RencanaKinerjaUpdateResponse response =
             cc.kertaskerja.bontang.rencanakinerja.web.response.RencanaKinerjaUpdateResponse.from(
                 savedRencanaKinerja,
+                sumberDanaList,
                 indikatorResponses
             );
 
