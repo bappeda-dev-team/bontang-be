@@ -1,0 +1,5 @@
+ALTER TABLE program_prioritas_opd DROP CONSTRAINT IF EXISTS fk_program_prioritas_opd_subkegiatan_opd;
+ALTER TABLE program_prioritas_opd DROP CONSTRAINT IF EXISTS fk_program_prioritas_opd_rencana_kinerja;
+ALTER TABLE program_prioritas_opd DROP CONSTRAINT IF EXISTS fk_program_prioritas_opd_program_prioritas;
+
+DROP TABLE IF EXISTS program_prioritas_opd CASCADE;
