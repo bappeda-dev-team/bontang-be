@@ -9,6 +9,10 @@ public record ProgramPrioritasAnggaranRequest(
 
         @NotNull(message = "Kode OPD tidak boleh kosong")
         @NotEmpty(message = "Kode OPD tidak boleh kosong")
-        String kodeOpd
+        String kodeOpd,
+
+        String nip,
+
+        Integer tahun
 ) {
 }

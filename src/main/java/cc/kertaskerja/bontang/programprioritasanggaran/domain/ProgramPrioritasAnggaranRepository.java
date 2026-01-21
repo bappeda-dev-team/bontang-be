@@ -24,6 +24,12 @@ public interface ProgramPrioritasAnggaranRepository extends CrudRepository<Progr
 
     Iterable<ProgramPrioritasAnggaran> findByKodeOpd(String kodeOpd);
 
+    Iterable<ProgramPrioritasAnggaran> findByKodeOpdAndNipAndTahun(
+            String kodeOpd,
+            String nip,
+            Integer tahun
+    );
+
     @Modifying
     @Transactional
     @Query("DELETE FROM program_prioritas_anggaran WHERE id = :id")

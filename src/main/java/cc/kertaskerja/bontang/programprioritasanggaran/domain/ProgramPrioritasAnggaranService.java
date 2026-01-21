@@ -34,6 +34,10 @@ public class ProgramPrioritasAnggaranService {
         return programPrioritasAnggaranRepository.findAll();
     }
 
+    public Iterable<ProgramPrioritasAnggaran> getByKodeOpdNipTahun(String kodeOpd, String nip, Integer tahun) {
+        return programPrioritasAnggaranRepository.findByKodeOpdAndNipAndTahun(kodeOpd, nip, tahun);
+    }
+
     public ProgramPrioritasAnggaran detailProgramPrioritasAnggaranById(Long id) {
         return programPrioritasAnggaranRepository.findById(id)
                 .orElseThrow(() -> new ProgramPrioritasAnggaranNotFoundException(id));
@@ -43,7 +47,9 @@ public class ProgramPrioritasAnggaranService {
     public ProgramPrioritasAnggaran simpanPerencanaanAnggaran(ProgramPrioritasAnggaranRequest request) {
         ProgramPrioritasAnggaran programPrioritasAnggaran = ProgramPrioritasAnggaran.of(
                 request.idProgramPrioritas(),
-                request.kodeOpd()
+                request.kodeOpd(),
+                request.nip(),
+                request.tahun()
         );
 
         return programPrioritasAnggaranRepository.save(programPrioritasAnggaran);
@@ -57,6 +63,8 @@ public class ProgramPrioritasAnggaranService {
                 existing.id(),
                 request.idProgramPrioritas(),
                 request.kodeOpd(),
+                request.nip(),
+                request.tahun(),
                 existing.createdDate(),
                 null
         );
@@ -113,15 +121,15 @@ public class ProgramPrioritasAnggaranService {
         return rencanaKinerjaRepository.save(relasi);
     }
 
-    @Transactional
-    public void removeRencanaKinerja(Long idProgramPrioritasAnggaran, Long idRencanaKinerja) {
-        if (!programPrioritasAnggaranRepository.existsById(idProgramPrioritasAnggaran)) {
-            throw new ProgramPrioritasAnggaranNotFoundException(idProgramPrioritasAnggaran);
-        }
+    // @Transactional
+    // public void removeRencanaKinerja(Long idProgramPrioritasAnggaran, Long idRencanaKinerja) {
+    //     if (!programPrioritasAnggaranRepository.existsById(idProgramPrioritasAnggaran)) {
+    //         throw new ProgramPrioritasAnggaranNotFoundException(idProgramPrioritasAnggaran);
+    //     }
 
-        rencanaKinerjaRepository.deleteByIdProgramPrioritasAnggaranAndIdRencanaKinerja(
-                idProgramPrioritasAnggaran, idRencanaKinerja);
-    }
+    //     rencanaKinerjaRepository.deleteByIdProgramPrioritasAnggaranAndIdRencanaKinerja(
+    //             idProgramPrioritasAnggaran, idRencanaKinerja);
+    // }
 
     public void hapusProgramPrioritasAnggaran(Long id) {
         if (!programPrioritasAnggaranRepository.existsById(id)) {

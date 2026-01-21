@@ -19,6 +19,12 @@ public record ProgramPrioritasAnggaran(
         @Column("kode_opd")
         String kodeOpd,
 
+        @Column("nip")
+        String nip,
+
+        @Column("tahun")
+        Integer tahun,
+
         @CreatedDate
         Instant createdDate,
 
@@ -33,6 +39,25 @@ public record ProgramPrioritasAnggaran(
                 null,
                 idProgramPrioritas,
                 kodeOpd,
+                null,
+                null,
+                null,
+                null
+        );
+    }
+
+    public static ProgramPrioritasAnggaran of (
+            Long idProgramPrioritas,
+            String kodeOpd,
+            String nip,
+            Integer tahun
+    ) {
+        return new ProgramPrioritasAnggaran(
+                null,
+                idProgramPrioritas,
+                kodeOpd,
+                nip,
+                tahun,
                 null,
                 null
         );

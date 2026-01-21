@@ -33,6 +33,15 @@ public class ProgramPrioritasAnggaranController {
         return programPrioritasAnggaranService.findAll();
     }
 
+    @GetMapping("detail/kode-opd/{kodeOpd}/nip/{nip}/tahun/{tahun}")
+    public Iterable<ProgramPrioritasAnggaran> getByKodeOpdNipTahun(
+            @PathVariable("kodeOpd") String kodeOpd,
+            @PathVariable("nip") String nip,
+            @PathVariable("tahun") Integer tahun
+    ) {
+        return programPrioritasAnggaranService.getByKodeOpdNipTahun(kodeOpd, nip, tahun);
+    }
+
     @PostMapping
     public ResponseEntity<ProgramPrioritasAnggaran> create(@Valid @RequestBody ProgramPrioritasAnggaranRequest request) {
         ProgramPrioritasAnggaran saved = programPrioritasAnggaranService.simpanPerencanaanAnggaran(request);
@@ -69,12 +78,12 @@ public class ProgramPrioritasAnggaranController {
         return programPrioritasAnggaranService.addRencanaKinerjaBatch(id, request.getRencanaKinerja());
     }
 
-    @DeleteMapping("delete/{id}/rencana-kinerja/{idRencanaKinerja}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeRencanaKinerja(
-            @PathVariable("id") Long id,
-            @PathVariable("idRk") Long idRencanaKinerja
-    ) {
-        programPrioritasAnggaranService.removeRencanaKinerja(id, idRencanaKinerja);
-    }
+    // @DeleteMapping("delete/{id}/rencana-kinerja/{idRencanaKinerja}")
+    // @ResponseStatus(HttpStatus.NO_CONTENT)
+    // public void removeRencanaKinerja(
+    //         @PathVariable("id") Long id,
+    //         @PathVariable("idRk") Long idRencanaKinerja
+    // ) {
+    //     programPrioritasAnggaranService.removeRencanaKinerja(id, idRencanaKinerja);
+    // }
 }
