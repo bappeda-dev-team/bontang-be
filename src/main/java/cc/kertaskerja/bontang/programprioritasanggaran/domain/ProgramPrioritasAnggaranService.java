@@ -3,22 +3,31 @@ package cc.kertaskerja.bontang.programprioritasanggaran.domain;
 import cc.kertaskerja.bontang.programprioritasanggaran.domain.exception.ProgramPrioritasAnggaranNotFoundException;
 import cc.kertaskerja.bontang.programprioritasanggaran.domain.exception.ProgramPrioritasAnggaranRencanaKinerjaAlreadyExistException;
 import cc.kertaskerja.bontang.programprioritasanggaran.web.ProgramPrioritasAnggaranRequest;
+import cc.kertaskerja.bontang.programprioritasanggaran.web.ProgramPrioritasAnggaranRencanaKinerjaResponse;
+import cc.kertaskerja.bontang.programprioritasanggaran.web.RencanaKinerjaBatchRequest;
+import cc.kertaskerja.bontang.rencanakinerja.domain.RencanaKinerja;
+import cc.kertaskerja.bontang.rencanakinerja.domain.RencanaKinerjaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProgramPrioritasAnggaranService {
     private final ProgramPrioritasAnggaranRepository programPrioritasAnggaranRepository;
     private final ProgramPrioritasAnggaranRencanaKinerjaRepository rencanaKinerjaRepository;
+    private final RencanaKinerjaRepository rencanaKinerjaEntityRepository;
 
     public ProgramPrioritasAnggaranService(
             ProgramPrioritasAnggaranRepository programPrioritasAnggaranRepository,
-            ProgramPrioritasAnggaranRencanaKinerjaRepository rencanaKinerjaRepository
+            ProgramPrioritasAnggaranRencanaKinerjaRepository rencanaKinerjaRepository,
+            RencanaKinerjaRepository rencanaKinerjaEntityRepository
     ) {
         this.programPrioritasAnggaranRepository = programPrioritasAnggaranRepository;
         this.rencanaKinerjaRepository = rencanaKinerjaRepository;
+        this.rencanaKinerjaEntityRepository = rencanaKinerjaEntityRepository;
     }
 
     public Iterable<ProgramPrioritasAnggaran> findAll() {
@@ -37,13 +46,7 @@ public class ProgramPrioritasAnggaranService {
                 request.kodeOpd()
         );
 
-        ProgramPrioritasAnggaran saved = programPrioritasAnggaranRepository.save(programPrioritasAnggaran);
-
-        if (request.idRencanaKinerjaList() != null && !request.idRencanaKinerjaList().isEmpty()) {
-            simpanAtauPerbaruiListRencanaKinerja(saved.id(), request.idRencanaKinerjaList());
-        }
-
-        return saved;
+        return programPrioritasAnggaranRepository.save(programPrioritasAnggaran);
     }
 
     @Transactional
@@ -58,13 +61,7 @@ public class ProgramPrioritasAnggaranService {
                 null
         );
 
-        ProgramPrioritasAnggaran saved = programPrioritasAnggaranRepository.save(updated);
-
-        if (request.idRencanaKinerjaList() != null) {
-            simpanAtauPerbaruiListRencanaKinerja(saved.id(), request.idRencanaKinerjaList());
-        }
-
-        return saved;
+        return programPrioritasAnggaranRepository.save(updated);
     }
 
     @Transactional
@@ -133,5 +130,47 @@ public class ProgramPrioritasAnggaranService {
 
         rencanaKinerjaRepository.deleteByIdProgramPrioritasAnggaran(id);
         programPrioritasAnggaranRepository.deleteById(id);
+    }
+
+    @Transactional
+    public List<ProgramPrioritasAnggaranRencanaKinerjaResponse> addRencanaKinerjaBatch(
+            Long idProgramPrioritasAnggaran,
+            List<RencanaKinerjaBatchRequest.RencanaKinerjaItem> rencanaKinerjaItems
+    ) {
+        if (!programPrioritasAnggaranRepository.existsById(idProgramPrioritasAnggaran)) {
+            throw new ProgramPrioritasAnggaranNotFoundException(idProgramPrioritasAnggaran);
+        }
+
+        List<ProgramPrioritasAnggaranRencanaKinerjaResponse> result = new ArrayList<>();
+
+        for (RencanaKinerjaBatchRequest.RencanaKinerjaItem item : rencanaKinerjaItems) {
+            if (rencanaKinerjaRepository.existsByIdProgramPrioritasAnggaranAndIdRencanaKinerja(
+                    idProgramPrioritasAnggaran, item.getIdRencanaKinerja())) {
+                throw new ProgramPrioritasAnggaranRencanaKinerjaAlreadyExistException(
+                        item.getIdRencanaKinerja(), idProgramPrioritasAnggaran);
+            }
+
+            ProgramPrioritasAnggaranRencanaKinerja relasi = ProgramPrioritasAnggaranRencanaKinerja.of(
+                    idProgramPrioritasAnggaran,
+                    item.getIdRencanaKinerja()
+            );
+
+            ProgramPrioritasAnggaranRencanaKinerja saved = rencanaKinerjaRepository.save(relasi);
+
+            // Ambil nama rencana kinerja dari entity RencanaKinerja
+            Optional<RencanaKinerja> rencanaKinerja = rencanaKinerjaEntityRepository.findById(item.getIdRencanaKinerja());
+            String namaRencanaKinerja = rencanaKinerja.map(RencanaKinerja::rencanaKinerja).orElse(null);
+
+            result.add(new ProgramPrioritasAnggaranRencanaKinerjaResponse(
+                    saved.id(),
+                    saved.idProgramPrioritasAnggaran(),
+                    saved.idRencanaKinerja(),
+                    namaRencanaKinerja,
+                    saved.createdDate(),
+                    saved.lastModifiedDate()
+            ));
+        }
+
+        return result;
     }
 }

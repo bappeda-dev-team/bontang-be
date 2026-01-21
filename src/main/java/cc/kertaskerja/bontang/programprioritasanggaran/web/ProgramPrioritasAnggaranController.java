@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @Tag(name = "program prioritas anggaran")
@@ -61,11 +62,11 @@ public class ProgramPrioritasAnggaranController {
     }
 
     @PostMapping("{id}/rencana-kinerja")
-    public ProgramPrioritasAnggaranRencanaKinerja addRencanaKinerja(
+    public List<ProgramPrioritasAnggaranRencanaKinerjaResponse> addRencanaKinerja(
             @PathVariable("id") Long id,
-            @RequestParam("idRencanaKinerja") Long idRencanaKinerja
+            @Valid @RequestBody RencanaKinerjaBatchRequest request
     ) {
-        return programPrioritasAnggaranService.addRencanaKinerja(id, idRencanaKinerja);
+        return programPrioritasAnggaranService.addRencanaKinerjaBatch(id, request.getRencanaKinerja());
     }
 
     @DeleteMapping("delete/{id}/rencana-kinerja/{idRencanaKinerja}")
