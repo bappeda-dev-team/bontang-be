@@ -7,8 +7,16 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Optional;
+
 public interface ProgramPrioritasAnggaranRencanaKinerjaRepository extends CrudRepository<ProgramPrioritasAnggaranRencanaKinerja, Long> {
-    Iterable<ProgramPrioritasAnggaranRencanaKinerja> findByIdProgramPrioritasAnggaran(Long idProgramPrioritasAnggaran);
+    List<ProgramPrioritasAnggaranRencanaKinerja> findByIdProgramPrioritasAnggaran(Long idProgramPrioritasAnggaran);
+
+    Optional<ProgramPrioritasAnggaranRencanaKinerja> findByIdProgramPrioritasAnggaranAndIdRencanaKinerja(
+            Long idProgramPrioritasAnggaran,
+            Long idRencanaKinerja
+    );
 
     boolean existsByIdProgramPrioritasAnggaranAndIdRencanaKinerja(
             Long idProgramPrioritasAnggaran,

@@ -4,6 +4,7 @@ import cc.kertaskerja.bontang.programprioritasanggaran.domain.exception.ProgramP
 import cc.kertaskerja.bontang.programprioritasanggaran.domain.exception.ProgramPrioritasAnggaranRencanaKinerjaAlreadyExistException;
 import cc.kertaskerja.bontang.programprioritasanggaran.web.ProgramPrioritasAnggaranRequest;
 import cc.kertaskerja.bontang.programprioritasanggaran.web.ProgramPrioritasAnggaranRencanaKinerjaResponse;
+import cc.kertaskerja.bontang.programprioritasanggaran.web.ProgramPrioritasAnggaranWithRencanaKinerjaResponse;
 import cc.kertaskerja.bontang.programprioritasanggaran.web.RencanaKinerjaBatchRequest;
 import cc.kertaskerja.bontang.rencanakinerja.domain.RencanaKinerja;
 import cc.kertaskerja.bontang.rencanakinerja.domain.RencanaKinerjaRepository;
@@ -13,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ProgramPrioritasAnggaranService {
@@ -34,8 +37,38 @@ public class ProgramPrioritasAnggaranService {
         return programPrioritasAnggaranRepository.findAll();
     }
 
-    public Iterable<ProgramPrioritasAnggaran> getByKodeOpdNipTahun(String kodeOpd, String nip, Integer tahun) {
-        return programPrioritasAnggaranRepository.findByKodeOpdAndNipAndTahun(kodeOpd, nip, tahun);
+    public List<ProgramPrioritasAnggaranWithRencanaKinerjaResponse> getByKodeOpdNipTahun(String kodeOpd, String nip, Integer tahun) {
+        Iterable<ProgramPrioritasAnggaran> programs = programPrioritasAnggaranRepository.findByKodeOpdAndNipAndTahun(kodeOpd, nip, tahun);
+        List<ProgramPrioritasAnggaranWithRencanaKinerjaResponse> result = new ArrayList<>();
+
+        for (ProgramPrioritasAnggaran program : programs) {
+            List<ProgramPrioritasAnggaranRencanaKinerja> rencanaKinerjaList =
+                    rencanaKinerjaRepository.findByIdProgramPrioritasAnggaran(program.id());
+
+            List<ProgramPrioritasAnggaranWithRencanaKinerjaResponse.RencanaKinerjaItem> rencanaKinerjaItems = rencanaKinerjaList.stream()
+                    .map(rk -> {
+                        Optional<RencanaKinerja> rencanaKinerja = rencanaKinerjaEntityRepository.findById(rk.idRencanaKinerja());
+                        String namaRencanaKinerja = rencanaKinerja.map(RencanaKinerja::rencanaKinerja).orElse(null);
+                        return new ProgramPrioritasAnggaranWithRencanaKinerjaResponse.RencanaKinerjaItem(
+                                rk.idRencanaKinerja(),
+                                namaRencanaKinerja
+                        );
+                    })
+                    .collect(Collectors.toList());
+
+            result.add(new ProgramPrioritasAnggaranWithRencanaKinerjaResponse(
+                    program.id(),
+                    program.idProgramPrioritas(),
+                    program.kodeOpd(),
+                    program.nip(),
+                    program.tahun(),
+                    rencanaKinerjaItems,
+                    program.createdDate(),
+                    program.lastModifiedDate()
+            ));
+        }
+
+        return result;
     }
 
     public ProgramPrioritasAnggaran detailProgramPrioritasAnggaranById(Long id) {
@@ -121,16 +154,6 @@ public class ProgramPrioritasAnggaranService {
         return rencanaKinerjaRepository.save(relasi);
     }
 
-    // @Transactional
-    // public void removeRencanaKinerja(Long idProgramPrioritasAnggaran, Long idRencanaKinerja) {
-    //     if (!programPrioritasAnggaranRepository.existsById(idProgramPrioritasAnggaran)) {
-    //         throw new ProgramPrioritasAnggaranNotFoundException(idProgramPrioritasAnggaran);
-    //     }
-
-    //     rencanaKinerjaRepository.deleteByIdProgramPrioritasAnggaranAndIdRencanaKinerja(
-    //             idProgramPrioritasAnggaran, idRencanaKinerja);
-    // }
-
     public void hapusProgramPrioritasAnggaran(Long id) {
         if (!programPrioritasAnggaranRepository.existsById(id)) {
             throw new ProgramPrioritasAnggaranNotFoundException(id);
@@ -151,31 +174,63 @@ public class ProgramPrioritasAnggaranService {
 
         List<ProgramPrioritasAnggaranRencanaKinerjaResponse> result = new ArrayList<>();
 
-        for (RencanaKinerjaBatchRequest.RencanaKinerjaItem item : rencanaKinerjaItems) {
-            if (rencanaKinerjaRepository.existsByIdProgramPrioritasAnggaranAndIdRencanaKinerja(
-                    idProgramPrioritasAnggaran, item.getIdRencanaKinerja())) {
-                throw new ProgramPrioritasAnggaranRencanaKinerjaAlreadyExistException(
-                        item.getIdRencanaKinerja(), idProgramPrioritasAnggaran);
+        Set<Long> requestedIds = rencanaKinerjaItems.stream()
+                .map(RencanaKinerjaBatchRequest.RencanaKinerjaItem::getIdRencanaKinerja)
+                .collect(Collectors.toSet());
+
+        List<ProgramPrioritasAnggaranRencanaKinerja> existingRelations =
+                rencanaKinerjaRepository.findByIdProgramPrioritasAnggaran(idProgramPrioritasAnggaran);
+
+        // Hapus data relasi yang tidak ada di dalam request
+        for (ProgramPrioritasAnggaranRencanaKinerja existing : existingRelations) {
+            if (!requestedIds.contains(existing.idRencanaKinerja())) {
+                rencanaKinerjaRepository.deleteByIdProgramPrioritasAnggaranAndIdRencanaKinerja(
+                        idProgramPrioritasAnggaran,
+                        existing.idRencanaKinerja()
+                );
             }
+        }
 
-            ProgramPrioritasAnggaranRencanaKinerja relasi = ProgramPrioritasAnggaranRencanaKinerja.of(
-                    idProgramPrioritasAnggaran,
-                    item.getIdRencanaKinerja()
-            );
+        // UPSERT
+        for (RencanaKinerjaBatchRequest.RencanaKinerjaItem item : rencanaKinerjaItems) {
+            Optional<ProgramPrioritasAnggaranRencanaKinerja> existingRelasi =
+                    rencanaKinerjaRepository.findByIdProgramPrioritasAnggaranAndIdRencanaKinerja(
+                            idProgramPrioritasAnggaran, item.getIdRencanaKinerja());
 
-            ProgramPrioritasAnggaranRencanaKinerja saved = rencanaKinerjaRepository.save(relasi);
+            ProgramPrioritasAnggaranRencanaKinerja relasi;
+
+            if (existingRelasi.isPresent()) {
+                // Relasi ditemukan
+                ProgramPrioritasAnggaranRencanaKinerja existing = existingRelasi.get();
+                relasi = rencanaKinerjaRepository.save(
+                        new ProgramPrioritasAnggaranRencanaKinerja(
+                                existing.id(),
+                                existing.idProgramPrioritasAnggaran(),
+                                existing.idRencanaKinerja(),
+                                existing.createdDate(),
+                                null
+                        )
+                );
+            } else {
+                // Buat relasi baru
+                ProgramPrioritasAnggaranRencanaKinerja newRelasi = ProgramPrioritasAnggaranRencanaKinerja.of(
+                        idProgramPrioritasAnggaran,
+                        item.getIdRencanaKinerja()
+                );
+                relasi = rencanaKinerjaRepository.save(newRelasi);
+            }
 
             // Ambil nama rencana kinerja dari entity RencanaKinerja
             Optional<RencanaKinerja> rencanaKinerja = rencanaKinerjaEntityRepository.findById(item.getIdRencanaKinerja());
             String namaRencanaKinerja = rencanaKinerja.map(RencanaKinerja::rencanaKinerja).orElse(null);
 
             result.add(new ProgramPrioritasAnggaranRencanaKinerjaResponse(
-                    saved.id(),
-                    saved.idProgramPrioritasAnggaran(),
-                    saved.idRencanaKinerja(),
+                    relasi.id(),
+                    relasi.idProgramPrioritasAnggaran(),
+                    relasi.idRencanaKinerja(),
                     namaRencanaKinerja,
-                    saved.createdDate(),
-                    saved.lastModifiedDate()
+                    relasi.createdDate(),
+                    relasi.lastModifiedDate()
             ));
         }
 
