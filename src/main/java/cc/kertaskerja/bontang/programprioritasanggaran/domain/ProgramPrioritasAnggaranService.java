@@ -1,13 +1,18 @@
 package cc.kertaskerja.bontang.programprioritasanggaran.domain;
 
+import cc.kertaskerja.bontang.programprioritas.domain.ProgramPrioritasRepository;
+import cc.kertaskerja.bontang.programprioritas.domain.exception.ProgramPrioritasNotFoundException;
 import cc.kertaskerja.bontang.programprioritasanggaran.domain.exception.ProgramPrioritasAnggaranNotFoundException;
 import cc.kertaskerja.bontang.programprioritasanggaran.domain.exception.ProgramPrioritasAnggaranRencanaKinerjaAlreadyExistException;
+import cc.kertaskerja.bontang.programprioritasanggaran.web.CheckRelasiProgramPrioritasResponse;
+import cc.kertaskerja.bontang.programprioritasanggaran.web.CheckRelasiRencanaKinerjaResponse;
 import cc.kertaskerja.bontang.programprioritasanggaran.web.ProgramPrioritasAnggaranRequest;
 import cc.kertaskerja.bontang.programprioritasanggaran.web.ProgramPrioritasAnggaranRencanaKinerjaResponse;
 import cc.kertaskerja.bontang.programprioritasanggaran.web.ProgramPrioritasAnggaranWithRencanaKinerjaResponse;
 import cc.kertaskerja.bontang.programprioritasanggaran.web.RencanaKinerjaBatchRequest;
 import cc.kertaskerja.bontang.rencanakinerja.domain.RencanaKinerja;
 import cc.kertaskerja.bontang.rencanakinerja.domain.RencanaKinerjaRepository;
+import cc.kertaskerja.bontang.rencanakinerja.domain.exception.RencanaKinerjaNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,15 +27,18 @@ public class ProgramPrioritasAnggaranService {
     private final ProgramPrioritasAnggaranRepository programPrioritasAnggaranRepository;
     private final ProgramPrioritasAnggaranRencanaKinerjaRepository rencanaKinerjaRepository;
     private final RencanaKinerjaRepository rencanaKinerjaEntityRepository;
+    private final ProgramPrioritasRepository programPrioritasRepository;
 
     public ProgramPrioritasAnggaranService(
             ProgramPrioritasAnggaranRepository programPrioritasAnggaranRepository,
             ProgramPrioritasAnggaranRencanaKinerjaRepository rencanaKinerjaRepository,
-            RencanaKinerjaRepository rencanaKinerjaEntityRepository
+            RencanaKinerjaRepository rencanaKinerjaEntityRepository,
+            ProgramPrioritasRepository programPrioritasRepository
     ) {
         this.programPrioritasAnggaranRepository = programPrioritasAnggaranRepository;
         this.rencanaKinerjaRepository = rencanaKinerjaRepository;
         this.rencanaKinerjaEntityRepository = rencanaKinerjaEntityRepository;
+        this.programPrioritasRepository = programPrioritasRepository;
     }
 
     public Iterable<ProgramPrioritasAnggaran> findAll() {
@@ -235,5 +243,29 @@ public class ProgramPrioritasAnggaranService {
         }
 
         return result;
+    }
+
+    public CheckRelasiProgramPrioritasResponse checkRelasiByProgramPrioritas(Long idProgramPrioritas) {
+        // Validasi apakah program prioritas ada
+        if (!programPrioritasRepository.existsById(idProgramPrioritas)) {
+            throw new ProgramPrioritasNotFoundException(idProgramPrioritas);
+        }
+
+        // Hitung jumlah relasi
+        long count = programPrioritasAnggaranRepository.countByIdProgramPrioritas(idProgramPrioritas);
+
+        return CheckRelasiProgramPrioritasResponse.of(idProgramPrioritas, count);
+    }
+
+    public CheckRelasiRencanaKinerjaResponse checkRelasiByRencanaKinerja(Long idRencanaKinerja) {
+        // Validasi apakah rencana kinerja ada
+        if (!rencanaKinerjaEntityRepository.existsById(idRencanaKinerja)) {
+            throw new RencanaKinerjaNotFoundException(idRencanaKinerja);
+        }
+
+        // Hitung jumlah relasi
+        long count = rencanaKinerjaRepository.countByIdRencanaKinerja(idRencanaKinerja);
+
+        return CheckRelasiRencanaKinerjaResponse.of(idRencanaKinerja, count);
     }
 }

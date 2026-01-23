@@ -30,6 +30,10 @@ public interface ProgramPrioritasAnggaranRepository extends CrudRepository<Progr
             Integer tahun
     );
 
+    boolean existsByIdProgramPrioritas(Long idProgramPrioritas);
+
+    long countByIdProgramPrioritas(Long idProgramPrioritas);
+
     @Modifying
     @Transactional
     @Query("DELETE FROM program_prioritas_anggaran WHERE id = :id")

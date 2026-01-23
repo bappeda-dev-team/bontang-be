@@ -35,4 +35,6 @@ public interface ProgramPrioritasAnggaranRencanaKinerjaRepository extends CrudRe
             @NonNull @Param("idProgramPrioritasAnggaran") Long idProgramPrioritasAnggaran,
             @NonNull @Param("idRencanaKinerja") Long idRencanaKinerja
     );
+
+    long countByIdRencanaKinerja(Long idRencanaKinerja);
 }

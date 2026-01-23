@@ -3,6 +3,7 @@ package cc.kertaskerja.bontang.programprioritasanggaran.web;
 import cc.kertaskerja.bontang.programprioritasanggaran.domain.ProgramPrioritasAnggaran;
 import cc.kertaskerja.bontang.programprioritasanggaran.domain.ProgramPrioritasAnggaranRencanaKinerja;
 import cc.kertaskerja.bontang.programprioritasanggaran.domain.ProgramPrioritasAnggaranService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -76,5 +77,25 @@ public class ProgramPrioritasAnggaranController {
             @Valid @RequestBody RencanaKinerjaBatchRequest request
     ) {
         return programPrioritasAnggaranService.addRencanaKinerjaBatch(id, request.getRencanaKinerja());
+    }
+
+    /**
+     * Cek relasi antara program prioritas dengan program prioritas anggaran
+     */
+    @Operation(summary = "Cek relasi program prioritas dengan program prioritas anggaran",
+            description = "Memeriksa apakah program prioritas memiliki relasi dengan program prioritas anggaran dan menghitung jumlah relasinya")
+    @GetMapping("check-relasi-program-prioritas/{id}")
+    public CheckRelasiProgramPrioritasResponse checkRelasiProgramPrioritas(@PathVariable("id") Long id) {
+        return programPrioritasAnggaranService.checkRelasiByProgramPrioritas(id);
+    }
+
+    /**
+     * Cek relasi antara rencana kinerja dengan program prioritas anggaran
+     */
+    @Operation(summary = "Cek relasi rencana kinerja dengan program prioritas anggaran",
+            description = "Memeriksa apakah rencana kinerja memiliki relasi dengan program prioritas anggaran dan menghitung jumlah relasinya")
+    @GetMapping("check-relasi-rencana-kinerja/{id}")
+    public CheckRelasiRencanaKinerjaResponse checkRelasiRencanaKinerja(@PathVariable("id") Long id) {
+        return programPrioritasAnggaranService.checkRelasiByRencanaKinerja(id);
     }
 }
