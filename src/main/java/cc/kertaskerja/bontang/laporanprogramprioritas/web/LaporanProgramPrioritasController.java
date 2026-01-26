@@ -21,7 +21,7 @@ public class LaporanProgramPrioritasController {
 
     @Operation(summary = "Get laporan program prioritas multiple rekap anggaran",
             description = "Mengambil data laporan program prioritas rekap anggaran untuk banyak program prioritas anggaran berdasarkan id program prioritas anggaran (dipisahkan dengan koma), kode OPD, dan tahun")
-    @GetMapping("detail/{idProgramPrioritasAnggaran}")
+    @GetMapping("detail/id_program_prioritas_anggaran={idProgramPrioritasAnggaran}")
     public List<LaporanProgramPrioritasDataResponse> getLaporanProgramPrioritas(
             @PathVariable("idProgramPrioritasAnggaran") String idProgramPrioritasAnggaran,
             @RequestParam("kode_opd") String kode_opd,
