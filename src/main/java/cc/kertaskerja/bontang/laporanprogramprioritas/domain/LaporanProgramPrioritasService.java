@@ -100,8 +100,9 @@ public class LaporanProgramPrioritasService {
                     List<RincianBelanja> rincianBelanjaList =
                             rincianBelanjaRepository.findByIdSubkegiatanRencanaKinerja(subKegiatan.id());
                     pagu = rincianBelanjaList.stream()
-                            .mapToInt(RincianBelanja::totalAnggaran)
-                            .sum();
+                            .findFirst()
+                            .map(RincianBelanja::totalAnggaran)
+                            .orElse(0);
                 }
 
                 // 7. Hitung tahapan pelaksanaan (TW)
