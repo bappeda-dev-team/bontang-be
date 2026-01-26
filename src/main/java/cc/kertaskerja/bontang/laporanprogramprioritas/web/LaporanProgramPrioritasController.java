@@ -20,17 +20,17 @@ public class LaporanProgramPrioritasController {
     }
 
     @Operation(summary = "Get laporan program prioritas multiple rekap anggaran",
-            description = "Mengambil data laporan program prioritas rekap anggaran untuk banyak program prioritas berdasarkan id program prioritas (dipisahkan dengan koma), kode OPD, dan tahun")
-    @GetMapping("batch/{idProgramPrioritas}")
-    public List<LaporanProgramPrioritasDataResponse> getLaporanBatch(
-            @PathVariable("idProgramPrioritas") String idProgramPrioritas,
+            description = "Mengambil data laporan program prioritas rekap anggaran untuk banyak program prioritas anggaran berdasarkan id program prioritas anggaran (dipisahkan dengan koma), kode OPD, dan tahun")
+    @GetMapping("detail/{idProgramPrioritasAnggaran}")
+    public List<LaporanProgramPrioritasDataResponse> getLaporanProgramPrioritas(
+            @PathVariable("idProgramPrioritasAnggaran") String idProgramPrioritasAnggaran,
             @RequestParam("kode_opd") String kode_opd,
             @RequestParam("tahun") Integer tahun
     ) {
-        List<Long> idProgramPrioritasList = Arrays.stream(idProgramPrioritas.split(","))
+        List<Long> idProgramPrioritasAnggaranList = Arrays.stream(idProgramPrioritasAnggaran.split(","))
                 .map(String::trim)
                 .map(Long::parseLong)
                 .toList();
-        return laporanProgramPrioritasService.getLaporanBatch(idProgramPrioritasList, kode_opd, null, tahun);
+        return laporanProgramPrioritasService.getLaporanProgramPrioritas(idProgramPrioritasAnggaranList, kode_opd, null, tahun);
     }
 }
