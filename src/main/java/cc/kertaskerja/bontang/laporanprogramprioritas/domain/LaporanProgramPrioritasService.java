@@ -87,21 +87,25 @@ public class LaporanProgramPrioritasService {
                                 rencanaKinerja.id().intValue()
                         );
 
-                // 6. Hitung total anggaran (pagu)
+                // 6. Hitung total anggaran (pagu) dari SEMUA subkegiatan
                 Integer pagu = 0;
                 String kodeSubkegiatan = null;
                 String namaSubkegiatan = null;
 
                 if (!subKegiatanList.isEmpty()) {
-                    SubKegiatanRencanaKinerja subKegiatan = subKegiatanList.get(0);
-                    kodeSubkegiatan = subKegiatan.kodeSubKegiatan();
-                    namaSubkegiatan = subKegiatan.namaSubKegiatan();
-
-                    List<RincianBelanja> rincianBelanjaList =
-                            rincianBelanjaRepository.findByIdSubkegiatanRencanaKinerja(subKegiatan.id());
-                    pagu = rincianBelanjaList.stream()
-                            .mapToInt(RincianBelanja::totalAnggaran)
-                            .sum();
+                    // Ambil data subkegiatan pertama untuk informasi
+                    SubKegiatanRencanaKinerja subKegiatanPertama = subKegiatanList.get(0);
+                    kodeSubkegiatan = subKegiatanPertama.kodeSubKegiatan();
+                    namaSubkegiatan = subKegiatanPertama.namaSubKegiatan();
+                    
+                    // Jumlahkan pagu dari SEMUA subkegiatan
+                    for (SubKegiatanRencanaKinerja subKegiatan : subKegiatanList) {
+                        List<RincianBelanja> rincianBelanjaList =
+                                rincianBelanjaRepository.findByIdSubkegiatanRencanaKinerja(subKegiatan.id());
+                        pagu += rincianBelanjaList.stream()
+                                .mapToInt(RincianBelanja::totalAnggaran)
+                                .sum();
+                    }
                 }
 
                 // 7. Hitung tahapan pelaksanaan (TW)
