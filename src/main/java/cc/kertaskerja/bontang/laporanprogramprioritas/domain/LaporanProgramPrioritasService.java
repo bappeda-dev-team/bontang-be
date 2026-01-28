@@ -5,6 +5,8 @@ import cc.kertaskerja.bontang.laporanprogramprioritas.web.response.LaporanProgra
 import cc.kertaskerja.bontang.laporanprogramprioritas.web.response.PelaksanaLaporanResponse;
 import cc.kertaskerja.bontang.laporanprogramprioritas.web.response.RencanaKinerjaLaporanResponse;
 import cc.kertaskerja.bontang.laporanprogramprioritas.web.response.TahapanPelaksanaanResponse;
+import cc.kertaskerja.bontang.opd.domain.Opd;
+import cc.kertaskerja.bontang.opd.domain.OpdRepository;
 import cc.kertaskerja.bontang.programprioritas.domain.ProgramPrioritas;
 import cc.kertaskerja.bontang.programprioritas.domain.exception.ProgramPrioritasNotFoundException;
 import cc.kertaskerja.bontang.programprioritasanggaran.domain.ProgramPrioritasAnggaran;
@@ -34,6 +36,7 @@ public class LaporanProgramPrioritasService {
     private final SubKegiatanRencanaKinerjaRepository subKegiatanRencanaKinerjaRepository;
     private final PelaksanaanRepository pelaksanaanRepository;
     private final RincianBelanjaRepository rincianBelanjaRepository;
+    private final OpdRepository opdRepository;
 
     public LaporanProgramPrioritasService(
             LaporanProgramPrioritasRepository laporanProgramPrioritasRepository,
@@ -42,7 +45,8 @@ public class LaporanProgramPrioritasService {
             RencanaKinerjaRepository rencanaKinerjaEntityRepository,
             SubKegiatanRencanaKinerjaRepository subKegiatanRencanaKinerjaRepository,
             PelaksanaanRepository pelaksanaanRepository,
-            RincianBelanjaRepository rincianBelanjaRepository
+            RincianBelanjaRepository rincianBelanjaRepository,
+            OpdRepository opdRepository
     ) {
         this.laporanProgramPrioritasRepository = laporanProgramPrioritasRepository;
         this.programPrioritasAnggaranRepository = programPrioritasAnggaranRepository;
@@ -51,12 +55,11 @@ public class LaporanProgramPrioritasService {
         this.subKegiatanRencanaKinerjaRepository = subKegiatanRencanaKinerjaRepository;
         this.pelaksanaanRepository = pelaksanaanRepository;
         this.rincianBelanjaRepository = rincianBelanjaRepository;
+        this.opdRepository = opdRepository;
     }
 
     public LaporanProgramPrioritasDataResponse getLaporan(
             Long idProgramPrioritasAnggaran,
-            String kodeOpd,
-            String namaOpd,
             Integer tahun
     ) {
         // 1. Ambil data ProgramPrioritasAnggaran berdasarkan id
@@ -143,6 +146,11 @@ public class LaporanProgramPrioritasService {
         }
 
         // 9. Buat list pelaksana
+        String kodeOpd = programPrioritasAnggaran.kodeOpd();
+        String namaOpd = opdRepository.findByKodeOpd(kodeOpd)
+                .map(Opd::namaOpd)
+                .orElse(null);
+
         List<PelaksanaLaporanResponse> pelaksanas = new ArrayList<>();
         if (!rencanaKinerjaResponses.isEmpty()) {
             pelaksanas.add(new PelaksanaLaporanResponse(
@@ -167,12 +175,10 @@ public class LaporanProgramPrioritasService {
 
     public List<LaporanProgramPrioritasDataResponse> getLaporanProgramPrioritas(
             List<Long> idProgramPrioritasAnggaranList,
-            String kodeOpd,
-            String namaOpd,
             Integer tahun
     ) {
         return idProgramPrioritasAnggaranList.stream()
-                .map(id -> getLaporan(id, kodeOpd, namaOpd, tahun))
+                .map(id -> getLaporan(id, tahun))
                 .toList();
     }
 
