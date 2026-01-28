@@ -20,6 +20,8 @@ public interface RincianBelanjaRepository extends CrudRepository<RincianBelanja,
 
     List<RincianBelanja> findByNipPegawaiAndKodeOpdAndTahun(@NonNull String nipPegawai, String kodeOpd, @NonNull Integer tahun);
 
+    List<RincianBelanja> findByKodeOpdAndTahun(String kodeOpd, @NonNull Integer tahun);
+
     @Modifying
     @Transactional
     @Query("DELETE FROM rincian_belanja WHERE id = :id")

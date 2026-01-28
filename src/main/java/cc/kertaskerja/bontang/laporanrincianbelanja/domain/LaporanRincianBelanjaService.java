@@ -58,12 +58,11 @@ public class LaporanRincianBelanjaService {
     }
 
     public LaporanRincianBelanjaEnvelopeResponse getLaporanRincianBelanja(
-            String nipPegawai,
             String kodeOpd,
             Integer tahun
     ) {
         List<RencanaKinerja> rencanaKinerjaList =
-                rencanaKinerjaRepository.findByNipPegawaiAndKodeOpdAndTahun(nipPegawai, kodeOpd, tahun);
+                rencanaKinerjaRepository.findByKodeOpdAndTahun(kodeOpd, tahun);
 
         if (rencanaKinerjaList.isEmpty()) {
             return new LaporanRincianBelanjaEnvelopeResponse(
@@ -74,7 +73,7 @@ public class LaporanRincianBelanjaService {
         }
 
         List<RincianBelanja> rincianBelanjaRecords =
-                rincianBelanjaRepository.findByNipPegawaiAndKodeOpdAndTahun(nipPegawai, kodeOpd, tahun);
+                rincianBelanjaRepository.findByKodeOpdAndTahun(kodeOpd, tahun);
 
         Map<Long, RincianBelanja> rincianBelanjaByRencanaAksiId = rincianBelanjaRecords.stream()
                 .filter(r -> r.idRencanaAksi() != null)

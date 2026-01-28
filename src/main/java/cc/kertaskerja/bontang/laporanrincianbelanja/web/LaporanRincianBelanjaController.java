@@ -19,12 +19,11 @@ public class LaporanRincianBelanjaController {
         this.laporanRincianBelanjaService = laporanRincianBelanjaService;
     }
 
-    @GetMapping("detail/pegawai/{nipPegawai}/{kodeOpd}/{tahun}")
+    @GetMapping("detail/kodeopd/{kodeOpd}/tahun/{tahun}")
     public LaporanRincianBelanjaEnvelopeResponse getLaporanRincianBelanja(
-            @PathVariable("nipPegawai") String nipPegawai,
             @PathVariable("kodeOpd") String kodeOpd,
             @PathVariable("tahun") Integer tahun
     ) {
-        return laporanRincianBelanjaService.getLaporanRincianBelanja(nipPegawai, kodeOpd, tahun);
+        return laporanRincianBelanjaService.getLaporanRincianBelanja(kodeOpd, tahun);
     }
 }
