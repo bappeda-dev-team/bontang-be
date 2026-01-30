@@ -279,12 +279,14 @@ public class RincianBelanjaService {
 
     private record ActionDetail(String idString, Long idLong, String nama) {}
     
-    public RincianBelanja upsertRincianBelanja(Long idRencanaAksi, Integer anggaran) {
+    public RincianBelanja upsertRincianBelanja(Long idRencanaAksi, Integer anggaran, String kodeRekening, String namaRekening) {
         // Cek jika ada data record rencana belanja
         Optional<RincianBelanja> existingRecord = rincianBelanjaRepository.findByIdRencanaAksi(idRencanaAksi);
         
         if (existingRecord.isPresent()) {
             RincianBelanja existing = existingRecord.get();
+            String resolvedKodeRekening = kodeRekening != null ? kodeRekening : existing.kodeRekening();
+            String resolvedNamaRekening = namaRekening != null ? namaRekening : existing.namaRekening();
             
             // Fetch data subkegiatan jika tidak ada
             Long idSubkegiatanRencanaKinerja = existing.idSubkegiatanRencanaKinerja();
@@ -375,8 +377,8 @@ public class RincianBelanjaService {
                 satuan,
                 existing.sumberDana(),
                 existing.rencanaAksi(),
-                existing.kodeRekening(),
-                existing.namaRekening(),
+                resolvedKodeRekening,
+                resolvedNamaRekening,
                 anggaran,
                 existing.totalAnggaran(),
                 existing.createdDate(),
@@ -512,8 +514,8 @@ public class RincianBelanjaService {
                     satuan,
                     null,
                     rencanaAksi.namaRencanaAksi(),
-                    null,
-                    null,
+                    kodeRekening,
+                    namaRekening,
                     anggaran,
                     anggaran
                 );

@@ -37,8 +37,10 @@ public class RincianBelanjaController {
     public ResponseEntity<RincianBelanjaCreateResponse> upsertRincianBelanja(
             @Valid @RequestBody RincianBelanjaCreateRequest request) {
         RincianBelanja updated = rincianBelanjaService.upsertRincianBelanja(
-                request.id_rencana_aksi(), 
-                request.anggaran()
+                request.id_rencana_aksi(),
+                request.anggaran(),
+                request.kode_rekening(),
+                request.nama_rekening()
         );
         
         if (updated == null) {
@@ -48,7 +50,9 @@ public class RincianBelanjaController {
         RincianBelanjaCreateResponse response = new RincianBelanjaCreateResponse(
                 updated.idRencanaAksi(),
                 updated.rencanaAksi(),
-                updated.anggaran()
+                updated.anggaran(),
+                updated.kodeRekening(),
+                updated.namaRekening()
         );
         
         return ResponseEntity.ok(response);
