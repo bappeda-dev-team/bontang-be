@@ -1,0 +1,4 @@
+﻿ALTER TABLE pegawai
+    ALTER COLUMN email DROP NOT NULL,
+    ALTER COLUMN jabatan_dinas DROP NOT NULL,
+    ALTER COLUMN jabatan_tim DROP NOT NULL;

@@ -19,16 +19,13 @@ public record PegawaiRequest(
         @NotEmpty(message = "NIP tidak boleh kosong")
         String nip,
 
-        @NotNull(message = "Email tidak boleh kosong")
-        @NotEmpty(message = "Email tidak boleh kosong")
+        @Nullable
         String email,
 
-        @NotNull(message = "Jabatan dinas tidak boleh kosong")
-        @NotEmpty(message = "Jabatan dinas tidak boleh kosong")
+        @Nullable
         String jabatanDinas,
 
-        @NotNull(message = "Jabatan tim tidak boleh kosong")
-        @NotEmpty(message = "Jabatan tim tidak boleh kosong")
+        @Nullable
         String jabatanTim
 ) {
 }
