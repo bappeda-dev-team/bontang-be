@@ -257,7 +257,9 @@ public class RincianBelanjaService {
 
         for (ActionDetail action : actionDetails) {
             Integer actualAnggaran = calculateAnggaranForAction(subkegiatanRecords, action.idLong());
-            actions.add(new RencanaAksi(action.idString(), action.nama(), actualAnggaran));
+            String kodeRekening = findFirstKodeRekeningForAction(subkegiatanRecords, action.idLong());
+            String namaRekening = findFirstNamaRekeningForAction(subkegiatanRecords, action.idLong());
+            actions.add(new RencanaAksi(action.idString(), action.nama(), actualAnggaran, kodeRekening, namaRekening));
         }
 
         return actions;
@@ -275,6 +277,32 @@ public class RincianBelanjaService {
             .filter(rb -> idRencanaAksi.equals(rb.idRencanaAksi()))
             .mapToInt(RincianBelanja::anggaran)
             .sum();
+    }
+
+    private String findFirstKodeRekeningForAction(List<RincianBelanja> records, Long idRencanaAksi) {
+        if (idRencanaAksi == null || records == null) {
+            return null;
+        }
+
+        return records.stream()
+            .filter(rb -> idRencanaAksi.equals(rb.idRencanaAksi()))
+            .map(RincianBelanja::kodeRekening)
+            .filter(kode -> kode != null && !kode.isBlank())
+            .findFirst()
+            .orElse(null);
+    }
+
+    private String findFirstNamaRekeningForAction(List<RincianBelanja> records, Long idRencanaAksi) {
+        if (idRencanaAksi == null || records == null) {
+            return null;
+        }
+
+        return records.stream()
+            .filter(rb -> idRencanaAksi.equals(rb.idRencanaAksi()))
+            .map(RincianBelanja::namaRekening)
+            .filter(nama -> nama != null && !nama.isBlank())
+            .findFirst()
+            .orElse(null);
     }
 
     private record ActionDetail(String idString, Long idLong, String nama) {}

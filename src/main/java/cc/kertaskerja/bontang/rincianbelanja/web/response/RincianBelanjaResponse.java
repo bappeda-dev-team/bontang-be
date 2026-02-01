@@ -33,6 +33,8 @@ public record RincianBelanjaResponse(
     public record RencanaAksi(
         String idRencanaAksi,
         String renaksi,
-        Integer anggaran
+        Integer anggaran,
+        String kodeRekening,
+        String namaRekening
     ) {}
 }
