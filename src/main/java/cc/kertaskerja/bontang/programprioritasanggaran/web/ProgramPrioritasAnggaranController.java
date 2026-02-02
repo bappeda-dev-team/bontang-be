@@ -44,12 +44,20 @@ public class ProgramPrioritasAnggaranController {
     }
 
     @PostMapping
-    public ResponseEntity<ProgramPrioritasAnggaran> create(@Valid @RequestBody ProgramPrioritasAnggaranRequest request) {
-        ProgramPrioritasAnggaran saved = programPrioritasAnggaranService.simpanPerencanaanAnggaran(request);
+    public ResponseEntity<List<ProgramPrioritasAnggaran>> create(
+            @Valid @RequestBody ProgramPrioritasAnggaranBulkCreateRequest request
+    ) {
+        List<ProgramPrioritasAnggaran> saved = programPrioritasAnggaranService
+                .simpanPerencanaanAnggaran(request.programPrioritas());
+
+        if (saved.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        }
+
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(saved.id())
+                .buildAndExpand(saved.get(0).id())
                 .toUri();
 
         return ResponseEntity.created(location).body(saved);

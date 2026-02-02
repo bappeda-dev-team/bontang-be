@@ -86,14 +86,24 @@ public class ProgramPrioritasAnggaranService {
 
     @Transactional
     public ProgramPrioritasAnggaran simpanPerencanaanAnggaran(ProgramPrioritasAnggaranRequest request) {
-        ProgramPrioritasAnggaran programPrioritasAnggaran = ProgramPrioritasAnggaran.of(
+        return programPrioritasAnggaranRepository.save(buildProgramPrioritasAnggaran(request));
+    }
+
+    @Transactional
+    public List<ProgramPrioritasAnggaran> simpanPerencanaanAnggaran(List<ProgramPrioritasAnggaranRequest> requests) {
+        return requests.stream()
+                .map(this::buildProgramPrioritasAnggaran)
+                .map(programPrioritasAnggaranRepository::save)
+                .collect(Collectors.toList());
+    }
+
+    private ProgramPrioritasAnggaran buildProgramPrioritasAnggaran(ProgramPrioritasAnggaranRequest request) {
+        return ProgramPrioritasAnggaran.of(
                 request.idProgramPrioritas(),
                 request.kodeOpd(),
                 request.nip(),
                 request.tahun()
         );
-
-        return programPrioritasAnggaranRepository.save(programPrioritasAnggaran);
     }
 
     @Transactional
