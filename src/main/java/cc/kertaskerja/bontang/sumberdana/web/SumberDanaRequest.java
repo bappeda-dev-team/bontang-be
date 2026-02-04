@@ -1,6 +1,5 @@
 package cc.kertaskerja.bontang.sumberdana.web;
 
-import cc.kertaskerja.bontang.sumberdana.domain.SetInput;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -21,7 +20,7 @@ public record SumberDanaRequest(
         @NotEmpty(message = "Kode dana baru tidak boleh kosong")
         String kodeDanaBaru,
 
-        @NotNull(message = "Set input tidak boleh kosong")
-        SetInput setInput
+        @Nullable
+        String setInput
 ) {
 }

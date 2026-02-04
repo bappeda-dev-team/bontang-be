@@ -1,0 +1,1 @@
+ALTER TABLE sumber_dana ALTER COLUMN set_input DROP NOT NULL;

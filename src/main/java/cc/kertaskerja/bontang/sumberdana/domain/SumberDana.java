@@ -23,7 +23,7 @@ public record SumberDana(
         String kodeDanaBaru,
 
         @Column("set_input")
-        SetInput setInput,
+        String setInput,
 
         @CreatedDate
         Instant createdDate,
@@ -35,7 +35,7 @@ public record SumberDana(
             String kodeDanaLama,
             String sumberDana,
             String kodeDanaBaru,
-            SetInput setInput
+            String setInput
     ) {
         return new SumberDana(
                 null,
