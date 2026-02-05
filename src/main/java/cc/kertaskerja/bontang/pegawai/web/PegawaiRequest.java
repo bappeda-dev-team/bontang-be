@@ -26,6 +26,9 @@ public record PegawaiRequest(
         String jabatanDinas,
 
         @Nullable
-        String jabatanTim
+        String jabatanTim,
+
+        @Nullable
+        String role
 ) {
 }

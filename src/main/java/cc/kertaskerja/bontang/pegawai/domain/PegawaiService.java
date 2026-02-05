@@ -29,7 +29,8 @@ public class PegawaiService {
                 request.nip(),
                 request.email(),
                 request.jabatanDinas(),
-                request.jabatanTim()
+                request.jabatanTim(),
+                request.role()
         );
         return pegawaiRepository.save(pegawai);
     }
@@ -46,6 +47,7 @@ public class PegawaiService {
                 request.email(),
                 request.jabatanDinas(),
                 request.jabatanTim(),
+                request.role(),
                 existingPegawai.createdDate(),
                 null
         );
