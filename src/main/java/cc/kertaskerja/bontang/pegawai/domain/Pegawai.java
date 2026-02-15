@@ -28,12 +28,6 @@ public record Pegawai(
         @Column("email")
         String email,
 
-        @Column("jabatan_dinas")
-        String jabatanDinas,
-
-        @Column("jabatan_tim")
-        String jabatanTim,
-
         @Column("role")
         String role,
 
@@ -49,8 +43,6 @@ public record Pegawai(
             String namaPegawai,
             String nip,
             String email,
-            String jabatanDinas,
-            String jabatanTim,
             String role
     ) {
         return new Pegawai(
@@ -60,8 +52,6 @@ public record Pegawai(
                 namaPegawai,
                 nip,
                 email,
-                jabatanDinas,
-                jabatanTim,
                 role,
                 null,
                 null

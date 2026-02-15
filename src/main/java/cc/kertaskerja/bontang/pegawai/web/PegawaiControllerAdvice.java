@@ -21,7 +21,7 @@ public class PegawaiControllerAdvice {
     }
 
     @ExceptionHandler(PegawaiAlreadyExistException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.CONFLICT)
     String pegawaiAlreadyExistException(PegawaiAlreadyExistException ex) {
         return ex.getMessage();
     }

@@ -23,12 +23,6 @@ public record PegawaiRequest(
         String email,
 
         @Nullable
-        String jabatanDinas,
-
-        @Nullable
-        String jabatanTim,
-
-        @Nullable
         String role
 ) {
 }
