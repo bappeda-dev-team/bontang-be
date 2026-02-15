@@ -1,0 +1,2 @@
+ALTER TABLE jabatan
+    ADD COLUMN IF NOT EXISTS kode_opd VARCHAR(255);
