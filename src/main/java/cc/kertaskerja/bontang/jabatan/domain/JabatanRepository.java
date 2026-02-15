@@ -21,6 +21,8 @@ public interface JabatanRepository extends CrudRepository<Jabatan, Long> {
     @NonNull
     Optional<Jabatan> findByNamaJabatan(@NonNull String namaJabatan);
 
+    Iterable<Jabatan> findByKodeOpd(@NonNull String kodeOpd);
+
     @Modifying
     @Transactional
     @Query("DELETE FROM jabatan WHERE kode_jabatan = :kodeJabatan")

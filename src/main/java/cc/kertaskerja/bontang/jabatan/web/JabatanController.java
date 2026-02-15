@@ -34,9 +34,9 @@ public class JabatanController {
         return jabatanService.detailJabatanByKodeJabatan(kodeJabatan);
     }
 
-    @GetMapping("detail/get-all-jabatans")
-    public Iterable<Jabatan> findAll() {
-        return jabatanService.findAll();
+    @GetMapping("opd/{kodeOpd}")
+    public Iterable<Jabatan> findByKodeOpd(@PathVariable("kodeOpd") String kodeOpd) {
+        return jabatanService.findByKodeOpd(kodeOpd);
     }
 
     @PostMapping

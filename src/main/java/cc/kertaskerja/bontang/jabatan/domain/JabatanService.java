@@ -12,8 +12,8 @@ public class JabatanService {
         this.jabatanRepository = jabatanRepository;
     }
 
-    public Iterable<Jabatan> findAll() {
-        return jabatanRepository.findAll();
+    public Iterable<Jabatan> findByKodeOpd(String kodeOpd) {
+        return jabatanRepository.findByKodeOpd(kodeOpd);
     }
 
     public Jabatan detailJabatanByKodeJabatan(String kodeJabatan) {
