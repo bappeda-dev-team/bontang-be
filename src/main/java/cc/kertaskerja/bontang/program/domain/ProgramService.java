@@ -39,6 +39,10 @@ public class ProgramService {
                 .orElseThrow(() -> new ProgramNotFoundException(kodeProgram));
     }
 
+    public Iterable<Program> findByKodeOpd(String kodeOpd) {
+        return programRepository.findByKodeOpd(kodeOpd);
+    }
+
     public List<Program> detailProgramByKodeProgramIn(List<String> kodePrograms) {
         List<Program> programs = programRepository.findAllByKodeProgramIn(kodePrograms);
         if (programs.size() != kodePrograms.size()) {

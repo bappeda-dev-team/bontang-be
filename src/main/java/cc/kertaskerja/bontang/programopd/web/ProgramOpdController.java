@@ -45,6 +45,14 @@ public class ProgramOpdController {
                 .toList();
     }
 
+    @GetMapping("opd/{kodeOpd}")
+    public List<ProgramOpdResponse> findByKodeOpd(@PathVariable("kodeOpd") String kodeOpd) {
+        Iterable<Program> programs = programService.findByKodeOpd(kodeOpd);
+        return StreamSupport.stream(programs.spliterator(), false)
+                .map(this::mapFromProgram)
+                .toList();
+    }
+
     // update program opd by kode program opd
     @PutMapping("update/{kodeProgramOpd}")
     public ProgramOpd put(@PathVariable("kodeProgramOpd") String kodeProgramOpd, @Valid @RequestBody ProgramOpdRequest request) {
@@ -84,10 +92,12 @@ public class ProgramOpdController {
 
     // ambil data program opd berdasarkan kumpulan kode program
     @PostMapping("/find/batch/kode-program")
-    public List<Program> findProgramBatch(@Valid @RequestBody ProgramBatchRequest request) {
+    public List<ProgramOpdResponse> findProgramBatch(@Valid @RequestBody ProgramBatchRequest request) {
         List<Program> programs = programService.detailProgramByKodeProgramIn(request.kodeProgram());
-        programs.forEach(programOpdService::simpanProgramOpd);
-        return programs;
+        return programs.stream()
+                .map(programOpdService::simpanProgramOpd)
+                .map(this::map)
+                .toList();
     }
 
     // hapus program opd
@@ -106,6 +116,18 @@ public class ProgramOpdController {
                 programOpd.tahun(),
                 programOpd.createdDate(),
                 programOpd.lastModifiedDate()
+        );
+    }
+
+    private ProgramOpdResponse mapFromProgram(Program program) {
+        return new ProgramOpdResponse(
+                program.id(),
+                program.kodeProgram(),
+                program.namaProgram(),
+                program.kodeOpd(),
+                program.tahun(),
+                program.createdDate(),
+                program.lastModifiedDate()
         );
     }
 }
