@@ -31,6 +31,9 @@ public record Pegawai(
         @Column("role")
         String role,
 
+        @Column("jabatan_id")
+        Long jabatanId,
+
         @CreatedDate
         Instant createdDate,
 
@@ -43,7 +46,8 @@ public record Pegawai(
             String namaPegawai,
             String nip,
             String email,
-            String role
+            String role,
+            Long jabatanId
     ) {
         return new Pegawai(
                 null,
@@ -53,6 +57,7 @@ public record Pegawai(
                 nip,
                 email,
                 role,
+                jabatanId,
                 null,
                 null
         );

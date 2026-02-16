@@ -23,6 +23,9 @@ public record PegawaiRequest(
         String email,
 
         @Nullable
-        String role
+        String role,
+
+        @Nullable
+        Long jabatanId
 ) {
 }

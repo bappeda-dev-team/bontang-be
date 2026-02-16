@@ -1,7 +1,6 @@
 package cc.kertaskerja.bontang.pegawai.domain;
 
 import cc.kertaskerja.bontang.pegawai.domain.exception.PegawaiAlreadyExistException;
-import cc.kertaskerja.bontang.pegawai.domain.exception.PegawaiAlreadyExistException;
 import cc.kertaskerja.bontang.pegawai.domain.exception.PegawaiNotFoundException;
 import cc.kertaskerja.bontang.pegawai.web.PegawaiRequest;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,8 @@ public class PegawaiService {
                 request.namaPegawai(),
                 request.nip(),
                 request.email(),
-                request.role()
+                request.role(),
+                request.jabatanId()
         );
         return pegawaiRepository.save(pegawai);
     }
@@ -50,6 +50,7 @@ public class PegawaiService {
                 request.nip(),
                 request.email(),
                 request.role(),
+                request.jabatanId(),
                 existingPegawai.createdDate(),
                 null
         );
