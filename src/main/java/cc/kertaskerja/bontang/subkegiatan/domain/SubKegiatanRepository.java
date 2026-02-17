@@ -23,6 +23,10 @@ public interface SubKegiatanRepository extends CrudRepository<SubKegiatan, Long>
     @NonNull
     List<SubKegiatan> findAllByKodeSubKegiatanIn(@NonNull Collection<String> kodeSubKegiatans);
 
+    Iterable<SubKegiatan> findByKodeOpd(@NonNull String kodeOpd);
+
+    List<SubKegiatan> findByKodeSubKegiatanStartingWith(@NonNull String prefix);
+
     @Modifying
     @Transactional
     @Query("DELETE FROM subkegiatan WHERE kode_subkegiatan = :kodeSubKegiatan")

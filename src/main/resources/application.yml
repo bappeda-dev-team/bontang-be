@@ -11,20 +11,18 @@ server:
 spring:
   application:
     name: kertaskerja-bontang
-  cache:
-    type: redis
-  data:
-    redis:
-      host: 192.168.194.241
-      port: 6379
-      timeout: 60000
   datasource:
-    username: user
-    password: password
-    url: jdbc:postgresql://192.168.194.241:5432/kertaskerja_bontang
+    username: postgres
+    password: root
+    url: jdbc:postgresql://localhost:5432/kertaskerja_bontang
     hikari:
       connection-timeout: 2000
       maximum-pool-size: 5
+
+flyway:
+  enabled: true
+  locations: classpath:db/migration
+  baseline-on-migrate: true
 
 kertaskerja:
   status: Kertas Kerja UP!
