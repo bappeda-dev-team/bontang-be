@@ -3,6 +3,7 @@ package cc.kertaskerja.bontang.program.domain;
 import cc.kertaskerja.bontang.bidangurusan.domain.BidangUrusan;
 import cc.kertaskerja.bontang.bidangurusan.domain.BidangUrusanRepository;
 import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanNotFoundException;
+import cc.kertaskerja.bontang.shared.OpdPrefixExtractor;
 import org.springframework.stereotype.Service;
 
 import cc.kertaskerja.bontang.program.domain.exception.ProgramNotFoundException;
@@ -50,7 +51,7 @@ public class ProgramService {
             return programs;
         }
 
-        String prefix = deriveProgramPrefix(kodeOpd);
+        String prefix = OpdPrefixExtractor.extractPrefix(kodeOpd, 2);
         if (prefix == null) {
             return List.of();
         }

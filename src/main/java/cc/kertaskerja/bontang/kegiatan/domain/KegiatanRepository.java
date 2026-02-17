@@ -24,6 +24,10 @@ public interface KegiatanRepository extends CrudRepository<Kegiatan, Long> {
     @NonNull
     List<Kegiatan> findAllByKodeKegiatanIn(@NonNull Collection<String> kodeKegiatans);
 
+    Iterable<Kegiatan> findByKodeOpd(@NonNull String kodeOpd);
+
+    List<Kegiatan> findByKodeKegiatanStartingWith(@NonNull String prefix);
+
     @Modifying
     @Transactional
     @Query("DELETE FROM kegiatan WHERE kode_kegiatan = :kodeKegiatan")

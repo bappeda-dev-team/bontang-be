@@ -45,6 +45,14 @@ public class KegiatanOpdController {
                 .toList();
     }
 
+    @GetMapping("opd/{kodeOpd}")
+    public List<KegiatanOpdResponse> findByKodeOpd(@PathVariable("kodeOpd") String kodeOpd) {
+        List<Kegiatan> kegiatans = kegiatanService.findKegiatansForKodeOpd(kodeOpd);
+        return kegiatans.stream()
+                .map(this::mapFromKegiatan)
+                .toList();
+    }
+
     // update kegiatan opd by kode kegiatan opd
     @PutMapping("update/{kodeKegiatanOpd}")
     public KegiatanOpd put(@PathVariable("kodeKegiatanOpd") String kodeKegiatanOpd, @Valid @RequestBody KegiatanOpdRequest request) {
@@ -106,6 +114,18 @@ public class KegiatanOpdController {
                 kegiatanOpd.tahun(),
                 kegiatanOpd.createdDate(),
                 kegiatanOpd.lastModifiedDate()
+        );
+    }
+
+    private KegiatanOpdResponse mapFromKegiatan(Kegiatan kegiatan) {
+        return new KegiatanOpdResponse(
+                kegiatan.id(),
+                kegiatan.kodeKegiatan(),
+                kegiatan.namaKegiatan(),
+                kegiatan.kodeOpd(),
+                kegiatan.tahun(),
+                kegiatan.createdDate(),
+                kegiatan.lastModifiedDate()
         );
     }
 }
