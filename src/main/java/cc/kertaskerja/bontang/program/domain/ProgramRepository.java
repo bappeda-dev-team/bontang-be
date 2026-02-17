@@ -25,6 +25,8 @@ public interface ProgramRepository extends CrudRepository<Program, Long> {
 
     Iterable<Program> findByKodeOpd(@NonNull String kodeOpd);
 
+    List<Program> findByKodeProgramStartingWith(@NonNull String prefix);
+
     @Modifying
     @Transactional
     @Query("DELETE FROM program WHERE kode_program = :kodeProgram")

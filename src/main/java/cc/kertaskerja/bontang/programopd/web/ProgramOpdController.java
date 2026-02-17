@@ -45,9 +45,9 @@ public class ProgramOpdController {
                 .toList();
     }
 
-    @GetMapping("opd/{kodeOpd}")
+    @GetMapping("detail/opd/{kodeOpd}")
     public List<ProgramOpdResponse> findByKodeOpd(@PathVariable("kodeOpd") String kodeOpd) {
-        Iterable<Program> programs = programService.findByKodeOpd(kodeOpd);
+        List<Program> programs = programService.findProgramsForKodeOpd(kodeOpd);
         return StreamSupport.stream(programs.spliterator(), false)
                 .map(this::mapFromProgram)
                 .toList();
