@@ -45,7 +45,7 @@ public class KegiatanOpdController {
                 .toList();
     }
 
-    @GetMapping("opd/{kodeOpd}")
+    @GetMapping("detail/opd/{kodeOpd}")
     public List<KegiatanOpdResponse> findByKodeOpd(@PathVariable("kodeOpd") String kodeOpd) {
         List<Kegiatan> kegiatans = kegiatanService.findKegiatansForKodeOpd(kodeOpd);
         return kegiatans.stream()
