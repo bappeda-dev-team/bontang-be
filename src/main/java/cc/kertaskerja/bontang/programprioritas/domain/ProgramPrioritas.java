@@ -27,6 +27,8 @@ public record ProgramPrioritas(
         Integer periodeTahunAkhir,
 
         String status,
+        @Column("rencana_implementasi")
+        String rencanaImplementasi,
 
         @CreatedDate
         Instant createdDate,
@@ -40,7 +42,8 @@ public record ProgramPrioritas(
             String keterangan,
             Integer periodeTahunAwal,
             Integer periodeTahunAkhir,
-            String status
+            String status,
+            String rencanaImplementasi
     ) {
         return new ProgramPrioritas(
                 null,
@@ -50,6 +53,7 @@ public record ProgramPrioritas(
                 periodeTahunAwal,
                 periodeTahunAkhir,
                 status,
+                rencanaImplementasi,
                 null,
                 null
         );

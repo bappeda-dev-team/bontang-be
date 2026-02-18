@@ -41,7 +41,8 @@ public class ProgramPrioritasService{
                 request.keterangan(),
                 request.periodeTahunAwal(),
                 request.periodeTahunAkhir(),
-                request.status()
+                request.status(),
+                request.rencanaImplementasi()
         );
 
         return tambahProgramPrioritas(programPrioritas);
@@ -66,6 +67,7 @@ public class ProgramPrioritasService{
                 request.periodeTahunAwal(),
                 request.periodeTahunAkhir(),
                 request.status(),
+                request.rencanaImplementasi(),
                 existingProgramPrioritas.createdDate(),
                 null
         );

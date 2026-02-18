@@ -22,6 +22,9 @@ public record ProgramPrioritasRequest(
         Integer periodeTahunAkhir,
 
         @Nullable
-        String status
+        String status,
+
+        @Nullable
+        String rencanaImplementasi
 ) {
 }
