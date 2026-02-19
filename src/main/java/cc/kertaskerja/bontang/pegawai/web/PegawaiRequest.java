@@ -26,6 +26,9 @@ public record PegawaiRequest(
         String role,
 
         @Nullable
-        Long jabatanId
+        Long jabatanId,
+
+        @Nullable
+        String password
 ) {
 }

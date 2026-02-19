@@ -26,6 +26,11 @@ flyway:
 
 kertaskerja:
   status: Kertas Kerja UP!
+  security:
+    setup-enabled: ${KERTASKERJA_SETUP_ENABLED:true}
+    jwt:
+      secret: vuebu3LXBxgdvMsoKwHaD5WvPjijTVT8yd8UduKN2Yg=
+      ttl: ${KERTASKERJA_JWT_TTL:8h}
 
 management:
   endpoints:
