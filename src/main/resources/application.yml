@@ -12,8 +12,8 @@ spring:
   application:
     name: kertaskerja-bontang
   datasource:
-    username: postgres
-    password: root
+    username: user
+    password: password
     url: jdbc:postgresql://192.168.194.241:5432/kertaskerja_bontang
     hikari:
       connection-timeout: 2000
