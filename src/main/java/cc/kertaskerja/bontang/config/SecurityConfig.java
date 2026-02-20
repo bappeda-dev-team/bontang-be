@@ -31,6 +31,7 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health").permitAll()
 
                 // LEVEL 1
+                .requestMatchers("/opd/detail/findall").hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4")
                 .requestMatchers(
                         "/opd/**",
                         "/program/**",
