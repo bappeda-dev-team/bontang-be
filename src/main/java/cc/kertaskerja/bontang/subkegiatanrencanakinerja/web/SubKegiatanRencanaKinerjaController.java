@@ -1,5 +1,8 @@
 package cc.kertaskerja.bontang.subkegiatanrencanakinerja.web;
 
+import cc.kertaskerja.bontang.subkegiatan.domain.SubKegiatan;
+import cc.kertaskerja.bontang.subkegiatan.domain.SubKegiatanService;
+import cc.kertaskerja.bontang.subkegiatanopd.web.SubKegiatanOpdResponse;
 import cc.kertaskerja.bontang.subkegiatanrencanakinerja.domain.SubKegiatanRencanaKinerja;
 import cc.kertaskerja.bontang.subkegiatanrencanakinerja.domain.SubKegiatanRencanaKinerjaService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,9 +20,12 @@ import java.util.List;
 @RequestMapping("subkegiatanrencanakinerja")
 public class SubKegiatanRencanaKinerjaController {
     private final SubKegiatanRencanaKinerjaService subKegiatanRencanaKinerjaService;
+    private final SubKegiatanService subKegiatanService;
 
-    public SubKegiatanRencanaKinerjaController(SubKegiatanRencanaKinerjaService subKegiatanRencanaKinerjaService) {
+    public SubKegiatanRencanaKinerjaController(SubKegiatanRencanaKinerjaService subKegiatanRencanaKinerjaService,
+                                               SubKegiatanService subKegiatanService) {
         this.subKegiatanRencanaKinerjaService = subKegiatanRencanaKinerjaService;
+        this.subKegiatanService = subKegiatanService;
     }
 
     /**
@@ -37,6 +43,14 @@ public class SubKegiatanRencanaKinerjaController {
     @GetMapping("detail/{idRencanaKinerja}")
     public List<SubKegiatanRencanaKinerja> getByIdRencanaKinerja(@PathVariable("idRencanaKinerja") Long idRencanaKinerja) {
         return subKegiatanRencanaKinerjaService.findByIdRekin(idRencanaKinerja.intValue());
+    }
+
+    @GetMapping("detail/opd/{kodeOpd}")
+    public List<SubKegiatanOpdResponse> findByKodeOpd(@PathVariable("kodeOpd") String kodeOpd) {
+        List<SubKegiatan> subKegiatans = subKegiatanService.findSubKegiatansForKodeOpd(kodeOpd);
+        return subKegiatans.stream()
+                .map(this::mapFromSubKegiatan)
+                .toList();
     }
 
     /**
@@ -77,5 +91,17 @@ public class SubKegiatanRencanaKinerjaController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("idSubKegiatanRencanaKinerja") Long idSubKegiatanRencanaKinerja) {
         subKegiatanRencanaKinerjaService.hapusSubKegiatanRencanaKinerja(idSubKegiatanRencanaKinerja);
+    }
+
+    private SubKegiatanOpdResponse mapFromSubKegiatan(SubKegiatan subKegiatan) {
+        return new SubKegiatanOpdResponse(
+                subKegiatan.id(),
+                subKegiatan.kodeSubKegiatan(),
+                subKegiatan.namaSubKegiatan(),
+                subKegiatan.kodeOpd(),
+                subKegiatan.tahun(),
+                subKegiatan.createdDate(),
+                subKegiatan.lastModifiedDate()
+        );
     }
 }
