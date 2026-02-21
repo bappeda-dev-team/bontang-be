@@ -48,7 +48,7 @@ public class AuthController {
                 .sorted()
                 .toList();
 
-        return new MeResponse(nip, roleNormalizer.normalize(pegawai.role()), authorities);
+        return new MeResponse(nip, roleNormalizer.normalize(pegawai.role()), authorities, pegawai.namaPegawai());
     }
 
     public record LoginRequest(
@@ -65,6 +65,7 @@ public class AuthController {
     public record MeResponse(
             String nip,
             String role,
-            List<String> authorities
+            List<String> authorities,
+            String namaPegawai
     ) {}
 }
