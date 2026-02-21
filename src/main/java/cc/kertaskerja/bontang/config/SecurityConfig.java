@@ -1,6 +1,7 @@
 package cc.kertaskerja.bontang.config;
 
 import static org.springframework.http.HttpMethod.OPTIONS;
+import static org.springframework.http.HttpMethod.GET;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +25,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(OPTIONS, "/**").permitAll()
+                .requestMatchers(GET, "/**/get-all-*").hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4")
                 .requestMatchers("/", "/error").permitAll()
                 .requestMatchers("/auth/login").permitAll()
                 .requestMatchers("/auth/me").authenticated()
