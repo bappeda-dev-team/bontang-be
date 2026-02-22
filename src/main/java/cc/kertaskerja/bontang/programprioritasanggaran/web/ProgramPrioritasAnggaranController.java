@@ -34,6 +34,11 @@ public class ProgramPrioritasAnggaranController {
         return programPrioritasAnggaranService.findAll();
     }
 
+    @GetMapping("detail/kode-opd/{kodeOpd}")
+    public Iterable<ProgramPrioritasAnggaran> getByKodeOpd(@PathVariable("kodeOpd") String kodeOpd) {
+        return programPrioritasAnggaranService.getByKodeOpd(kodeOpd);
+    }
+
     @GetMapping("detail/kode-opd/{kodeOpd}/nip/{nip}/tahun/{tahun}")
     public List<ProgramPrioritasAnggaranWithRencanaKinerjaResponse> getByKodeOpdNipTahun(
             @PathVariable("kodeOpd") String kodeOpd,

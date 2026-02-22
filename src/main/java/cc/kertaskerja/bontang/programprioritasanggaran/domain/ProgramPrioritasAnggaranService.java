@@ -45,6 +45,10 @@ public class ProgramPrioritasAnggaranService {
         return programPrioritasAnggaranRepository.findAll();
     }
 
+    public Iterable<ProgramPrioritasAnggaran> getByKodeOpd(String kodeOpd) {
+        return programPrioritasAnggaranRepository.findByKodeOpd(kodeOpd);
+    }
+
     public List<ProgramPrioritasAnggaranWithRencanaKinerjaResponse> getByKodeOpdNipTahun(String kodeOpd, String nip, Integer tahun) {
         Iterable<ProgramPrioritasAnggaran> programs = programPrioritasAnggaranRepository.findByKodeOpdAndNipAndTahun(kodeOpd, nip, tahun);
         List<ProgramPrioritasAnggaranWithRencanaKinerjaResponse> result = new ArrayList<>();
