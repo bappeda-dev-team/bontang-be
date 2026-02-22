@@ -46,11 +46,14 @@ public class SecurityConfig {
                         "/programopd/**",
                         "/kegiatanopd/**",
                         "/subkegiatanopd/**",
-                        "/laporanprogramprioritas/**",
-                        "/laporanrincianbelanja/**",
                         "/bidangurusan/**",
                         "/programprioritas/**"
                 ).hasRole("LEVEL_1")
+                // allow all authenticated roles to access laporan endpoints
+                .requestMatchers(
+                        "/laporanprogramprioritas/**",
+                        "/laporanrincianbelanja/**"
+                ).hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4")
 
                 // LEVEL 2 & 3
                 .requestMatchers(
