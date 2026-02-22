@@ -55,6 +55,8 @@ public class SecurityConfig {
                         "/laporanrincianbelanja/**"
                 ).hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4")
 
+                .requestMatchers("/programprioritasanggaran/**").hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4")
+
                 // LEVEL 2 & 3
                 .requestMatchers(
                         "/rencanakinerja/**",
@@ -64,7 +66,6 @@ public class SecurityConfig {
                         "/dasarhukum/**",
                         "/gambaranumum/**",
                         "/rincianbelanja/**",
-                        "/programprioritasanggaran/**",
                         "/indikator/**",
                         "/target/**",
                         "/indikatorbelanja/**",
