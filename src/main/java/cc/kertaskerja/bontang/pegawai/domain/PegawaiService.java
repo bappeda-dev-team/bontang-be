@@ -90,7 +90,22 @@ public class PegawaiService {
                 null
         );
 
-        return pegawaiRepository.save(pegawai);
+        Pegawai saved = pegawaiRepository.save(pegawai);
+        updatePasswordIfNeeded(request.password(), saved.nip(), normalizedRole);
+
+        return saved;
+    }
+
+    private void updatePasswordIfNeeded(String password, String nip, String role) {
+        if (password == null || password.isBlank()) {
+            return;
+        }
+
+        String passwordHash = passwordEncoder.encode(password);
+        int rows = pegawaiAuthRepository.setPasswordHashAndRole(nip, passwordHash, role);
+        if (rows <= 0) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Gagal menyimpan kredensial pegawai");
+        }
     }
 
     public void hapusPegawai(String nip) {
