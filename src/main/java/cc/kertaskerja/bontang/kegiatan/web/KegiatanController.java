@@ -5,11 +5,14 @@ import cc.kertaskerja.bontang.kegiatan.domain.KegiatanService;
 import cc.kertaskerja.bontang.kegiatan.web.request.KegiatanBatchRequest;
 import cc.kertaskerja.bontang.kegiatan.web.request.KegiatanRequest;
 import cc.kertaskerja.bontang.kegiatan.web.response.KegiatanResponse;
+import cc.kertaskerja.bontang.shared.OpdPrefixExtractor;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -69,13 +72,24 @@ public class KegiatanController {
     @PutMapping("update/{kodeKegiatan}")
     public Kegiatan put(@PathVariable("kodeKegiatan") String kodeKegiatan, @Valid @RequestBody KegiatanRequest request) {
         Kegiatan existingKegiatan = kegiatanService.detailKegiatanByKodeKegiatan(kodeKegiatan);
+        String kodeOpdFinal = existingKegiatan.kodeOpd();
+        if (!StringUtils.hasText(kodeOpdFinal)) {
+            kodeOpdFinal = kegiatanService.resolveKodeOpdFromKodeKegiatan(request.kodeKegiatan());
+        }
+        if (!StringUtils.hasText(kodeOpdFinal)) {
+            String prefix = OpdPrefixExtractor.extractPrefix(request.kodeKegiatan(), 2);
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Kode OPD tidak ditemukan untuk prefix kode kegiatan " + (prefix != null ? prefix : request.kodeKegiatan())
+            );
+        }
 
         Kegiatan kegiatan = new Kegiatan(
                 existingKegiatan.id(),
                 request.kodeKegiatan(),
                 request.namaKegiatan(),
-                request.kodeOpd(),
-                request.tahun(),
+                kodeOpdFinal,
+                existingKegiatan.tahun(),
                 existingKegiatan.createdDate(),
                 null
         );
@@ -89,11 +103,20 @@ public class KegiatanController {
      */
     @PostMapping
     public ResponseEntity<Kegiatan> post(@Valid @RequestBody KegiatanRequest request) {
+        String kodeOpdFinal = kegiatanService.resolveKodeOpdFromKodeKegiatan(request.kodeKegiatan());
+        if (!StringUtils.hasText(kodeOpdFinal)) {
+            String prefix = OpdPrefixExtractor.extractPrefix(request.kodeKegiatan(), 2);
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Kode OPD tidak ditemukan untuk prefix kode kegiatan " + (prefix != null ? prefix : request.kodeKegiatan())
+            );
+        }
+
         Kegiatan kegiatan = Kegiatan.of(
                 request.kodeKegiatan(),
                 request.namaKegiatan(),
-                request.kodeOpd(),
-                request.tahun()
+                kodeOpdFinal,
+                null
         );
         Kegiatan saved = kegiatanService.tambahKegiatan(kegiatan);
         URI location = ServletUriComponentsBuilder

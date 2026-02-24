@@ -5,11 +5,14 @@ import cc.kertaskerja.bontang.subkegiatan.domain.SubKegiatanService;
 import cc.kertaskerja.bontang.subkegiatan.web.request.SubKegiatanBatchRequest;
 import cc.kertaskerja.bontang.subkegiatan.web.request.SubKegiatanRequest;
 import cc.kertaskerja.bontang.subkegiatan.web.response.SubKegiatanResponse;
+import cc.kertaskerja.bontang.shared.OpdPrefixExtractor;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -74,13 +77,24 @@ public class SubKegiatanController {
     public SubKegiatan put(@PathVariable("kodeSubKegiatan") String kodeSubKegiatan, @Valid @RequestBody SubKegiatanRequest request) {
 
         SubKegiatan existingSubKegiatan = subKegiatanService.detailSubKegiatanByKodeSubKegiatan(kodeSubKegiatan);
+        String kodeOpdFinal = existingSubKegiatan.kodeOpd();
+        if (!StringUtils.hasText(kodeOpdFinal)) {
+            kodeOpdFinal = subKegiatanService.resolveKodeOpdFromKodeSubKegiatan(request.kodeSubKegiatan());
+        }
+        if (!StringUtils.hasText(kodeOpdFinal)) {
+            String prefix = OpdPrefixExtractor.extractPrefix(request.kodeSubKegiatan(), 2);
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Kode OPD tidak ditemukan untuk prefix kode sub kegiatan " + (prefix != null ? prefix : request.kodeSubKegiatan())
+            );
+        }
 
         SubKegiatan subKegiatan = new SubKegiatan(
                 existingSubKegiatan.id(),
                 request.kodeSubKegiatan(),
                 request.namaSubKegiatan(),
-                request.kodeOpd(),
-                request.tahun(),
+                kodeOpdFinal,
+                existingSubKegiatan.tahun(),
                 existingSubKegiatan.createdDate(),
                 null
         );
@@ -94,11 +108,20 @@ public class SubKegiatanController {
      */
     @PostMapping
     public ResponseEntity<SubKegiatan> post(@Valid @RequestBody SubKegiatanRequest request) {
+        String kodeOpdFinal = subKegiatanService.resolveKodeOpdFromKodeSubKegiatan(request.kodeSubKegiatan());
+        if (!StringUtils.hasText(kodeOpdFinal)) {
+            String prefix = OpdPrefixExtractor.extractPrefix(request.kodeSubKegiatan(), 2);
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Kode OPD tidak ditemukan untuk prefix kode sub kegiatan " + (prefix != null ? prefix : request.kodeSubKegiatan())
+            );
+        }
+
         SubKegiatan subKegiatan = SubKegiatan.of(
                 request.kodeSubKegiatan(),
                 request.namaSubKegiatan(),
-                request.kodeOpd(),
-                request.tahun()
+                kodeOpdFinal,
+                null
         );
         SubKegiatan saved = subKegiatanService.tambahSubKegiatan(subKegiatan);
         URI location = ServletUriComponentsBuilder

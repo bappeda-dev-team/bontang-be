@@ -1,5 +1,6 @@
 package cc.kertaskerja.bontang.subkegiatan.domain;
 
+import cc.kertaskerja.bontang.opd.domain.OpdRepository;
 import cc.kertaskerja.bontang.shared.OpdPrefixExtractor;
 import cc.kertaskerja.bontang.subkegiatan.domain.exception.SubKegiatanNotFoundException;
 import org.springframework.stereotype.Service;
@@ -12,11 +13,14 @@ import java.util.stream.StreamSupport;
 @Service
 public class SubKegiatanService {
     private final SubKegiatanRepository subKegiatanRepository;
+    private final OpdRepository opdRepository;
 
     public SubKegiatanService(
-            SubKegiatanRepository subKegiatanRepository
+            SubKegiatanRepository subKegiatanRepository,
+            OpdRepository opdRepository
     ) {
         this.subKegiatanRepository = subKegiatanRepository;
+        this.opdRepository = opdRepository;
     }
 
     public Iterable<SubKegiatan> findAll() {
@@ -85,5 +89,16 @@ public class SubKegiatanService {
 
     private List<SubKegiatan> toList(Iterable<SubKegiatan> iterable) {
         return StreamSupport.stream(iterable.spliterator(), false).toList();
+    }
+
+    public String resolveKodeOpdFromKodeSubKegiatan(String kodeSubKegiatan) {
+        String prefix = OpdPrefixExtractor.extractPrefix(kodeSubKegiatan, 2);
+        if (prefix == null) {
+            return null;
+        }
+
+        return opdRepository.findFirstByKodeOpdStartingWith(prefix)
+                .map(opd -> opd.kodeOpd())
+                .orElse(null);
     }
 }

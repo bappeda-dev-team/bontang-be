@@ -1,9 +1,10 @@
 package cc.kertaskerja.bontang.program.web;
 
 import java.net.URI;
-
+ 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.server.ResponseStatusException;
 
 import cc.kertaskerja.bontang.program.domain.Program;
 import cc.kertaskerja.bontang.program.domain.ProgramService;
@@ -21,6 +23,7 @@ import cc.kertaskerja.bontang.program.web.request.ProgramBatchRequest;
 //import cc.kertaskerja.bontang.program.web.request.ProgramBatchRequest;
 import cc.kertaskerja.bontang.program.web.request.ProgramRequest;
 import cc.kertaskerja.bontang.program.web.response.ProgramResponse;
+import cc.kertaskerja.bontang.shared.OpdPrefixExtractor;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -72,13 +75,24 @@ public class ProgramController {
     @PutMapping("update/{kodeProgram}")
     public Program put(@PathVariable("kodeProgram") String kodeProgram, @Valid @RequestBody ProgramRequest request) {
         Program existingProgram = programService.detailProgramByKodeProgram(kodeProgram);
+        String kodeOpdFinal = existingProgram.kodeOpd();
+        if (!StringUtils.hasText(kodeOpdFinal)) {
+            kodeOpdFinal = programService.resolveKodeOpdFromKodeProgram(request.kodeProgram());
+        }
+        if (!StringUtils.hasText(kodeOpdFinal)) {
+            String prefix = OpdPrefixExtractor.extractPrefix(request.kodeProgram(), 2);
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Kode OPD tidak ditemukan untuk prefix kode program " + (prefix != null ? prefix : request.kodeProgram())
+            );
+        }
 
         Program program = new Program(
                 existingProgram.id(),
                 request.kodeProgram(),
                 request.namaProgram(),
-                request.kodeOpd(),
-                request.tahun(),
+                kodeOpdFinal,
+                existingProgram.tahun(),
                 existingProgram.createdDate(),
                 null
         );
@@ -92,11 +106,20 @@ public class ProgramController {
      */
     @PostMapping
     public ResponseEntity<Program> post(@Valid @RequestBody ProgramRequest request) {
+        String kodeOpdFinal = programService.resolveKodeOpdFromKodeProgram(request.kodeProgram());
+        if (!StringUtils.hasText(kodeOpdFinal)) {
+            String prefix = OpdPrefixExtractor.extractPrefix(request.kodeProgram(), 2);
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Kode OPD tidak ditemukan untuk prefix kode program " + (prefix != null ? prefix : request.kodeProgram())
+            );
+        }
+
         Program program = Program.of(
                 request.kodeProgram(),
                 request.namaProgram(),
-                request.kodeOpd(),
-                request.tahun()
+                kodeOpdFinal,
+                null
         );
         Program saved = programService.tambahProgram(program);
         URI location = ServletUriComponentsBuilder

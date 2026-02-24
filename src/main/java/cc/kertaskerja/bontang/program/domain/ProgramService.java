@@ -1,8 +1,6 @@
 package cc.kertaskerja.bontang.program.domain;
 
-import cc.kertaskerja.bontang.bidangurusan.domain.BidangUrusan;
-import cc.kertaskerja.bontang.bidangurusan.domain.BidangUrusanRepository;
-import cc.kertaskerja.bontang.bidangurusan.domain.exception.BidangUrusanNotFoundException;
+import cc.kertaskerja.bontang.opd.domain.OpdRepository;
 import cc.kertaskerja.bontang.shared.OpdPrefixExtractor;
 import org.springframework.stereotype.Service;
 
@@ -16,24 +14,18 @@ import java.util.stream.StreamSupport;
 @Service
 public class ProgramService {
     private final ProgramRepository programRepository;
-    private final BidangUrusanRepository bidangUrusanRepository;
+    private final OpdRepository opdRepository;
 
     public ProgramService(
             ProgramRepository programRepository,
-            BidangUrusanRepository bidangUrusanRepository
+            OpdRepository opdRepository
     ) {
         this.programRepository = programRepository;
-        this.bidangUrusanRepository = bidangUrusanRepository;
+        this.opdRepository = opdRepository;
     }
 
     public Iterable<Program> findAll() {
         return programRepository.findAll();
-    }
-
-    public String getKodeBidangUrusan(Long bidangUrusanId) {
-        return bidangUrusanRepository.findById(bidangUrusanId)
-                .map(BidangUrusan::kodeBidangUrusan)
-                .orElseThrow(() -> new BidangUrusanNotFoundException(String.valueOf(bidangUrusanId)));
     }
 
     public Program detailProgramByKodeProgram(String kodeProgram) {
@@ -82,6 +74,17 @@ public class ProgramService {
     public Program tambahProgram(Program program) {
 
         return programRepository.save(program);
+    }
+
+    public String resolveKodeOpdFromKodeProgram(String kodeProgram) {
+        String prefix = OpdPrefixExtractor.extractPrefix(kodeProgram, 2);
+        if (prefix == null) {
+            return null;
+        }
+
+        return opdRepository.findFirstByKodeOpdStartingWith(prefix)
+                .map(opd -> opd.kodeOpd())
+                .orElse(null);
     }
 
     private List<Program> toList(Iterable<Program> iterable) {

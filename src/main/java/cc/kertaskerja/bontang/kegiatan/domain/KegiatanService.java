@@ -1,6 +1,7 @@
 package cc.kertaskerja.bontang.kegiatan.domain;
 
 import cc.kertaskerja.bontang.kegiatan.domain.exception.KegiatanNotFoundException;
+import cc.kertaskerja.bontang.opd.domain.OpdRepository;
 import cc.kertaskerja.bontang.shared.OpdPrefixExtractor;
 import org.springframework.stereotype.Service;
 
@@ -12,11 +13,14 @@ import java.util.stream.StreamSupport;
 @Service
 public class KegiatanService{
     private final KegiatanRepository kegiatanRepository;
+    private final OpdRepository opdRepository;
 
     public KegiatanService(
-            KegiatanRepository kegiatanRepository
+            KegiatanRepository kegiatanRepository,
+            OpdRepository opdRepository
     ) {
         this.kegiatanRepository = kegiatanRepository;
+        this.opdRepository = opdRepository;
     }
 
     public Iterable<Kegiatan> findAll() {
@@ -64,8 +68,19 @@ public class KegiatanService{
     }
 
     public Kegiatan tambahKegiatan(Kegiatan kegiatan) {
-    	
+
         return kegiatanRepository.save(kegiatan);
+    }
+
+    public String resolveKodeOpdFromKodeKegiatan(String kodeKegiatan) {
+        String prefix = OpdPrefixExtractor.extractPrefix(kodeKegiatan, 2);
+        if (prefix == null) {
+            return null;
+        }
+
+        return opdRepository.findFirstByKodeOpdStartingWith(prefix)
+                .map(opd -> opd.kodeOpd())
+                .orElse(null);
     }
 
     public Kegiatan ubahKegiatan(String kodeKegiatan, Kegiatan kegiatan) {

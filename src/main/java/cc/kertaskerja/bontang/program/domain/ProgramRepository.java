@@ -3,7 +3,6 @@ package cc.kertaskerja.bontang.program.domain;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.data.jdbc.repository.query.Modifying;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -21,7 +20,9 @@ public interface ProgramRepository extends CrudRepository<Program, Long> {
     Optional<Program> findByKodeProgram(@NonNull String kodeProgram);
 
     @NonNull
-    List<Program> findAllByKodeProgramIn(@NonNull Collection<String> kodePrograms);
+    List<Program> findAllByKodeProgramIn(
+        @NonNull Collection<String> kodePrograms
+    );
 
     Iterable<Program> findByKodeOpd(@NonNull String kodeOpd);
 

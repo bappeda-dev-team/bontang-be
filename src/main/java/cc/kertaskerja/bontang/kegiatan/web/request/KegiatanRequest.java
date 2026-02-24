@@ -1,6 +1,5 @@
 package cc.kertaskerja.bontang.kegiatan.web.request;
 
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
@@ -11,12 +10,6 @@ public record KegiatanRequest(
 
         @NotNull(message = "Nama kegiatan tidak boleh kosong")
         @NotEmpty(message = "Nama kegiatan tidak boleh kosong")
-        String namaKegiatan,
-
-        @Nullable
-        String kodeOpd,
-
-        @Nullable
-        Integer tahun
+        String namaKegiatan
 ) {
 }
