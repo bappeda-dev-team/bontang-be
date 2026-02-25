@@ -48,7 +48,7 @@ public class SecurityConfig {
                         "/subkegiatanopd/**",
                         "/bidangurusan/**",
                         "/programprioritas/**"
-                ).hasRole("LEVEL_1")
+                ).hasAnyRole("LEVEL_1", "LEVEL_2")
                 // allow all authenticated roles to access laporan endpoints
                 .requestMatchers(
                         "/laporanprogramprioritas/**",
@@ -70,7 +70,7 @@ public class SecurityConfig {
                         "/target/**",
                         "/indikatorbelanja/**",
                         "/targetbelanja/**"
-                ).hasAnyRole("LEVEL_2", "LEVEL_3")
+                ).hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3")
 
                 // LEVEL 4: login only (via /auth/me), everything else denied by default.
                 .anyRequest().denyAll()
