@@ -61,6 +61,7 @@ public class ProgramController {
                         program.kodeProgram(),
                         program.namaProgram(),
                         program.kodeOpd(),
+                        programService.resolveNamaOpd(program.kodeOpd()),
                         program.tahun(),
                         program.createdDate(),
                         program.lastModifiedDate()

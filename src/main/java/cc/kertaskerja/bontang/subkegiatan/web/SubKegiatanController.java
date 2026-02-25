@@ -50,6 +50,7 @@ public class SubKegiatanController {
                         subKegiatan.kodeSubKegiatan(),
                         subKegiatan.namaSubKegiatan(),
                         subKegiatan.kodeOpd(),
+                        subKegiatanService.resolveNamaOpd(subKegiatan.kodeOpd()),
                         subKegiatan.tahun(),
                         subKegiatan.createdDate(),
                         subKegiatan.lastModifiedDate()

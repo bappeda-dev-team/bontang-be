@@ -1,9 +1,11 @@
 package cc.kertaskerja.bontang.kegiatan.domain;
 
 import cc.kertaskerja.bontang.kegiatan.domain.exception.KegiatanNotFoundException;
+import cc.kertaskerja.bontang.opd.domain.Opd;
 import cc.kertaskerja.bontang.opd.domain.OpdRepository;
 import cc.kertaskerja.bontang.shared.OpdPrefixExtractor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Set;
@@ -80,6 +82,16 @@ public class KegiatanService{
 
         return opdRepository.findFirstByKodeOpdStartingWith(prefix)
                 .map(opd -> opd.kodeOpd())
+                .orElse(null);
+    }
+
+    public String resolveNamaOpd(String kodeOpd) {
+        if (!StringUtils.hasText(kodeOpd)) {
+            return null;
+        }
+
+        return opdRepository.findByKodeOpd(kodeOpd)
+                .map(Opd::namaOpd)
                 .orElse(null);
     }
 

@@ -7,6 +7,7 @@ public record KegiatanResponse(
         String kodeKegiatan,
         String namaKegiatan,
         String kodeOpd,
+        String namaOpd,
         Integer tahun,
         Instant createdDate,
         Instant lastModifiedDate

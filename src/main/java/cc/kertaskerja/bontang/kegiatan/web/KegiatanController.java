@@ -50,6 +50,7 @@ public class KegiatanController {
                         kegiatan.kodeKegiatan(),
                         kegiatan.namaKegiatan(),
                         kegiatan.kodeOpd(),
+                        kegiatanService.resolveNamaOpd(kegiatan.kodeOpd()),
                         kegiatan.tahun(),
                         kegiatan.createdDate(),
                         kegiatan.lastModifiedDate()

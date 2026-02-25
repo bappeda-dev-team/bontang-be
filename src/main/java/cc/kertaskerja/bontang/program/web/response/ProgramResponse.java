@@ -7,6 +7,7 @@ public record ProgramResponse(
         String kodeProgram,
         String namaProgram,
         String kodeOpd,
+        String namaOpd,
         Integer tahun,
         Instant createdDate,
         Instant lastModifiedDate
