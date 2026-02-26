@@ -35,7 +35,7 @@ public class SecurityConfig {
                 // LEVEL 1
                 .requestMatchers("/opd/detail/findall").hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4")
                 .requestMatchers(
-                        "/opd/**",
+                "/opd/**",
                         "/program/**",
                         "/kegiatan/**",
                         "/subkegiatan/**",
@@ -48,7 +48,7 @@ public class SecurityConfig {
                         "/subkegiatanopd/**",
                         "/bidangurusan/**",
                         "/programprioritas/**"
-                ).hasAnyRole("LEVEL_1", "LEVEL_2")
+                ).hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3")
                 // allow all authenticated roles to access laporan endpoints
                 .requestMatchers(
                         "/laporanprogramprioritas/**",

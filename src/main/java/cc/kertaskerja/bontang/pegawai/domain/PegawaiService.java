@@ -34,6 +34,10 @@ public class PegawaiService {
         return pegawaiRepository.findByKodeOpdAndTahun(kodeOpd, tahun);
     }
 
+    public Iterable<Pegawai> findByKodeOpdAndTahunAndRole(String kodeOpd, Integer tahun, String role) {
+        return pegawaiRepository.findByKodeOpdAndTahunAndRole(kodeOpd, tahun, role);
+    }
+
     public Pegawai detailPegawaiByNip(String nip) {
         return pegawaiRepository.findByNip(nip)
                 .orElseThrow(() -> new PegawaiNotFoundException(nip));

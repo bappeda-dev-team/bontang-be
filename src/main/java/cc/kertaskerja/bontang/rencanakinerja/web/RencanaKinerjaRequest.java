@@ -38,7 +38,10 @@ public record RencanaKinerjaRequest(
     String keterangan,
 
     @Nullable
-    List<IndikatorData> indikatorList
+    List<IndikatorData> indikatorList,
+
+    @Nullable
+    List<String> verifikatorList
 ) {
     public record IndikatorData(
         @Nullable

@@ -42,9 +42,12 @@ import cc.kertaskerja.bontang.rencanakinerja.web.response.SimpleRencanaKinerjaRe
 import cc.kertaskerja.bontang.rencanakinerja.web.response.SimpleIndikatorResponse;
 import cc.kertaskerja.bontang.rencanakinerja.web.response.SimpleTargetResponse;
 import cc.kertaskerja.bontang.rencanakinerja.web.response.SumberDanaResponse;
+import cc.kertaskerja.bontang.rencanakinerja.web.response.VerifikatorResponse;
 
 import cc.kertaskerja.bontang.sumberdana.domain.SumberDana;
 import cc.kertaskerja.bontang.sumberdana.domain.SumberDanaRepository;
+import cc.kertaskerja.bontang.pegawai.domain.Pegawai;
+import cc.kertaskerja.bontang.pegawai.domain.PegawaiRepository;
 
 import java.util.stream.StreamSupport;
 
@@ -62,6 +65,8 @@ public class RencanaKinerjaService {
     private SubKegiatanRencanaKinerjaService subKegiatanRencanaKinerjaService;
     private DasarHukumService dasarHukumService;
     private GambaranUmumService gambaranUmumService;
+    private PegawaiRepository pegawaiRepository;
+    private RencanaKinerjaVerifikatorRepository rencanaKinerjaVerifikatorRepository;
 
     public RencanaKinerjaService(RencanaKinerjaRepository rencanaKinerjaRepository,
                            RencanaKinerjaSumberDanaRepository rencanaKinerjaSumberDanaRepository,
@@ -72,7 +77,9 @@ public class RencanaKinerjaService {
                            PelaksanaanService pelaksanaanService,
                            SubKegiatanRencanaKinerjaService subKegiatanRencanaKinerjaService,
                            DasarHukumService dasarHukumService,
-                           GambaranUmumService gambaranUmumService) {
+                           GambaranUmumService gambaranUmumService,
+                           PegawaiRepository pegawaiRepository,
+                           RencanaKinerjaVerifikatorRepository rencanaKinerjaVerifikatorRepository) {
         this.rencanaKinerjaRepository = rencanaKinerjaRepository;
         this.rencanaKinerjaSumberDanaRepository = rencanaKinerjaSumberDanaRepository;
         this.sumberDanaRepository = sumberDanaRepository;
@@ -83,6 +90,8 @@ public class RencanaKinerjaService {
         this.subKegiatanRencanaKinerjaService = subKegiatanRencanaKinerjaService;
         this.dasarHukumService = dasarHukumService;
         this.gambaranUmumService = gambaranUmumService;
+        this.pegawaiRepository = pegawaiRepository;
+        this.rencanaKinerjaVerifikatorRepository = rencanaKinerjaVerifikatorRepository;
     }
 
     private List<SumberDanaResponse> buildSumberDanaResponses(Long rencanaKinerjaId) {
@@ -122,6 +131,56 @@ public class RencanaKinerjaService {
         }
     }
 
+    private void validateVerifikatorNips(List<String> verifikatorList, String kodeOpd, Integer tahun) {
+        if (verifikatorList == null || verifikatorList.isEmpty()) {
+            return;
+        }
+
+        for (String nip : verifikatorList) {
+            Pegawai pegawai = pegawaiRepository.findByNip(nip)
+                .orElseThrow(() -> new IllegalArgumentException("Pegawai dengan nip " + nip + " tidak ditemukan"));
+
+            if (!"LEVEL_2".equals(pegawai.role())) {
+                throw new IllegalArgumentException("Pegawai dengan nip " + nip + " bukan LEVEL_2");
+            }
+
+            if (!Objects.equals(kodeOpd, pegawai.kodeOpd())) {
+                throw new IllegalArgumentException("Pegawai dengan nip " + nip + " tidak sesuai kode OPD");
+            }
+
+            if (!Objects.equals(tahun, pegawai.tahun())) {
+                throw new IllegalArgumentException("Pegawai dengan nip " + nip + " tidak sesuai tahun");
+            }
+        }
+    }
+
+    private void syncVerifikator(Long rencanaKinerjaId, List<String> verifikatorList) {
+        rencanaKinerjaVerifikatorRepository.deleteByIdRencanaKinerja(rencanaKinerjaId);
+
+        if (verifikatorList == null || verifikatorList.isEmpty()) {
+            return;
+        }
+
+        List<RencanaKinerjaVerifikator> relasiList = verifikatorList.stream()
+            .filter(Objects::nonNull)
+            .distinct()
+            .map(nip -> RencanaKinerjaVerifikator.of(rencanaKinerjaId, nip))
+            .toList();
+
+        rencanaKinerjaVerifikatorRepository.saveAll(relasiList);
+    }
+
+    private List<VerifikatorResponse> buildVerifikatorResponses(Long rencanaKinerjaId) {
+        List<RencanaKinerjaVerifikator> relasiList =
+            rencanaKinerjaVerifikatorRepository.findByIdRencanaKinerja(rencanaKinerjaId);
+
+        return relasiList.stream()
+            .map(relasi -> pegawaiRepository.findByNip(relasi.nipVerifikator()).orElse(null))
+            .filter(Objects::nonNull)
+            .map(VerifikatorResponse::from)
+            .toList();
+    }
+
     public Iterable<RencanaKinerja> findAll() {
         return rencanaKinerjaRepository.findAll();
     }
@@ -158,7 +217,14 @@ public class RencanaKinerjaService {
 
                 List<SumberDanaResponse> sumberDanaList = buildSumberDanaResponses(rencanaKinerja.id());
 
-                return SimpleRencanaKinerjaResponse.from(rencanaKinerja, sumberDanaList, indikatorResponses);
+                List<VerifikatorResponse> verifikatorList = buildVerifikatorResponses(rencanaKinerja.id());
+
+                return SimpleRencanaKinerjaResponse.from(
+                    rencanaKinerja,
+                    sumberDanaList,
+                    indikatorResponses,
+                    verifikatorList
+                );
             })
             .toList();
 
@@ -361,6 +427,7 @@ public class RencanaKinerjaService {
     @Transactional
     public ResponseEntity<Map<String, Object>> tambahRencanaKinerja(RencanaKinerjaRequest request) {
         validateSumberDanaIds(request.sumberDanaIds());
+        validateVerifikatorNips(request.verifikatorList(), request.kodeOpd(), request.tahun());
 
         RencanaKinerja rencanaKinerja = RencanaKinerja.of(
                 null,
@@ -377,6 +444,7 @@ public class RencanaKinerjaService {
         RencanaKinerja savedRencanaKinerja = rencanaKinerjaRepository.save(rencanaKinerja);
 
         syncSumberDana(savedRencanaKinerja.id(), request.sumberDanaIds());
+        syncVerifikator(savedRencanaKinerja.id(), request.verifikatorList());
 
         return buildResponse(savedRencanaKinerja, request.indikatorList(), request.sumberDanaIds());
     }
@@ -403,10 +471,13 @@ public class RencanaKinerjaService {
             savedRencanaKinerja.id()
         );
 
+        List<VerifikatorResponse> verifikatorList = buildVerifikatorResponses(savedRencanaKinerja.id());
+
         RencanaKinerjaCreateResponse createResponse = RencanaKinerjaCreateResponse.from(
             savedRencanaKinerja,
             sumberDanaList,
-            indikatorResponses
+            indikatorResponses,
+            verifikatorList
         );
 
         return ResponseEntity.ok(createResponse.toMap());
@@ -574,6 +645,10 @@ public class RencanaKinerjaService {
         RencanaKinerja existingRencanaKinerja = rencanaKinerjaRepository.findById(id)
                 .orElseThrow(() -> new RencanaKinerjaNotFoundException(id));
 
+        String effectiveKodeOpd = request.kodeOpd() != null ? request.kodeOpd() : existingRencanaKinerja.kodeOpd();
+        Integer effectiveTahun = request.tahun() != null ? request.tahun() : existingRencanaKinerja.tahun();
+        validateVerifikatorNips(request.verifikatorList(), effectiveKodeOpd, effectiveTahun);
+
         RencanaKinerja updatedRencanaKinerja = new RencanaKinerja(
                 id,
                 null,
@@ -593,17 +668,23 @@ public class RencanaKinerjaService {
         RencanaKinerja savedRencanaKinerja = rencanaKinerjaRepository.save(updatedRencanaKinerja);
 
         syncSumberDana(savedRencanaKinerja.id(), request.sumberDanaIds());
+        if (request.verifikatorList() != null) {
+            syncVerifikator(savedRencanaKinerja.id(), request.verifikatorList());
+        }
 
         List<cc.kertaskerja.bontang.rencanakinerja.web.response.IndikatorUpdateResponse> indikatorResponses =
             buildIndikatorWithTargetsForUpdate(savedRencanaKinerja, request.indikatorList());
 
         List<SumberDanaResponse> sumberDanaList = buildSumberDanaResponses(savedRencanaKinerja.id());
 
+        List<VerifikatorResponse> verifikatorList = buildVerifikatorResponses(savedRencanaKinerja.id());
+
         cc.kertaskerja.bontang.rencanakinerja.web.response.RencanaKinerjaUpdateResponse response =
             cc.kertaskerja.bontang.rencanakinerja.web.response.RencanaKinerjaUpdateResponse.from(
                 savedRencanaKinerja,
                 sumberDanaList,
-                indikatorResponses
+                indikatorResponses,
+                verifikatorList
             );
 
         return ResponseEntity.ok(response.toMap());

@@ -17,12 +17,14 @@ public record SimpleRencanaKinerjaResponse(
     String namaPegawai,
     String keterangan,
     List<SumberDanaResponse> sumberDanaList,
-    List<SimpleIndikatorResponse> indikatorList
+    List<SimpleIndikatorResponse> indikatorList,
+    List<VerifikatorResponse> verifikator
 ) {
     public static SimpleRencanaKinerjaResponse from(
         RencanaKinerja rencanaKinerja,
         List<SumberDanaResponse> sumberDanaList,
-        List<SimpleIndikatorResponse> indikatorList
+        List<SimpleIndikatorResponse> indikatorList,
+        List<VerifikatorResponse> verifikator
     ) {
         return new SimpleRencanaKinerjaResponse(
             rencanaKinerja.id(),
@@ -36,7 +38,8 @@ public record SimpleRencanaKinerjaResponse(
             rencanaKinerja.namaPegawai(),
             rencanaKinerja.keterangan(),
             sumberDanaList,
-            indikatorList
+            indikatorList,
+            verifikator
         );
     }
 
@@ -57,6 +60,9 @@ public record SimpleRencanaKinerjaResponse(
         map.put("keterangan", keterangan);
         map.put("indikatorList", indikatorList.stream()
             .map(SimpleIndikatorResponse::toMap)
+            .toList());
+        map.put("verifikator", verifikator.stream()
+            .map(VerifikatorResponse::toMap)
             .toList());
         return map;
     }

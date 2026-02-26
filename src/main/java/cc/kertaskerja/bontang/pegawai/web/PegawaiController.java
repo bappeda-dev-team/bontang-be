@@ -2,6 +2,7 @@ package cc.kertaskerja.bontang.pegawai.web;
 
 import cc.kertaskerja.bontang.pegawai.domain.Pegawai;
 import cc.kertaskerja.bontang.pegawai.domain.PegawaiService;
+import cc.kertaskerja.bontang.rencanakinerja.web.response.VerifikatorResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Map;
+import java.util.stream.StreamSupport;
 
 @RestController
 @Tag(name = "pegawai")
@@ -37,6 +40,20 @@ public class PegawaiController {
     public Iterable<Pegawai> findByKodeOpdAndTahun(@PathVariable("kodeOpd") String kodeOpd,
                                                     @PathVariable("tahun") Integer tahun) {
         return pegawaiService.findByKodeOpdAndTahun(kodeOpd, tahun);
+    }
+
+    /**
+     * Ambil semua data pegawai LEVEL_2 berdasarkan kode OPD dan tahun
+     */
+    @GetMapping("detail/kodeOpd/{kodeOpd}/tahun/{tahun}/level2")
+    public Iterable<Map<String, Object>> findByKodeOpdAndTahunLevel2(
+            @PathVariable("kodeOpd") String kodeOpd,
+            @PathVariable("tahun") Integer tahun) {
+        Iterable<Pegawai> pegawaiList = pegawaiService.findByKodeOpdAndTahunAndRole(kodeOpd, tahun, "LEVEL_2");
+        return StreamSupport.stream(pegawaiList.spliterator(), false)
+                .map(VerifikatorResponse::from)
+                .map(VerifikatorResponse::toMap)
+                .toList();
     }
 
     /**
