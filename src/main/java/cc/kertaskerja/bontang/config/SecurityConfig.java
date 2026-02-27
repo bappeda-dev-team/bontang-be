@@ -2,6 +2,7 @@ package cc.kertaskerja.bontang.config;
 
 import static org.springframework.http.HttpMethod.OPTIONS;
 import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +32,9 @@ public class SecurityConfig {
                 .requestMatchers("/auth/me").authenticated()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
+                .requestMatchers(GET, "/laporan/verifikasi/status", "/laporan/cetak")
+                        .hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4")
+                .requestMatchers(POST, "/laporan/verifikasi").hasRole("LEVEL_2")
 
                 // LEVEL 1
                 .requestMatchers("/opd/detail/findall").hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4")

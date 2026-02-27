@@ -24,6 +24,11 @@ public interface ProgramPrioritasAnggaranRepository extends CrudRepository<Progr
 
     Iterable<ProgramPrioritasAnggaran> findByKodeOpd(String kodeOpd);
 
+    Iterable<ProgramPrioritasAnggaran> findByKodeOpdAndTahun(
+            String kodeOpd,
+            Integer tahun
+    );
+
     Iterable<ProgramPrioritasAnggaran> findByKodeOpdAndNipAndTahun(
             String kodeOpd,
             String nip,
