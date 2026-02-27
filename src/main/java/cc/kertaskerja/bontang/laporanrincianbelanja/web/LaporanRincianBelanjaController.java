@@ -3,6 +3,7 @@ package cc.kertaskerja.bontang.laporanrincianbelanja.web;
 import cc.kertaskerja.bontang.laporanrincianbelanja.domain.LaporanRincianBelanjaService;
 import cc.kertaskerja.bontang.laporanrincianbelanja.web.response.LaporanRincianBelanjaEnvelopeResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,8 +23,12 @@ public class LaporanRincianBelanjaController {
     @GetMapping("detail/kodeopd/{kodeOpd}/tahun/{tahun}")
     public LaporanRincianBelanjaEnvelopeResponse getLaporanRincianBelanja(
             @PathVariable("kodeOpd") String kodeOpd,
-            @PathVariable("tahun") Integer tahun
+            @PathVariable("tahun") Integer tahun,
+            Authentication authentication
     ) {
-        return laporanRincianBelanjaService.getLaporanRincianBelanja(kodeOpd, tahun);
+        String requesterNip = authentication.getName();
+        boolean isLevel2 = authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_LEVEL_2".equals(authority.getAuthority()));
+        return laporanRincianBelanjaService.getLaporanRincianBelanja(kodeOpd, tahun, requesterNip, isLevel2);
     }
 }

@@ -12,6 +12,7 @@ import cc.kertaskerja.bontang.rencanaaksi.domain.RencanaAksi;
 import cc.kertaskerja.bontang.rencanaaksi.domain.RencanaAksiRepository;
 import cc.kertaskerja.bontang.rencanakinerja.domain.RencanaKinerja;
 import cc.kertaskerja.bontang.rencanakinerja.domain.RencanaKinerjaRepository;
+import cc.kertaskerja.bontang.rencanakinerja.domain.RencanaKinerjaVerifikatorRepository;
 import cc.kertaskerja.bontang.rincianbelanja.domain.RincianBelanja;
 import cc.kertaskerja.bontang.rincianbelanja.domain.RincianBelanjaRepository;
 import cc.kertaskerja.bontang.subkegiatanrencanakinerja.domain.SubKegiatanRencanaKinerja;
@@ -40,6 +41,7 @@ public class LaporanRincianBelanjaService {
     private final TargetRepository targetRepository;
     private final RencanaAksiRepository rencanaAksiRepository;
     private final RincianBelanjaRepository rincianBelanjaRepository;
+    private final RencanaKinerjaVerifikatorRepository rencanaKinerjaVerifikatorRepository;
 
     public LaporanRincianBelanjaService(
             RencanaKinerjaRepository rencanaKinerjaRepository,
@@ -47,7 +49,8 @@ public class LaporanRincianBelanjaService {
             IndikatorRepository indikatorRepository,
             TargetRepository targetRepository,
             RencanaAksiRepository rencanaAksiRepository,
-            RincianBelanjaRepository rincianBelanjaRepository
+            RincianBelanjaRepository rincianBelanjaRepository,
+            RencanaKinerjaVerifikatorRepository rencanaKinerjaVerifikatorRepository
     ) {
         this.rencanaKinerjaRepository = rencanaKinerjaRepository;
         this.subKegiatanRencanaKinerjaRepository = subKegiatanRencanaKinerjaRepository;
@@ -55,14 +58,26 @@ public class LaporanRincianBelanjaService {
         this.targetRepository = targetRepository;
         this.rencanaAksiRepository = rencanaAksiRepository;
         this.rincianBelanjaRepository = rincianBelanjaRepository;
+        this.rencanaKinerjaVerifikatorRepository = rencanaKinerjaVerifikatorRepository;
     }
 
     public LaporanRincianBelanjaEnvelopeResponse getLaporanRincianBelanja(
             String kodeOpd,
-            Integer tahun
+            Integer tahun,
+            String requesterNip,
+            boolean isLevel2
     ) {
         List<RencanaKinerja> rencanaKinerjaList =
                 rencanaKinerjaRepository.findByKodeOpdAndTahun(kodeOpd, tahun);
+
+        if (isLevel2) {
+            Set<Long> allowedRencanaKinerjaIds = rencanaKinerjaVerifikatorRepository.findByNipVerifikator(requesterNip).stream()
+                    .map(relasi -> relasi.idRencanaKinerja())
+                    .collect(Collectors.toSet());
+            rencanaKinerjaList = rencanaKinerjaList.stream()
+                    .filter(rencanaKinerja -> allowedRencanaKinerjaIds.contains(rencanaKinerja.id()))
+                    .toList();
+        }
 
         if (rencanaKinerjaList.isEmpty()) {
             return new LaporanRincianBelanjaEnvelopeResponse(

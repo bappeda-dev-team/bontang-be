@@ -1,6 +1,5 @@
 package cc.kertaskerja.bontang.laporanprogramprioritas.domain;
 
-import cc.kertaskerja.bontang.laporanprogramprioritas.domain.exception.LaporanProgramPrioritasNotFoundException;
 import cc.kertaskerja.bontang.laporanprogramprioritas.web.response.LaporanProgramPrioritasDataResponse;
 import cc.kertaskerja.bontang.laporanprogramprioritas.web.response.PelaksanaLaporanResponse;
 import cc.kertaskerja.bontang.laporanprogramprioritas.web.response.RencanaKinerjaLaporanResponse;
@@ -16,7 +15,7 @@ import cc.kertaskerja.bontang.programprioritasanggaran.domain.ProgramPrioritasAn
 import cc.kertaskerja.bontang.programprioritasanggaran.domain.exception.ProgramPrioritasAnggaranNotFoundException;
 import cc.kertaskerja.bontang.rencanakinerja.domain.RencanaKinerja;
 import cc.kertaskerja.bontang.rencanakinerja.domain.RencanaKinerjaRepository;
-import cc.kertaskerja.bontang.rencanakinerja.domain.exception.RencanaKinerjaNotFoundException;
+import cc.kertaskerja.bontang.rencanakinerja.domain.RencanaKinerjaVerifikatorRepository;
 import cc.kertaskerja.bontang.rencanaaksi.pelaksanaan.domain.PelaksanaanRepository;
 import cc.kertaskerja.bontang.rincianbelanja.domain.RincianBelanja;
 import cc.kertaskerja.bontang.rincianbelanja.domain.RincianBelanjaRepository;
@@ -26,6 +25,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class LaporanProgramPrioritasService {
@@ -37,6 +39,7 @@ public class LaporanProgramPrioritasService {
     private final PelaksanaanRepository pelaksanaanRepository;
     private final RincianBelanjaRepository rincianBelanjaRepository;
     private final OpdRepository opdRepository;
+    private final RencanaKinerjaVerifikatorRepository rencanaKinerjaVerifikatorRepository;
 
     public LaporanProgramPrioritasService(
             LaporanProgramPrioritasRepository laporanProgramPrioritasRepository,
@@ -46,7 +49,8 @@ public class LaporanProgramPrioritasService {
             SubKegiatanRencanaKinerjaRepository subKegiatanRencanaKinerjaRepository,
             PelaksanaanRepository pelaksanaanRepository,
             RincianBelanjaRepository rincianBelanjaRepository,
-            OpdRepository opdRepository
+            OpdRepository opdRepository,
+            RencanaKinerjaVerifikatorRepository rencanaKinerjaVerifikatorRepository
     ) {
         this.laporanProgramPrioritasRepository = laporanProgramPrioritasRepository;
         this.programPrioritasAnggaranRepository = programPrioritasAnggaranRepository;
@@ -56,11 +60,14 @@ public class LaporanProgramPrioritasService {
         this.pelaksanaanRepository = pelaksanaanRepository;
         this.rincianBelanjaRepository = rincianBelanjaRepository;
         this.opdRepository = opdRepository;
+        this.rencanaKinerjaVerifikatorRepository = rencanaKinerjaVerifikatorRepository;
     }
 
-    public LaporanProgramPrioritasDataResponse getLaporan(
+    private LaporanProgramPrioritasDataResponse getLaporan(
             Long idProgramPrioritasAnggaran,
-            Integer tahun
+            Integer tahun,
+            boolean isLevel2,
+            Set<Long> allowedRencanaKinerjaIds
     ) {
         // 1. Ambil data ProgramPrioritasAnggaran berdasarkan id
         ProgramPrioritasAnggaran programPrioritasAnggaran = programPrioritasAnggaranRepository.findById(idProgramPrioritasAnggaran)
@@ -78,6 +85,10 @@ public class LaporanProgramPrioritasService {
         List<RencanaKinerjaLaporanResponse> rencanaKinerjaResponses = new ArrayList<>();
 
         for (ProgramPrioritasAnggaranRencanaKinerja rkRelasi : rencanaKinerjaList) {
+            if (isLevel2 && !allowedRencanaKinerjaIds.contains(rkRelasi.idRencanaKinerja())) {
+                continue;
+            }
+
             // 4. Ambil data RencanaKinerja
             RencanaKinerja rencanaKinerja = rencanaKinerjaEntityRepository
                     .findById(rkRelasi.idRencanaKinerja())
@@ -145,6 +156,10 @@ public class LaporanProgramPrioritasService {
             }
         }
 
+        if (isLevel2 && rencanaKinerjaResponses.isEmpty()) {
+            return null;
+        }
+
         // 9. Buat list pelaksana
         String kodeOpd = programPrioritasAnggaran.kodeOpd();
         String namaOpd = opdRepository.findByKodeOpd(kodeOpd)
@@ -175,10 +190,19 @@ public class LaporanProgramPrioritasService {
 
     public List<LaporanProgramPrioritasDataResponse> getLaporanProgramPrioritas(
             List<Long> idProgramPrioritasAnggaranList,
-            Integer tahun
+            Integer tahun,
+            String requesterNip,
+            boolean isLevel2
     ) {
+        Set<Long> allowedRencanaKinerjaIds = isLevel2
+                ? rencanaKinerjaVerifikatorRepository.findByNipVerifikator(requesterNip).stream()
+                .map(relasi -> relasi.idRencanaKinerja())
+                .collect(Collectors.toSet())
+                : Set.of();
+
         return idProgramPrioritasAnggaranList.stream()
-                .map(id -> getLaporan(id, tahun))
+                .map(id -> getLaporan(id, tahun, isLevel2, allowedRencanaKinerjaIds))
+                .filter(Objects::nonNull)
                 .toList();
     }
 

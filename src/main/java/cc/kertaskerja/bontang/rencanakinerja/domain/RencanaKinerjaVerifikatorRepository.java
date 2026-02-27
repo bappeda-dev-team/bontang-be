@@ -13,6 +13,9 @@ public interface RencanaKinerjaVerifikatorRepository extends CrudRepository<Renc
     @NonNull
     List<RencanaKinerjaVerifikator> findByIdRencanaKinerja(@NonNull Long idRencanaKinerja);
 
+    @NonNull
+    List<RencanaKinerjaVerifikator> findByNipVerifikator(@NonNull String nipVerifikator);
+
     @Modifying
     @Transactional
     @Query("DELETE FROM rencana_kinerja_verifikator WHERE id_rencana_kinerja = :idRencanaKinerja")

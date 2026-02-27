@@ -4,6 +4,7 @@ import cc.kertaskerja.bontang.laporanprogramprioritas.domain.LaporanProgramPrior
 import cc.kertaskerja.bontang.laporanprogramprioritas.web.response.LaporanProgramPrioritasDataResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -24,12 +25,21 @@ public class LaporanProgramPrioritasController {
     @GetMapping("detail/id_program_prioritas_anggaran={idProgramPrioritasAnggaran}")
     public List<LaporanProgramPrioritasDataResponse> getLaporanProgramPrioritas(
             @PathVariable("idProgramPrioritasAnggaran") String idProgramPrioritasAnggaran,
-            @RequestParam("tahun") Integer tahun
+            @RequestParam("tahun") Integer tahun,
+            Authentication authentication
     ) {
         List<Long> idProgramPrioritasAnggaranList = Arrays.stream(idProgramPrioritasAnggaran.split(","))
                 .map(String::trim)
                 .map(Long::parseLong)
                 .toList();
-        return laporanProgramPrioritasService.getLaporanProgramPrioritas(idProgramPrioritasAnggaranList, tahun);
+        String requesterNip = authentication.getName();
+        boolean isLevel2 = authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_LEVEL_2".equals(authority.getAuthority()));
+        return laporanProgramPrioritasService.getLaporanProgramPrioritas(
+                idProgramPrioritasAnggaranList,
+                tahun,
+                requesterNip,
+                isLevel2
+        );
     }
 }
