@@ -3,7 +3,9 @@ package cc.kertaskerja.bontang.laporanverifikasi.domain;
 import cc.kertaskerja.bontang.jabatan.domain.Jabatan;
 import cc.kertaskerja.bontang.jabatan.domain.JabatanRepository;
 import cc.kertaskerja.bontang.laporanprogramprioritas.domain.LaporanProgramPrioritasService;
+import cc.kertaskerja.bontang.laporanprogramprioritas.web.response.LaporanProgramPrioritasDataResponse;
 import cc.kertaskerja.bontang.laporanrincianbelanja.domain.LaporanRincianBelanjaService;
+import cc.kertaskerja.bontang.laporanrincianbelanja.web.response.LaporanRincianBelanjaEnvelopeResponse;
 import cc.kertaskerja.bontang.laporanverifikasi.web.LaporanVerifikasiRequest;
 import cc.kertaskerja.bontang.laporanverifikasi.web.response.LaporanCetakResponse;
 import cc.kertaskerja.bontang.laporanverifikasi.web.response.LaporanPenandatanganResponse;
@@ -64,12 +66,15 @@ public class LaporanVerifikasiService {
             LaporanVerifikasiRequest request,
             Authentication authentication
     ) {
-        assertLevel2(authentication);
+        boolean isLevel1 = hasRole(authentication, "ROLE_LEVEL_1");
+        assertLevel1OrLevel2(authentication);
         String requesterNip = authentication.getName();
         LaporanJenis jenis = LaporanJenis.fromRaw(request.jenisLaporan());
         String filterHash = normalizeFilterHash(request.filterHash());
 
-        ensureScopeLevel2(requesterNip, request.kodeOpd(), request.tahun());
+        if (!isLevel1) {
+            ensureScopeLevel2(requesterNip, request.kodeOpd(), request.tahun());
+        }
 
         Instant now = Instant.now();
         LaporanVerifikasi existing = laporanVerifikasiRepository
@@ -218,6 +223,77 @@ public class LaporanVerifikasiService {
         );
     }
 
+    public List<LaporanProgramPrioritasDataResponse> getVerifiedProgramPrioritas(
+            String kodeOpd,
+            Integer tahun,
+            String filterHash,
+            Authentication authentication
+    ) {
+        String normalizedFilterHash = normalizeFilterHash(filterHash);
+        boolean verified = laporanVerifikasiRepository
+                .findByJenisLaporanAndKodeOpdAndTahunAndFilterHash(
+                        LaporanJenis.PROGRAM_PRIORITAS.name(),
+                        kodeOpd,
+                        tahun,
+                        normalizedFilterHash
+                )
+                .isPresent();
+
+        if (!verified) {
+            return List.of();
+        }
+
+        List<Long> ids = StreamSupport.stream(
+                        programPrioritasAnggaranRepository.findByKodeOpdAndTahun(kodeOpd, tahun).spliterator(),
+                        false
+                )
+                .map(ProgramPrioritasAnggaran::id)
+                .toList();
+
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+
+        return laporanProgramPrioritasService.getLaporanProgramPrioritas(
+                ids,
+                tahun,
+                authentication.getName(),
+                false
+        );
+    }
+
+    public LaporanRincianBelanjaEnvelopeResponse getVerifiedRincianBelanja(
+            String kodeOpd,
+            Integer tahun,
+            String filterHash,
+            Authentication authentication
+    ) {
+        String normalizedFilterHash = normalizeFilterHash(filterHash);
+        boolean verified = laporanVerifikasiRepository
+                .findByJenisLaporanAndKodeOpdAndTahunAndFilterHash(
+                        LaporanJenis.RINCIAN_BELANJA.name(),
+                        kodeOpd,
+                        tahun,
+                        normalizedFilterHash
+                )
+                .isPresent();
+
+        if (!verified) {
+            return new LaporanRincianBelanjaEnvelopeResponse(
+                    200,
+                    "success get laporan rincian belanja",
+                    List.of()
+            );
+        }
+
+        return laporanRincianBelanjaService.getLaporanRincianBelanja(
+                kodeOpd,
+                tahun,
+                authentication.getName(),
+                false
+        );
+    }
+
     private LaporanPenandatanganResponse buildPenandatangan(String nip) {
         Pegawai pegawai = pegawaiRepository.findByNip(nip).orElse(null);
         if (pegawai == null) {
@@ -259,9 +335,12 @@ public class LaporanVerifikasiService {
         }
     }
 
-    private void assertLevel2(Authentication authentication) {
-        if (!hasRole(authentication, "ROLE_LEVEL_2")) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Hanya LEVEL_2 yang dapat memverifikasi laporan");
+    private void assertLevel1OrLevel2(Authentication authentication) {
+        boolean isLevel1 = hasRole(authentication, "ROLE_LEVEL_1");
+        boolean isLevel2 = hasRole(authentication, "ROLE_LEVEL_2");
+
+        if (!isLevel1 && !isLevel2) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Hanya LEVEL_1 atau LEVEL_2 yang dapat memverifikasi laporan");
         }
     }
 

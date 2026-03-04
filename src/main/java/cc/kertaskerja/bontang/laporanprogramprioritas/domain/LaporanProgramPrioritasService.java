@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class LaporanProgramPrioritasService {
@@ -169,7 +170,7 @@ public class LaporanProgramPrioritasService {
         List<PelaksanaLaporanResponse> pelaksanas = new ArrayList<>();
         if (!rencanaKinerjaResponses.isEmpty()) {
             pelaksanas.add(new PelaksanaLaporanResponse(
-                    getNamaPegawaiByNip(programPrioritasAnggaran.nip(), kodeOpd, tahun),
+                    getNamaPegawaiByNip(programPrioritasAnggaran.nip(), kodeOpd, programPrioritasAnggaran.tahun()),
                     programPrioritasAnggaran.nip(),
                     rencanaKinerjaResponses
             ));
@@ -206,6 +207,196 @@ public class LaporanProgramPrioritasService {
                 .toList();
     }
 
+    public List<LaporanProgramPrioritasDataResponse> getLaporanProgramPrioritasByPegawai(
+            String kodeOpd,
+            Integer tahun,
+            String nipPegawai
+    ) {
+        List<ProgramPrioritasAnggaran> anggaranList = StreamSupport.stream(
+                        programPrioritasAnggaranRepository.findByKodeOpdAndTahun(kodeOpd, tahun).spliterator(),
+                        false
+                )
+                .toList();
+
+        if (anggaranList.isEmpty()) {
+            return List.of();
+        }
+
+        return anggaranList.stream()
+                .map(anggaran -> getLaporanForPegawai(anggaran, nipPegawai))
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    public List<LaporanProgramPrioritasDataResponse> getLaporanProgramPrioritasAllOpd(
+            Integer tahun,
+            String requesterNip,
+            boolean isLevel2
+    ) {
+        List<Long> ids = StreamSupport.stream(
+                        programPrioritasAnggaranRepository.findByTahun(tahun).spliterator(),
+                        false
+                )
+                .map(ProgramPrioritasAnggaran::id)
+                .toList();
+
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+
+        return getLaporanProgramPrioritas(ids, tahun, requesterNip, isLevel2);
+    }
+
+    private LaporanProgramPrioritasDataResponse getLaporanForPegawai(
+            ProgramPrioritasAnggaran programPrioritasAnggaran,
+            String nipPegawai
+    ) {
+        ProgramPrioritas programPrioritas = laporanProgramPrioritasRepository
+                .findById(programPrioritasAnggaran.idProgramPrioritas())
+                .orElseThrow(() -> new ProgramPrioritasNotFoundException(programPrioritasAnggaran.idProgramPrioritas()));
+
+        Iterable<ProgramPrioritasAnggaranRencanaKinerja> rencanaKinerjaList =
+                rencanaKinerjaRepository.findByIdProgramPrioritasAnggaran(programPrioritasAnggaran.id());
+
+        List<RencanaKinerjaLaporanResponse> rencanaKinerjaResponses = new ArrayList<>();
+
+        for (ProgramPrioritasAnggaranRencanaKinerja rkRelasi : rencanaKinerjaList) {
+            RencanaKinerja rencanaKinerja = rencanaKinerjaEntityRepository
+                    .findById(rkRelasi.idRencanaKinerja())
+                    .orElse(null);
+
+            if (rencanaKinerja == null) {
+                continue;
+            }
+
+            if (!Objects.equals(rencanaKinerja.nipPegawai(), nipPegawai)) {
+                continue;
+            }
+
+            List<SubKegiatanRencanaKinerja> subKegiatanList =
+                    subKegiatanRencanaKinerjaRepository.findByIdRekin(
+                            rencanaKinerja.id().intValue()
+                    );
+
+            Integer pagu = 0;
+            String kodeSubkegiatan = null;
+            String namaSubkegiatan = null;
+
+            if (!subKegiatanList.isEmpty()) {
+                SubKegiatanRencanaKinerja subKegiatanPertama = subKegiatanList.get(0);
+                kodeSubkegiatan = subKegiatanPertama.kodeSubKegiatan();
+                namaSubkegiatan = subKegiatanPertama.namaSubKegiatan();
+
+                for (SubKegiatanRencanaKinerja subKegiatan : subKegiatanList) {
+                    List<RincianBelanja> rincianBelanjaList =
+                            rincianBelanjaRepository.findByIdSubkegiatanRencanaKinerja(subKegiatan.id());
+                    pagu += rincianBelanjaList.stream()
+                            .mapToInt(RincianBelanja::totalAnggaran)
+                            .sum();
+                }
+            }
+
+            Integer tw1 = pelaksanaanRepository.sumBobotTW1ByIdRekin(
+                    rencanaKinerja.id().intValue()
+            );
+            Integer tw2 = pelaksanaanRepository.sumBobotTW2ByIdRekin(
+                    rencanaKinerja.id().intValue()
+            );
+            Integer tw3 = pelaksanaanRepository.sumBobotTW3ByIdRekin(
+                    rencanaKinerja.id().intValue()
+            );
+            Integer tw4 = pelaksanaanRepository.sumBobotTW4ByIdRekin(
+                    rencanaKinerja.id().intValue()
+            );
+
+            TahapanPelaksanaanResponse tahapanPelaksanaan =
+                    new TahapanPelaksanaanResponse(tw1, tw2, tw3, tw4);
+
+            RencanaKinerjaLaporanResponse rkResponse =
+                    new RencanaKinerjaLaporanResponse(
+                            rencanaKinerja.id(),
+                            rencanaKinerja.rencanaKinerja(),
+                            rencanaKinerja.namaPegawai(),
+                            rencanaKinerja.nipPegawai(),
+                            kodeSubkegiatan,
+                            namaSubkegiatan,
+                            pagu,
+                            tahapanPelaksanaan
+                    );
+
+            rencanaKinerjaResponses.add(rkResponse);
+        }
+
+        if (rencanaKinerjaResponses.isEmpty()) {
+            return null;
+        }
+
+        String kodeOpd = programPrioritasAnggaran.kodeOpd();
+        String namaOpd = opdRepository.findByKodeOpd(kodeOpd)
+                .map(Opd::namaOpd)
+                .orElse(null);
+
+        List<PelaksanaLaporanResponse> pelaksanas = new ArrayList<>();
+        pelaksanas.add(new PelaksanaLaporanResponse(
+                getNamaPegawaiByNip(nipPegawai, kodeOpd, programPrioritasAnggaran.tahun()),
+                nipPegawai,
+                rencanaKinerjaResponses
+        ));
+
+        return new LaporanProgramPrioritasDataResponse(
+                programPrioritasAnggaran.id(),
+                programPrioritas.programPrioritas(),
+                programPrioritasAnggaran.tahun(),
+                kodeOpd,
+                namaOpd,
+                pelaksanas,
+                "-"
+        );
+    }
+
+    public List<LaporanProgramPrioritasDataResponse> getLaporanProgramPrioritasVerified(
+            List<Long> idProgramPrioritasAnggaranList,
+            String requesterNip,
+            boolean isLevel2,
+            String filterHash
+    ) {
+        // filterHash tetap diterima untuk kompatibilitas, tetapi tidak digunakan.
+        if (idProgramPrioritasAnggaranList == null || idProgramPrioritasAnggaranList.isEmpty()) {
+            return List.of();
+        }
+
+        List<ProgramPrioritasAnggaran> programPrioritasAnggarans = idProgramPrioritasAnggaranList.stream()
+                .map(id -> programPrioritasAnggaranRepository.findById(id)
+                        .orElseThrow(() -> new ProgramPrioritasAnggaranNotFoundException(id)))
+                .toList();
+
+        String kodeOpd = programPrioritasAnggarans.stream()
+                .map(ProgramPrioritasAnggaran::kodeOpd)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+
+        boolean hasKodeOpd = kodeOpd != null && !kodeOpd.isBlank();
+        boolean mixedKodeOpd = programPrioritasAnggarans.stream()
+                .map(ProgramPrioritasAnggaran::kodeOpd)
+                .filter(Objects::nonNull)
+                .anyMatch(existing -> !Objects.equals(existing, kodeOpd));
+        if (!hasKodeOpd || mixedKodeOpd) {
+            return List.of();
+        }
+
+        Set<Long> allowedRencanaKinerjaIds = isLevel2
+                ? rencanaKinerjaVerifikatorRepository.findByNipVerifikator(requesterNip).stream()
+                .map(relasi -> relasi.idRencanaKinerja())
+                .collect(Collectors.toSet())
+                : Set.of();
+
+        return programPrioritasAnggarans.stream()
+                .map(anggaran -> getLaporanVerified(anggaran, isLevel2, allowedRencanaKinerjaIds))
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
     private String getNamaPegawaiByNip(String nip, String kodeOpd, Integer tahun) {
         List<RencanaKinerja> rencanaKinerjaList =
                 rencanaKinerjaEntityRepository.findByNipPegawaiAndKodeOpdAndTahun(nip, kodeOpd, tahun);
@@ -213,5 +404,117 @@ public class LaporanProgramPrioritasService {
                 .findFirst()
                 .map(RencanaKinerja::namaPegawai)
                 .orElse("-");
+    }
+
+    private LaporanProgramPrioritasDataResponse getLaporanVerified(
+            ProgramPrioritasAnggaran programPrioritasAnggaran,
+            boolean isLevel2,
+            Set<Long> allowedRencanaKinerjaIds
+    ) {
+        ProgramPrioritas programPrioritas = laporanProgramPrioritasRepository
+                .findById(programPrioritasAnggaran.idProgramPrioritas())
+                .orElseThrow(() -> new ProgramPrioritasNotFoundException(programPrioritasAnggaran.idProgramPrioritas()));
+
+        Iterable<ProgramPrioritasAnggaranRencanaKinerja> rencanaKinerjaList =
+                rencanaKinerjaRepository.findByIdProgramPrioritasAnggaran(programPrioritasAnggaran.id());
+
+        List<RencanaKinerjaLaporanResponse> rencanaKinerjaResponses = new ArrayList<>();
+
+        for (ProgramPrioritasAnggaranRencanaKinerja rkRelasi : rencanaKinerjaList) {
+            if (isLevel2 && !allowedRencanaKinerjaIds.contains(rkRelasi.idRencanaKinerja())) {
+                continue;
+            }
+
+            if (rencanaKinerjaVerifikatorRepository.findByIdRencanaKinerja(rkRelasi.idRencanaKinerja()).isEmpty()) {
+                continue;
+            }
+
+            RencanaKinerja rencanaKinerja = rencanaKinerjaEntityRepository
+                    .findById(rkRelasi.idRencanaKinerja())
+                    .orElse(null);
+
+            if (rencanaKinerja != null) {
+                List<SubKegiatanRencanaKinerja> subKegiatanList =
+                        subKegiatanRencanaKinerjaRepository.findByIdRekin(
+                                rencanaKinerja.id().intValue()
+                        );
+
+                Integer pagu = 0;
+                String kodeSubkegiatan = null;
+                String namaSubkegiatan = null;
+
+                if (!subKegiatanList.isEmpty()) {
+                    SubKegiatanRencanaKinerja subKegiatanPertama = subKegiatanList.get(0);
+                    kodeSubkegiatan = subKegiatanPertama.kodeSubKegiatan();
+                    namaSubkegiatan = subKegiatanPertama.namaSubKegiatan();
+
+                    for (SubKegiatanRencanaKinerja subKegiatan : subKegiatanList) {
+                        List<RincianBelanja> rincianBelanjaList =
+                                rincianBelanjaRepository.findByIdSubkegiatanRencanaKinerja(subKegiatan.id());
+                        pagu += rincianBelanjaList.stream()
+                                .mapToInt(RincianBelanja::totalAnggaran)
+                                .sum();
+                    }
+                }
+
+                Integer tw1 = pelaksanaanRepository.sumBobotTW1ByIdRekin(
+                        rencanaKinerja.id().intValue()
+                );
+                Integer tw2 = pelaksanaanRepository.sumBobotTW2ByIdRekin(
+                        rencanaKinerja.id().intValue()
+                );
+                Integer tw3 = pelaksanaanRepository.sumBobotTW3ByIdRekin(
+                        rencanaKinerja.id().intValue()
+                );
+                Integer tw4 = pelaksanaanRepository.sumBobotTW4ByIdRekin(
+                        rencanaKinerja.id().intValue()
+                );
+
+                TahapanPelaksanaanResponse tahapanPelaksanaan =
+                        new TahapanPelaksanaanResponse(tw1, tw2, tw3, tw4);
+
+                RencanaKinerjaLaporanResponse rkResponse =
+                        new RencanaKinerjaLaporanResponse(
+                                rencanaKinerja.id(),
+                                rencanaKinerja.rencanaKinerja(),
+                                rencanaKinerja.namaPegawai(),
+                                rencanaKinerja.nipPegawai(),
+                                kodeSubkegiatan,
+                                namaSubkegiatan,
+                                pagu,
+                                tahapanPelaksanaan
+                        );
+
+                rencanaKinerjaResponses.add(rkResponse);
+            }
+        }
+
+        if (isLevel2 && rencanaKinerjaResponses.isEmpty()) {
+            return null;
+        }
+
+        String kodeOpd = programPrioritasAnggaran.kodeOpd();
+        String namaOpd = opdRepository.findByKodeOpd(kodeOpd)
+                .map(Opd::namaOpd)
+                .orElse(null);
+
+        List<PelaksanaLaporanResponse> pelaksanas = new ArrayList<>();
+          if (!rencanaKinerjaResponses.isEmpty()) {
+              pelaksanas.add(new PelaksanaLaporanResponse(
+                      getNamaPegawaiByNip(programPrioritasAnggaran.nip(), kodeOpd, programPrioritasAnggaran.tahun()),
+                      programPrioritasAnggaran.nip(),
+                      rencanaKinerjaResponses
+              ));
+          }
+
+        return new LaporanProgramPrioritasDataResponse(
+                programPrioritasAnggaran.id(),
+                programPrioritas.programPrioritas(),
+                programPrioritasAnggaran.tahun(),
+                kodeOpd,
+                namaOpd,
+                pelaksanas,
+                "-"
+        );
     }
 }

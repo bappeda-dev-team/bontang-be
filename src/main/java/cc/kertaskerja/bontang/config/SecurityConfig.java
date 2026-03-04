@@ -26,20 +26,29 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(OPTIONS, "/**").permitAll()
-                .requestMatchers(GET, "/**/get-all-*").hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4")
+                .requestMatchers(GET, "/**/get-all-*").hasAnyRole("LEVEL_2", "LEVEL_3", "LEVEL_4", "SUPER_ADMIN")
                 .requestMatchers("/", "/error").permitAll()
                 .requestMatchers("/auth/login").permitAll()
                 .requestMatchers("/auth/me").authenticated()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers(GET, "/laporan/verifikasi/status", "/laporan/cetak")
-                        .hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4")
-                .requestMatchers(POST, "/laporan/verifikasi").hasRole("LEVEL_2")
-
-                // LEVEL 1
-                .requestMatchers("/opd/detail/findall").hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4")
+                        .hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4", "SUPER_ADMIN")
+                .requestMatchers(POST, "/laporan/verifikasi").hasAnyRole("LEVEL_1", "LEVEL_2")
+                .requestMatchers(GET, "/laporan/verified/program-prioritas", "/laporan/verified/rincian-belanja")
+                        .hasRole("LEVEL_1")
+                .requestMatchers(GET, "/laporanrincianbelanja/detail/all-opd/tahun/*").hasRole("SUPER_ADMIN")
+                .requestMatchers(GET, "/laporanprogramprioritas/detail/all-opd").hasRole("SUPER_ADMIN")
                 .requestMatchers(
-                "/opd/**",
+                        GET,
+                        "/laporanprogramprioritas/detail/kodeopd/*/tahun/*/nip/*",
+                        "/laporanrincianbelanja/detail/kodeopd/*/tahun/*/nip/*"
+                ).hasRole("LEVEL_3")
+
+                // LEVEL 2+ resource access
+                .requestMatchers("/opd/detail/findall").hasAnyRole("LEVEL_2", "LEVEL_3", "LEVEL_4", "SUPER_ADMIN", "ADMIN_OPD")
+                .requestMatchers(
+                        "/opd/**",
                         "/program/**",
                         "/kegiatan/**",
                         "/subkegiatan/**",
@@ -47,19 +56,26 @@ public class SecurityConfig {
                         "/sumberdana/**",
                         "/koderekening/**",
                         "/pegawai/**",
-                        "/programopd/**",
-                        "/kegiatanopd/**",
-                        "/subkegiatanopd/**",
                         "/bidangurusan/**",
                         "/programprioritas/**"
-                ).hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3")
-                // allow all authenticated roles to access laporan endpoints
+                ).hasAnyRole("LEVEL_2", "LEVEL_3", "SUPER_ADMIN")
+                .requestMatchers(
+                        "/programopd/**",
+                        "/kegiatanopd/**",
+                        "/subkegiatanopd/**"
+                ).hasAnyRole("LEVEL_2", "LEVEL_3", "SUPER_ADMIN", "ADMIN_OPD")
+
+                // LEVEL 1 restricted endpoints
+                .requestMatchers("/programprioritasanggaran/detail/kode-opd/*")
+                        .hasRole("LEVEL_1")
+                .requestMatchers("/rincianbelanja/detail/pegawai/*/*/*")
+                        .hasRole("LEVEL_1")
                 .requestMatchers(
                         "/laporanprogramprioritas/**",
                         "/laporanrincianbelanja/**"
-                ).hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4")
+                ).hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4", "SUPER_ADMIN")
 
-                .requestMatchers("/programprioritasanggaran/**").hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4")
+                .requestMatchers("/programprioritasanggaran/**").hasAnyRole("LEVEL_2", "LEVEL_3", "LEVEL_4", "SUPER_ADMIN")
 
                 // LEVEL 2 & 3
                 .requestMatchers(
@@ -74,7 +90,7 @@ public class SecurityConfig {
                         "/target/**",
                         "/indikatorbelanja/**",
                         "/targetbelanja/**"
-                ).hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3")
+                ).hasAnyRole("LEVEL_2", "LEVEL_3", "SUPER_ADMIN")
 
                 // LEVEL 4: login only (via /auth/me), everything else denied by default.
                 .anyRequest().denyAll()
