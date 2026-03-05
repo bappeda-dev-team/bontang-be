@@ -46,7 +46,7 @@ public class SecurityConfig {
                 ).hasRole("LEVEL_3")
 
                 // LEVEL 2+ resource access
-                .requestMatchers("/opd/detail/findall").hasAnyRole("LEVEL_2", "LEVEL_3", "LEVEL_4", "SUPER_ADMIN", "ADMIN_OPD")
+                .requestMatchers("/opd/detail/findall").hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4", "SUPER_ADMIN", "ADMIN_OPD")
                 .requestMatchers(
                         "/opd/**",
                         "/program/**",
