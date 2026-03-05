@@ -68,7 +68,7 @@ public class SecurityConfig {
 
                 // LEVEL 1 restricted endpoints
                 .requestMatchers("/programprioritasanggaran/detail/kode-opd/*")
-                        .hasRole("LEVEL_1")
+                        .hasAnyRole("LEVEL_1", "LEVEL_2")
                 .requestMatchers("/rincianbelanja/detail/pegawai/*/*/*")
                         .hasRole("LEVEL_1")
                 .requestMatchers(
