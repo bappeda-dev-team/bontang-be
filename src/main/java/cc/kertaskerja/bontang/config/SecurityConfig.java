@@ -58,7 +58,7 @@ public class SecurityConfig {
                         "/pegawai/**",
                         "/bidangurusan/**",
                         "/programprioritas/**"
-                ).hasAnyRole("LEVEL_2", "LEVEL_3", "SUPER_ADMIN")
+                ).hasAnyRole("LEVEL_2", "LEVEL_3", "SUPER_ADMIN", "ADMIN_OPD")
                 .requestMatchers(
                         "/programopd/**",
                         "/kegiatanopd/**",
