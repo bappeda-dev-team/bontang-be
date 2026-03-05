@@ -64,6 +64,23 @@ public class LaporanVerifikasiController {
         );
     }
 
+    @GetMapping("cetak/level3")
+    public LaporanCetakResponse cetakLevel3(
+            @RequestParam("jenisLaporan") String jenisLaporan,
+            @RequestParam("kodeOpd") String kodeOpd,
+            @RequestParam("tahun") Integer tahun,
+            @RequestParam(value = "filterHash", required = false) String filterHash,
+            Authentication authentication
+    ) {
+        return laporanVerifikasiService.getCetakLevel3(
+                jenisLaporan,
+                kodeOpd,
+                tahun,
+                filterHash,
+                authentication
+        );
+    }
+
     @Operation(
             summary = "Get laporan program prioritas terverifikasi (LEVEL_1)",
             description = "Mengambil data laporan program prioritas jika sudah terverifikasi berdasarkan laporan/verifikasi/status."

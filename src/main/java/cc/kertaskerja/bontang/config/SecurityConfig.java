@@ -32,6 +32,7 @@ public class SecurityConfig {
                 .requestMatchers("/auth/me").authenticated()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
+                .requestMatchers(GET, "/laporan/cetak/level3").hasRole("LEVEL_3")
                 .requestMatchers(GET, "/laporan/verifikasi/status", "/laporan/cetak")
                         .hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4", "SUPER_ADMIN")
                 .requestMatchers(POST, "/laporan/verifikasi").hasAnyRole("LEVEL_1", "LEVEL_2")
