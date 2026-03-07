@@ -29,6 +29,10 @@ public class LaporanVerifikasiController {
         this.laporanVerifikasiService = laporanVerifikasiService;
     }
 
+    @Operation(
+            summary = "Verifikasi laporan (LEVEL_1, LEVEL_2)",
+            description = "Melakukan verifikasi laporan; hanya dapat diakses oleh role LEVEL_1 dan LEVEL_2."
+    )
     @PostMapping("verifikasi")
     public LaporanVerifikasiResultResponse verifikasi(
             @Valid @RequestBody LaporanVerifikasiRequest request,
@@ -37,22 +41,33 @@ public class LaporanVerifikasiController {
         return laporanVerifikasiService.verifikasiLaporan(request, authentication);
     }
 
+    @Operation(
+            summary = "Cek status verifikasi laporan (LEVEL_1, LEVEL_2)",
+            description = "Mengambil status verifikasi laporan; hanya dapat diakses oleh role LEVEL_1 dan LEVEL_2."
+    )
     @GetMapping("verifikasi/status")
     public LaporanVerifikasiStatusResponse status(
             @RequestParam("jenisLaporan") String jenisLaporan,
             @RequestParam("kodeOpd") String kodeOpd,
             @RequestParam("tahun") Integer tahun,
-            @RequestParam(value = "filterHash", required = false) String filterHash
+            @RequestParam(value = "filterHash", required = false) String filterHash,
+            @RequestParam("tahapVerifikasi") String tahapVerifikasi,
+            Authentication authentication
     ) {
-        return laporanVerifikasiService.getStatus(jenisLaporan, kodeOpd, tahun, filterHash);
+        return laporanVerifikasiService.getStatus(jenisLaporan, kodeOpd, tahun, filterHash, tahapVerifikasi, authentication);
     }
 
+    @Operation(
+            summary = "Cetak laporan terverifikasi (LEVEL_1, LEVEL_2)",
+            description = "Mengambil data cetak laporan yang sudah diverifikasi; hanya dapat diakses oleh role LEVEL_1 dan LEVEL_2."
+    )
     @GetMapping("cetak")
     public LaporanCetakResponse cetak(
             @RequestParam("jenisLaporan") String jenisLaporan,
             @RequestParam("kodeOpd") String kodeOpd,
             @RequestParam("tahun") Integer tahun,
             @RequestParam(value = "filterHash", required = false) String filterHash,
+            @RequestParam("tahapVerifikasi") String tahapVerifikasi,
             Authentication authentication
     ) {
         return laporanVerifikasiService.getCetak(
@@ -60,6 +75,7 @@ public class LaporanVerifikasiController {
                 kodeOpd,
                 tahun,
                 filterHash,
+                tahapVerifikasi,
                 authentication
         );
     }

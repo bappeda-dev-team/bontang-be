@@ -7,10 +7,11 @@ import java.util.Optional;
 
 public interface LaporanVerifikasiRepository extends CrudRepository<LaporanVerifikasi, Long> {
     @NonNull
-    Optional<LaporanVerifikasi> findByJenisLaporanAndKodeOpdAndTahunAndFilterHash(
+    Optional<LaporanVerifikasi> findByJenisLaporanAndKodeOpdAndTahunAndFilterHashAndTahapVerifikasi(
             @NonNull String jenisLaporan,
             @NonNull String kodeOpd,
             @NonNull Integer tahun,
-            @NonNull String filterHash
+            @NonNull String filterHash,
+            @NonNull String tahapVerifikasi
     );
 }

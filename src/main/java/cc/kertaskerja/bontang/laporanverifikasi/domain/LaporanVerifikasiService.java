@@ -70,6 +70,8 @@ public class LaporanVerifikasiService {
         assertLevel1OrLevel2(authentication);
         String requesterNip = authentication.getName();
         LaporanJenis jenis = LaporanJenis.fromRaw(request.jenisLaporan());
+        TahapVerifikasi requestedTahap = TahapVerifikasi.fromRaw(request.tahapVerifikasi());
+        TahapVerifikasi effectiveTahap = resolveTahapByRole(authentication, requestedTahap);
         String filterHash = normalizeFilterHash(request.filterHash());
 
         if (!isLevel1) {
@@ -78,22 +80,32 @@ public class LaporanVerifikasiService {
 
         Instant now = Instant.now();
         LaporanVerifikasi existing = laporanVerifikasiRepository
-                .findByJenisLaporanAndKodeOpdAndTahunAndFilterHash(
+                .findByJenisLaporanAndKodeOpdAndTahunAndFilterHashAndTahapVerifikasi(
                         jenis.name(),
                         request.kodeOpd(),
                         request.tahun(),
-                        filterHash
+                        filterHash,
+                        effectiveTahap.name()
                 )
                 .orElse(null);
 
         LaporanVerifikasi toSave = existing == null
-                ? LaporanVerifikasi.of(jenis.name(), request.kodeOpd(), request.tahun(), filterHash, requesterNip, now)
+                ? LaporanVerifikasi.of(
+                        jenis.name(),
+                        request.kodeOpd(),
+                        request.tahun(),
+                        filterHash,
+                        effectiveTahap.name(),
+                        requesterNip,
+                        now
+                )
                 : new LaporanVerifikasi(
                         existing.id(),
                         existing.jenisLaporan(),
                         existing.kodeOpd(),
                         existing.tahun(),
                         existing.filterHash(),
+                        existing.tahapVerifikasi(),
                         requesterNip,
                         now,
                         existing.createdDate(),
@@ -120,17 +132,22 @@ public class LaporanVerifikasiService {
             String jenisLaporan,
             String kodeOpd,
             Integer tahun,
-            String filterHash
+            String filterHash,
+            String tahapVerifikasi,
+            Authentication authentication
     ) {
         LaporanJenis jenis = LaporanJenis.fromRaw(jenisLaporan);
+        TahapVerifikasi requestedTahap = TahapVerifikasi.fromRaw(tahapVerifikasi);
+        TahapVerifikasi effectiveTahap = resolveTahapByRole(authentication, requestedTahap);
         String normalizedFilterHash = normalizeFilterHash(filterHash);
 
         LaporanVerifikasi data = laporanVerifikasiRepository
-                .findByJenisLaporanAndKodeOpdAndTahunAndFilterHash(
+                .findByJenisLaporanAndKodeOpdAndTahunAndFilterHashAndTahapVerifikasi(
                         jenis.name(),
                         kodeOpd,
                         tahun,
-                        normalizedFilterHash
+                        normalizedFilterHash,
+                        effectiveTahap.name()
                 )
                 .orElse(null);
 
@@ -168,19 +185,23 @@ public class LaporanVerifikasiService {
             String kodeOpd,
             Integer tahun,
             String filterHash,
+            String tahapVerifikasi,
             Authentication authentication
     ) {
         LaporanJenis jenis = LaporanJenis.fromRaw(jenisLaporan);
+        TahapVerifikasi requestedTahap = TahapVerifikasi.fromRaw(tahapVerifikasi);
+        TahapVerifikasi effectiveTahap = resolveTahapByRole(authentication, requestedTahap);
         String normalizedFilterHash = normalizeFilterHash(filterHash);
         String requesterNip = authentication.getName();
         boolean isLevel2 = hasRole(authentication, "ROLE_LEVEL_2");
 
         LaporanVerifikasi verifikasi = laporanVerifikasiRepository
-                .findByJenisLaporanAndKodeOpdAndTahunAndFilterHash(
+                .findByJenisLaporanAndKodeOpdAndTahunAndFilterHashAndTahapVerifikasi(
                         jenis.name(),
                         kodeOpd,
                         tahun,
-                        normalizedFilterHash
+                        normalizedFilterHash,
+                        effectiveTahap.name()
                 )
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.CONFLICT,
@@ -247,11 +268,12 @@ public class LaporanVerifikasiService {
         }
 
         LaporanVerifikasi verifikasi = laporanVerifikasiRepository
-                .findByJenisLaporanAndKodeOpdAndTahunAndFilterHash(
+                .findByJenisLaporanAndKodeOpdAndTahunAndFilterHashAndTahapVerifikasi(
                         jenis.name(),
                         kodeOpd,
                         tahun,
-                        normalizedFilterHash
+                        normalizedFilterHash,
+                        TahapVerifikasi.LEVEL_2.name()
                 )
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.CONFLICT,
@@ -294,11 +316,12 @@ public class LaporanVerifikasiService {
     ) {
         String normalizedFilterHash = normalizeFilterHash(filterHash);
         boolean verified = laporanVerifikasiRepository
-                .findByJenisLaporanAndKodeOpdAndTahunAndFilterHash(
+                .findByJenisLaporanAndKodeOpdAndTahunAndFilterHashAndTahapVerifikasi(
                         LaporanJenis.PROGRAM_PRIORITAS.name(),
                         kodeOpd,
                         tahun,
-                        normalizedFilterHash
+                        normalizedFilterHash,
+                        resolveTahapByRole(authentication, TahapVerifikasi.LEVEL_2).name()
                 )
                 .isPresent();
 
@@ -333,11 +356,12 @@ public class LaporanVerifikasiService {
     ) {
         String normalizedFilterHash = normalizeFilterHash(filterHash);
         boolean verified = laporanVerifikasiRepository
-                .findByJenisLaporanAndKodeOpdAndTahunAndFilterHash(
+                .findByJenisLaporanAndKodeOpdAndTahunAndFilterHashAndTahapVerifikasi(
                         LaporanJenis.RINCIAN_BELANJA.name(),
                         kodeOpd,
                         tahun,
-                        normalizedFilterHash
+                        normalizedFilterHash,
+                        resolveTahapByRole(authentication, TahapVerifikasi.LEVEL_2).name()
                 )
                 .isPresent();
 
@@ -410,6 +434,16 @@ public class LaporanVerifikasiService {
     private boolean hasRole(Authentication authentication, String roleName) {
         return authentication.getAuthorities().stream()
                 .anyMatch(authority -> Objects.equals(roleName, authority.getAuthority()));
+    }
+
+    private TahapVerifikasi resolveTahapByRole(Authentication authentication, TahapVerifikasi requested) {
+        if (hasRole(authentication, "ROLE_LEVEL_2")) {
+            return TahapVerifikasi.LEVEL_1;
+        }
+        if (hasRole(authentication, "ROLE_LEVEL_1")) {
+            return TahapVerifikasi.LEVEL_2;
+        }
+        return requested;
     }
 
     private String normalizeFilterHash(String filterHash) {

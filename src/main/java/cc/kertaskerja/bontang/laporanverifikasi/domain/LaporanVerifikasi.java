@@ -25,6 +25,9 @@ public record LaporanVerifikasi(
         @Column("filter_hash")
         String filterHash,
 
+        @Column("tahap_verifikasi")
+        String tahapVerifikasi,
+
         @Column("verified_by_nip")
         String verifiedByNip,
 
@@ -44,6 +47,7 @@ public record LaporanVerifikasi(
             String kodeOpd,
             Integer tahun,
             String filterHash,
+            String tahapVerifikasi,
             String verifiedByNip,
             Instant verifiedAt
     ) {
@@ -53,6 +57,7 @@ public record LaporanVerifikasi(
                 kodeOpd,
                 tahun,
                 filterHash,
+                tahapVerifikasi,
                 verifiedByNip,
                 verifiedAt,
                 null,

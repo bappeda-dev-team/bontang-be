@@ -7,6 +7,7 @@ public record LaporanVerifikasiRequest(
         @NotBlank String jenisLaporan,
         @NotBlank String kodeOpd,
         @NotNull Integer tahun,
-        String filterHash
+        String filterHash,
+        @NotBlank String tahapVerifikasi
 ) {
 }
