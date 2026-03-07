@@ -72,6 +72,7 @@ public class LaporanVerifikasiService {
         LaporanJenis jenis = LaporanJenis.fromRaw(request.jenisLaporan());
         TahapVerifikasi requestedTahap = TahapVerifikasi.fromRaw(request.tahapVerifikasi());
         TahapVerifikasi effectiveTahap = resolveTahapByRole(authentication, requestedTahap);
+        assertTahapForRole(authentication, effectiveTahap);
         String filterHash = normalizeFilterHash(request.filterHash());
 
         if (!isLevel1) {
@@ -139,6 +140,7 @@ public class LaporanVerifikasiService {
         LaporanJenis jenis = LaporanJenis.fromRaw(jenisLaporan);
         TahapVerifikasi requestedTahap = TahapVerifikasi.fromRaw(tahapVerifikasi);
         TahapVerifikasi effectiveTahap = resolveTahapByRole(authentication, requestedTahap);
+        assertTahapForRole(authentication, effectiveTahap);
         String normalizedFilterHash = normalizeFilterHash(filterHash);
 
         LaporanVerifikasi data = laporanVerifikasiRepository
@@ -191,6 +193,7 @@ public class LaporanVerifikasiService {
         LaporanJenis jenis = LaporanJenis.fromRaw(jenisLaporan);
         TahapVerifikasi requestedTahap = TahapVerifikasi.fromRaw(tahapVerifikasi);
         TahapVerifikasi effectiveTahap = resolveTahapByRole(authentication, requestedTahap);
+        assertTahapForRole(authentication, effectiveTahap);
         String normalizedFilterHash = normalizeFilterHash(filterHash);
         String requesterNip = authentication.getName();
         boolean isLevel2 = hasRole(authentication, "ROLE_LEVEL_2");
@@ -321,7 +324,7 @@ public class LaporanVerifikasiService {
                         kodeOpd,
                         tahun,
                         normalizedFilterHash,
-                        resolveTahapByRole(authentication, TahapVerifikasi.LEVEL_2).name()
+                        TahapVerifikasi.LEVEL_2.name()
                 )
                 .isPresent();
 
@@ -361,7 +364,7 @@ public class LaporanVerifikasiService {
                         kodeOpd,
                         tahun,
                         normalizedFilterHash,
-                        resolveTahapByRole(authentication, TahapVerifikasi.LEVEL_2).name()
+                        TahapVerifikasi.LEVEL_2.name()
                 )
                 .isPresent();
 
@@ -431,18 +434,21 @@ public class LaporanVerifikasiService {
         }
     }
 
+    private void assertTahapForRole(Authentication authentication, TahapVerifikasi tahap) {
+        if (hasRole(authentication, "ROLE_LEVEL_2") && tahap != TahapVerifikasi.LEVEL_2) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "ROLE_LEVEL_2 hanya dapat memproses tahap LEVEL_2");
+        }
+        if (hasRole(authentication, "ROLE_LEVEL_1") && tahap != TahapVerifikasi.LEVEL_1) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "ROLE_LEVEL_1 hanya dapat memproses tahap LEVEL_1");
+        }
+    }
+
     private boolean hasRole(Authentication authentication, String roleName) {
         return authentication.getAuthorities().stream()
                 .anyMatch(authority -> Objects.equals(roleName, authority.getAuthority()));
     }
 
     private TahapVerifikasi resolveTahapByRole(Authentication authentication, TahapVerifikasi requested) {
-        if (hasRole(authentication, "ROLE_LEVEL_2")) {
-            return TahapVerifikasi.LEVEL_1;
-        }
-        if (hasRole(authentication, "ROLE_LEVEL_1")) {
-            return TahapVerifikasi.LEVEL_2;
-        }
         return requested;
     }
 
