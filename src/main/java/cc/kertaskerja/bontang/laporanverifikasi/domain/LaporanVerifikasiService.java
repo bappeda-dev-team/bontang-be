@@ -311,6 +311,78 @@ public class LaporanVerifikasiService {
         );
     }
 
+    public LaporanCetakResponse getCetakAdminOpd(
+            String jenisLaporan,
+            String kodeOpd,
+            Integer tahun,
+            String filterHash,
+            Authentication authentication
+    ) {
+        LaporanJenis jenis = LaporanJenis.fromRaw(jenisLaporan);
+        String normalizedFilterHash = normalizeFilterHash(filterHash);
+        String requesterNip = authentication.getName();
+        Pegawai pegawai = pegawaiRepository.findByNip(requesterNip)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Pegawai tidak ditemukan"
+                ));
+
+        if (!Objects.equals(pegawai.kodeOpd(), kodeOpd) || !Objects.equals(pegawai.tahun(), tahun)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Data laporan di luar scope OPD"
+            );
+        }
+
+        LaporanVerifikasi verifikasi = laporanVerifikasiRepository
+                .findByJenisLaporanAndKodeOpdAndTahunAndFilterHashAndTahapVerifikasi(
+                        jenis.name(),
+                        kodeOpd,
+                        tahun,
+                        normalizedFilterHash,
+                        TahapVerifikasi.LEVEL_2.name()
+                )
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Laporan belum diverifikasi untuk filter ini"
+                ));
+
+        Object data = switch (jenis) {
+            case PROGRAM_PRIORITAS -> {
+                List<Long> ids = StreamSupport.stream(
+                                programPrioritasAnggaranRepository.findByKodeOpdAndTahun(kodeOpd, tahun).spliterator(),
+                                false
+                        )
+                        .map(ProgramPrioritasAnggaran::id)
+                        .toList();
+                yield laporanProgramPrioritasService.getLaporanProgramPrioritas(ids, tahun, requesterNip, false);
+            }
+            case RINCIAN_BELANJA -> laporanRincianBelanjaService.getLaporanRincianBelanja(
+                    kodeOpd,
+                    tahun,
+                    requesterNip,
+                    false
+            );
+        };
+
+        String verifiedByNama = pegawaiRepository.findByNip(verifikasi.verifiedByNip())
+                .map(Pegawai::namaPegawai)
+                .orElse("-");
+        LaporanPenandatanganResponse penandatangan = buildPenandatangan(requesterNip);
+
+        return new LaporanCetakResponse(
+                verifikasi.jenisLaporan(),
+                verifikasi.kodeOpd(),
+                verifikasi.tahun(),
+                verifikasi.filterHash(),
+                verifikasi.verifiedByNip(),
+                verifiedByNama,
+                verifikasi.verifiedAt(),
+                penandatangan,
+                data
+        );
+    }
+
     public List<LaporanProgramPrioritasDataResponse> getVerifiedProgramPrioritas(
             String kodeOpd,
             Integer tahun,

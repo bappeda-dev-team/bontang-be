@@ -30,8 +30,7 @@ public class LaporanVerifikasiController {
     }
 
     @Operation(
-            summary = "Verifikasi laporan (LEVEL_1, LEVEL_2)",
-            description = "Melakukan verifikasi laporan; hanya dapat diakses oleh role LEVEL_1 dan LEVEL_2."
+            summary = "Verifikasi laporan (LEVEL_1, LEVEL_2)"
     )
     @PostMapping("verifikasi")
     public LaporanVerifikasiResultResponse verifikasi(
@@ -42,8 +41,7 @@ public class LaporanVerifikasiController {
     }
 
     @Operation(
-            summary = "Cek status verifikasi laporan (LEVEL_1, LEVEL_2)",
-            description = "Mengambil status verifikasi laporan; hanya dapat diakses oleh role LEVEL_1 dan LEVEL_2."
+            summary = "Cek status verifikasi laporan (LEVEL_1, LEVEL_2)"
     )
     @GetMapping("verifikasi/status")
     public LaporanVerifikasiStatusResponse status(
@@ -58,8 +56,7 @@ public class LaporanVerifikasiController {
     }
 
     @Operation(
-            summary = "Cetak laporan terverifikasi (LEVEL_1, LEVEL_2)",
-            description = "Mengambil data cetak laporan yang sudah diverifikasi; hanya dapat diakses oleh role LEVEL_1 dan LEVEL_2."
+            summary = "Cetak laporan terverifikasi (LEVEL_1, LEVEL_2)"
     )
     @GetMapping("cetak")
     public LaporanCetakResponse cetak(
@@ -89,6 +86,26 @@ public class LaporanVerifikasiController {
             Authentication authentication
     ) {
         return laporanVerifikasiService.getCetakLevel3(
+                jenisLaporan,
+                kodeOpd,
+                tahun,
+                filterHash,
+                authentication
+        );
+    }
+
+    @Operation(
+            summary = "Cetak laporan terverifikasi (ADMIN_OPD)"
+    )
+    @GetMapping("cetak/admin-opd")
+    public LaporanCetakResponse cetakAdminOpd(
+            @RequestParam("jenisLaporan") String jenisLaporan,
+            @RequestParam("kodeOpd") String kodeOpd,
+            @RequestParam("tahun") Integer tahun,
+            @RequestParam(value = "filterHash", required = false) String filterHash,
+            Authentication authentication
+    ) {
+        return laporanVerifikasiService.getCetakAdminOpd(
                 jenisLaporan,
                 kodeOpd,
                 tahun,
