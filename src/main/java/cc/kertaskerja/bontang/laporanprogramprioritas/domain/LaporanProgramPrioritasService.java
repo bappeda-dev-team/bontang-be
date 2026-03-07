@@ -247,6 +247,26 @@ public class LaporanProgramPrioritasService {
         return getLaporanProgramPrioritas(ids, tahun, requesterNip, isLevel2);
     }
 
+    public List<LaporanProgramPrioritasDataResponse> getLaporanProgramPrioritasByKodeOpd(
+            String kodeOpd,
+            Integer tahun,
+            String requesterNip,
+            boolean isLevel2
+    ) {
+        List<Long> ids = StreamSupport.stream(
+                        programPrioritasAnggaranRepository.findByKodeOpdAndTahun(kodeOpd, tahun).spliterator(),
+                        false
+                )
+                .map(ProgramPrioritasAnggaran::id)
+                .toList();
+
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+
+        return getLaporanProgramPrioritas(ids, tahun, requesterNip, isLevel2);
+    }
+
     private LaporanProgramPrioritasDataResponse getLaporanForPegawai(
             ProgramPrioritasAnggaran programPrioritasAnggaran,
             String nipPegawai

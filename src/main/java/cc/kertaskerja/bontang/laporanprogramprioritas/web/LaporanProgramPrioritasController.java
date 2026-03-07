@@ -80,6 +80,27 @@ public class LaporanProgramPrioritasController {
     }
 
     @Operation(
+            summary = "Get laporan program prioritas by kode opd",
+            description = "Mengambil data laporan program prioritas berdasarkan kode opd dan tahun"
+    )
+    @GetMapping("detail/kodeopd/{kodeOpd}/tahun/{tahun}")
+    public List<LaporanProgramPrioritasDataResponse> getLaporanProgramPrioritasByKodeOpdAndTahun(
+            @PathVariable("kodeOpd") String kodeOpd,
+            @PathVariable("tahun") Integer tahun,
+            Authentication authentication
+    ) {
+        String requesterNip = authentication.getName();
+        boolean isLevel2 = authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_LEVEL_2".equals(authority.getAuthority()));
+        return laporanProgramPrioritasService.getLaporanProgramPrioritasByKodeOpd(
+                kodeOpd,
+                tahun,
+                requesterNip,
+                isLevel2
+        );
+    }
+
+    @Operation(
             summary = "Get laporan program prioritas terverifikasi",
             description = "Mengambil data laporan program prioritas yang terverifikasi berdasarkan verifikator rencana kinerja; filterHash diabaikan"
     )

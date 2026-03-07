@@ -46,6 +46,10 @@ public class SecurityConfig {
                         "/laporanprogramprioritas/detail/kodeopd/*/tahun/*/nip/*",
                         "/laporanrincianbelanja/detail/kodeopd/*/tahun/*/nip/*"
                 ).hasRole("LEVEL_3")
+                .requestMatchers(
+                        GET,
+                        "/laporanprogramprioritas/detail/kodeopd/*/tahun/*"
+                ).hasRole("ADMIN_OPD")
 
                 // LEVEL 2+ resource access
                 .requestMatchers("/opd/detail/findall").hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4", "SUPER_ADMIN", "ADMIN_OPD")
