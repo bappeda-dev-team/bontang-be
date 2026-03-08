@@ -115,6 +115,24 @@ public class LaporanVerifikasiController {
     }
 
     @Operation(
+            summary = "Cetak laporan semua OPD (SUPER_ADMIN)"
+    )
+    @GetMapping("cetak/super-admin")
+    public LaporanCetakResponse cetakSuperAdminAllOpd(
+            @RequestParam("jenisLaporan") String jenisLaporan,
+            @RequestParam("tahun") Integer tahun,
+            @RequestParam(value = "filterHash", required = false) String filterHash,
+            Authentication authentication
+    ) {
+        return laporanVerifikasiService.getCetakSuperAdminAllOpd(
+                jenisLaporan,
+                tahun,
+                filterHash,
+                authentication
+        );
+    }
+
+    @Operation(
             summary = "Get laporan program prioritas terverifikasi (LEVEL_1)",
             description = "Mengambil data laporan program prioritas jika sudah terverifikasi berdasarkan laporan/verifikasi/status."
     )

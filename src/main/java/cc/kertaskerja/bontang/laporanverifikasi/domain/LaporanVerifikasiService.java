@@ -383,6 +383,44 @@ public class LaporanVerifikasiService {
         );
     }
 
+    public LaporanCetakResponse getCetakSuperAdminAllOpd(
+            String jenisLaporan,
+            Integer tahun,
+            String filterHash,
+            Authentication authentication
+    ) {
+        LaporanJenis jenis = LaporanJenis.fromRaw(jenisLaporan);
+        String normalizedFilterHash = normalizeFilterHash(filterHash);
+        String requesterNip = authentication.getName();
+
+        Object data = switch (jenis) {
+            case PROGRAM_PRIORITAS -> laporanProgramPrioritasService.getLaporanProgramPrioritasAllOpd(
+                    tahun,
+                    requesterNip,
+                    false
+            );
+            case RINCIAN_BELANJA -> laporanRincianBelanjaService.getLaporanRincianBelanjaAllOpd(
+                    tahun,
+                    requesterNip,
+                    false
+            );
+        };
+
+        LaporanPenandatanganResponse penandatangan = buildPenandatangan(requesterNip);
+
+        return new LaporanCetakResponse(
+                jenis.name(),
+                "ALL",
+                tahun,
+                normalizedFilterHash,
+                null,
+                null,
+                null,
+                penandatangan,
+                data
+        );
+    }
+
     public List<LaporanProgramPrioritasDataResponse> getVerifiedProgramPrioritas(
             String kodeOpd,
             Integer tahun,

@@ -34,6 +34,7 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers(GET, "/laporan/cetak/level3").hasRole("LEVEL_3")
                 .requestMatchers(GET, "/laporan/cetak/admin-opd").hasRole("ADMIN_OPD")
+                .requestMatchers(GET, "/laporan/cetak/super-admin").hasRole("SUPER_ADMIN")
                 .requestMatchers(GET, "/laporan/verifikasi/status", "/laporan/cetak")
                         .hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4", "SUPER_ADMIN")
                 .requestMatchers(POST, "/laporan/verifikasi").hasAnyRole("LEVEL_1", "LEVEL_2")
