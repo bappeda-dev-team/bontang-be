@@ -4,6 +4,7 @@ import cc.kertaskerja.bontang.laporanverifikasi.domain.LaporanVerifikasiService;
 import cc.kertaskerja.bontang.laporanprogramprioritas.web.response.LaporanProgramPrioritasDataResponse;
 import cc.kertaskerja.bontang.laporanrincianbelanja.web.response.LaporanRincianBelanjaEnvelopeResponse;
 import cc.kertaskerja.bontang.laporanverifikasi.web.response.LaporanCetakResponse;
+import cc.kertaskerja.bontang.laporanverifikasi.web.response.LaporanVerifikasiCatatanResponse;
 import cc.kertaskerja.bontang.laporanverifikasi.web.response.LaporanVerifikasiResultResponse;
 import cc.kertaskerja.bontang.laporanverifikasi.web.response.LaporanVerifikasiStatusResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,6 +39,39 @@ public class LaporanVerifikasiController {
             Authentication authentication
     ) {
         return laporanVerifikasiService.verifikasiLaporan(request, authentication);
+    }
+
+    @Operation(
+            summary = "Tambah/ubah catatan laporan sebelum verifikasi (LEVEL_1, LEVEL_2)"
+    )
+    @PostMapping("catatan")
+    public LaporanVerifikasiCatatanResponse catatan(
+            @Valid @RequestBody LaporanVerifikasiCatatanRequest request,
+            Authentication authentication
+    ) {
+        return laporanVerifikasiService.upsertCatatan(request, authentication);
+    }
+
+    @Operation(
+            summary = "Get catatan laporan sebelum verifikasi (LEVEL_1, LEVEL_2)"
+    )
+    @GetMapping("catatan/detail")
+    public LaporanVerifikasiCatatanResponse getCatatan(
+            @RequestParam("jenisLaporan") String jenisLaporan,
+            @RequestParam("kodeOpd") String kodeOpd,
+            @RequestParam("tahun") Integer tahun,
+            @RequestParam(value = "filterHash", required = false) String filterHash,
+            @RequestParam("tahapVerifikasi") String tahapVerifikasi,
+            Authentication authentication
+    ) {
+        return laporanVerifikasiService.getCatatan(
+                jenisLaporan,
+                kodeOpd,
+                tahun,
+                filterHash,
+                tahapVerifikasi,
+                authentication
+        );
     }
 
     @Operation(

@@ -38,6 +38,8 @@ public class SecurityConfig {
                 .requestMatchers(GET, "/laporan/verifikasi/status", "/laporan/cetak")
                         .hasAnyRole("LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4", "SUPER_ADMIN")
                 .requestMatchers(POST, "/laporan/verifikasi").hasAnyRole("LEVEL_1", "LEVEL_2")
+                .requestMatchers(POST, "/laporan/catatan").hasAnyRole("LEVEL_1", "LEVEL_2")
+                .requestMatchers(GET, "/laporan/catatan/detail").hasAnyRole("LEVEL_1", "LEVEL_2")
                 .requestMatchers(GET, "/laporan/verified/program-prioritas", "/laporan/verified/rincian-belanja")
                         .hasRole("LEVEL_1")
                 .requestMatchers(GET, "/laporanrincianbelanja/detail/all-opd/tahun/*").hasRole("SUPER_ADMIN")

@@ -6,9 +6,11 @@ import cc.kertaskerja.bontang.laporanprogramprioritas.domain.LaporanProgramPrior
 import cc.kertaskerja.bontang.laporanprogramprioritas.web.response.LaporanProgramPrioritasDataResponse;
 import cc.kertaskerja.bontang.laporanrincianbelanja.domain.LaporanRincianBelanjaService;
 import cc.kertaskerja.bontang.laporanrincianbelanja.web.response.LaporanRincianBelanjaEnvelopeResponse;
+import cc.kertaskerja.bontang.laporanverifikasi.web.LaporanVerifikasiCatatanRequest;
 import cc.kertaskerja.bontang.laporanverifikasi.web.LaporanVerifikasiRequest;
 import cc.kertaskerja.bontang.laporanverifikasi.web.response.LaporanCetakResponse;
 import cc.kertaskerja.bontang.laporanverifikasi.web.response.LaporanPenandatanganResponse;
+import cc.kertaskerja.bontang.laporanverifikasi.web.response.LaporanVerifikasiCatatanResponse;
 import cc.kertaskerja.bontang.laporanverifikasi.web.response.LaporanVerifikasiResultResponse;
 import cc.kertaskerja.bontang.laporanverifikasi.web.response.LaporanVerifikasiStatusResponse;
 import cc.kertaskerja.bontang.pegawai.domain.Pegawai;
@@ -34,6 +36,7 @@ import java.util.stream.StreamSupport;
 @Service
 public class LaporanVerifikasiService {
     private final LaporanVerifikasiRepository laporanVerifikasiRepository;
+    private final LaporanVerifikasiCatatanRepository laporanVerifikasiCatatanRepository;
     private final RencanaKinerjaVerifikatorRepository rencanaKinerjaVerifikatorRepository;
     private final RencanaKinerjaRepository rencanaKinerjaRepository;
     private final PegawaiRepository pegawaiRepository;
@@ -44,6 +47,7 @@ public class LaporanVerifikasiService {
 
     public LaporanVerifikasiService(
             LaporanVerifikasiRepository laporanVerifikasiRepository,
+            LaporanVerifikasiCatatanRepository laporanVerifikasiCatatanRepository,
             RencanaKinerjaVerifikatorRepository rencanaKinerjaVerifikatorRepository,
             RencanaKinerjaRepository rencanaKinerjaRepository,
             PegawaiRepository pegawaiRepository,
@@ -53,6 +57,7 @@ public class LaporanVerifikasiService {
             ProgramPrioritasAnggaranRepository programPrioritasAnggaranRepository
     ) {
         this.laporanVerifikasiRepository = laporanVerifikasiRepository;
+        this.laporanVerifikasiCatatanRepository = laporanVerifikasiCatatanRepository;
         this.rencanaKinerjaVerifikatorRepository = rencanaKinerjaVerifikatorRepository;
         this.rencanaKinerjaRepository = rencanaKinerjaRepository;
         this.pegawaiRepository = pegawaiRepository;
@@ -126,6 +131,136 @@ public class LaporanVerifikasiService {
                 saved.verifiedByNip(),
                 verifiedByNama,
                 saved.verifiedAt()
+        );
+    }
+
+    public LaporanVerifikasiCatatanResponse upsertCatatan(
+            LaporanVerifikasiCatatanRequest request,
+            Authentication authentication
+    ) {
+        assertLevel1OrLevel2(authentication);
+        String requesterNip = authentication.getName();
+        LaporanJenis jenis = LaporanJenis.fromRaw(request.jenisLaporan());
+        TahapVerifikasi requestedTahap = TahapVerifikasi.fromRaw(request.tahapVerifikasi());
+        TahapVerifikasi effectiveTahap = resolveTahapByRole(authentication, requestedTahap);
+        assertTahapForRole(authentication, effectiveTahap);
+        String filterHash = normalizeFilterHash(request.filterHash());
+
+        if (!hasRole(authentication, "ROLE_LEVEL_1")) {
+            ensureScopeLevel2(requesterNip, request.kodeOpd(), request.tahun());
+        }
+
+        LaporanVerifikasiCatatan existing = laporanVerifikasiCatatanRepository
+                .findByJenisLaporanAndKodeOpdAndTahunAndFilterHashAndTahapVerifikasi(
+                        jenis.name(),
+                        request.kodeOpd(),
+                        request.tahun(),
+                        filterHash,
+                        effectiveTahap.name()
+                )
+                .orElse(null);
+
+        LaporanVerifikasiCatatan toSave = existing == null
+                ? LaporanVerifikasiCatatan.of(
+                        jenis.name(),
+                        request.kodeOpd(),
+                        request.tahun(),
+                        filterHash,
+                        effectiveTahap.name(),
+                        request.catatan(),
+                        requesterNip
+                )
+                : new LaporanVerifikasiCatatan(
+                        existing.id(),
+                        existing.jenisLaporan(),
+                        existing.kodeOpd(),
+                        existing.tahun(),
+                        existing.filterHash(),
+                        existing.tahapVerifikasi(),
+                        request.catatan(),
+                        requesterNip,
+                        existing.createdDate(),
+                        existing.lastModifiedDate()
+                );
+
+        LaporanVerifikasiCatatan saved = laporanVerifikasiCatatanRepository.save(toSave);
+        String catatanByNama = pegawaiRepository.findByNip(saved.catatanByNip())
+                .map(Pegawai::namaPegawai)
+                .orElse("-");
+        Instant catatanAt = saved.lastModifiedDate() != null ? saved.lastModifiedDate() : saved.createdDate();
+
+        return new LaporanVerifikasiCatatanResponse(
+                saved.jenisLaporan(),
+                saved.kodeOpd(),
+                saved.tahun(),
+                saved.filterHash(),
+                saved.tahapVerifikasi(),
+                saved.catatan(),
+                saved.catatanByNip(),
+                catatanByNama,
+                catatanAt
+        );
+    }
+
+    public LaporanVerifikasiCatatanResponse getCatatan(
+            String jenisLaporan,
+            String kodeOpd,
+            Integer tahun,
+            String filterHash,
+            String tahapVerifikasi,
+            Authentication authentication
+    ) {
+        assertLevel1OrLevel2(authentication);
+        String requesterNip = authentication.getName();
+        LaporanJenis jenis = LaporanJenis.fromRaw(jenisLaporan);
+        TahapVerifikasi requestedTahap = TahapVerifikasi.fromRaw(tahapVerifikasi);
+        TahapVerifikasi effectiveTahap = resolveTahapByRole(authentication, requestedTahap);
+        assertTahapForRole(authentication, effectiveTahap);
+        String normalizedFilterHash = normalizeFilterHash(filterHash);
+
+        if (!hasRole(authentication, "ROLE_LEVEL_1")) {
+            ensureScopeLevel2(requesterNip, kodeOpd, tahun);
+        }
+
+        LaporanVerifikasiCatatan data = laporanVerifikasiCatatanRepository
+                .findByJenisLaporanAndKodeOpdAndTahunAndFilterHashAndTahapVerifikasi(
+                        jenis.name(),
+                        kodeOpd,
+                        tahun,
+                        normalizedFilterHash,
+                        effectiveTahap.name()
+                )
+                .orElse(null);
+
+        if (data == null) {
+            return new LaporanVerifikasiCatatanResponse(
+                    jenis.name(),
+                    kodeOpd,
+                    tahun,
+                    normalizedFilterHash,
+                    effectiveTahap.name(),
+                    null,
+                    null,
+                    null,
+                    null
+            );
+        }
+
+        String catatanByNama = pegawaiRepository.findByNip(data.catatanByNip())
+                .map(Pegawai::namaPegawai)
+                .orElse("-");
+        Instant catatanAt = data.lastModifiedDate() != null ? data.lastModifiedDate() : data.createdDate();
+
+        return new LaporanVerifikasiCatatanResponse(
+                data.jenisLaporan(),
+                data.kodeOpd(),
+                data.tahun(),
+                data.filterHash(),
+                data.tahapVerifikasi(),
+                data.catatan(),
+                data.catatanByNip(),
+                catatanByNama,
+                catatanAt
         );
     }
 
