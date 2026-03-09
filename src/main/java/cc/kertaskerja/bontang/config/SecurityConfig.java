@@ -82,7 +82,7 @@ public class SecurityConfig {
                 .requestMatchers("/programprioritasanggaran/detail/kode-opd/*")
                         .hasAnyRole("LEVEL_1", "LEVEL_2", "ADMIN_OPD")
                 .requestMatchers("/rincianbelanja/detail/pegawai/*/*/*")
-                        .hasRole("LEVEL_1")
+                        .hasAnyRole("LEVEL_1", "LEVEL_3")
                 .requestMatchers(
                         "/laporanprogramprioritas/**",
                         "/laporanrincianbelanja/**"
