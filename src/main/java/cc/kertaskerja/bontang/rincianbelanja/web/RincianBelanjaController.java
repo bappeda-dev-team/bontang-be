@@ -33,6 +33,15 @@ public class RincianBelanjaController {
         return rincianBelanjaService.findByNipPegawaiKodeOpdAndTahun(nipPegawai, kodeOpd, tahun);
     }
 
+    @GetMapping("detail/pegawai/{nipPegawai}/{kodeOpd}/{tahun}/jenisTahun/{jenisTahun}")
+    public List<RincianBelanjaResponse> getByNipPegawaiKodeOpdTahunAndJenisTahun(
+            @PathVariable("nipPegawai") String nipPegawai,
+            @PathVariable("kodeOpd") String kodeOpd,
+            @PathVariable("tahun") Integer tahun,
+            @PathVariable("jenisTahun") String jenisTahun) {
+        return rincianBelanjaService.findByNipPegawaiKodeOpdAndTahunAndJenisTahun(nipPegawai, kodeOpd, tahun, jenisTahun);
+    }
+
     @PostMapping("upsert")
     public ResponseEntity<RincianBelanjaCreateResponse> upsertRincianBelanja(
             @Valid @RequestBody RincianBelanjaCreateRequest request) {

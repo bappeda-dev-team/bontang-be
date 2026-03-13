@@ -55,20 +55,66 @@ public class RincianBelanjaService {
      * Mengisi daftar entri RincianBelanjaResponse untuk semua catatan rencana kinerja yang sesuai.
      */
     public List<RincianBelanjaResponse> findByNipPegawaiKodeOpdAndTahun(String nipPegawai, String kodeOpd, Integer tahun) {
-        // Step 1: Cari RencanaKinerja berdasarkan parameter
         List<RencanaKinerja> rencanaKinerjaList = rencanaKinerjaRepository
             .findByNipPegawaiAndKodeOpdAndTahun(nipPegawai, kodeOpd, tahun);
         
         if (rencanaKinerjaList.isEmpty()) {
             throw new RencanaKinerjaNotFoundException(nipPegawai, kodeOpd, tahun);
         }
-        
-        // Step 2: Ambil catatan RincianBelanja yang sebenarnya dari database.
+
         List<RincianBelanja> rincianBelanjaRecords = 
             rincianBelanjaRepository.findByNipPegawaiAndKodeOpdAndTahun(
                 nipPegawai, kodeOpd, tahun
             );
 
+        return buildResponsesForRencanaKinerjaList(
+            rencanaKinerjaList,
+            nipPegawai,
+            kodeOpd,
+            tahun,
+            rincianBelanjaRecords
+        );
+    }
+
+    public List<RincianBelanjaResponse> findByNipPegawaiKodeOpdAndTahunAndJenisTahun(
+            String nipPegawai,
+            String kodeOpd,
+            Integer tahun,
+            String jenisTahun
+    ) {
+        List<RencanaKinerja> rencanaKinerjaList =
+            rencanaKinerjaRepository.findByNipPegawaiAndKodeOpdAndTahunAndJenisTahun(
+                nipPegawai,
+                kodeOpd,
+                tahun,
+                jenisTahun
+            );
+
+        if (rencanaKinerjaList.isEmpty()) {
+            throw new RencanaKinerjaNotFoundException(nipPegawai, kodeOpd, tahun, jenisTahun);
+        }
+
+        List<RincianBelanja> rincianBelanjaRecords = 
+            rincianBelanjaRepository.findByNipPegawaiAndKodeOpdAndTahun(
+                nipPegawai, kodeOpd, tahun
+            );
+
+        return buildResponsesForRencanaKinerjaList(
+            rencanaKinerjaList,
+            nipPegawai,
+            kodeOpd,
+            tahun,
+            rincianBelanjaRecords
+        );
+    }
+
+    private List<RincianBelanjaResponse> buildResponsesForRencanaKinerjaList(
+            List<RencanaKinerja> rencanaKinerjaList,
+            String nipPegawai,
+            String kodeOpd,
+            Integer tahun,
+            List<RincianBelanja> rincianBelanjaRecords
+    ) {
         List<RincianBelanjaResponse> responses = new ArrayList<>();
 
         for (RencanaKinerja rencanaKinerja : rencanaKinerjaList) {
