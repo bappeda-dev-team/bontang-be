@@ -62,6 +62,29 @@ public class RencanaKinerjaController {
     }
 
     /**
+     * Ambil data rencana kinerja berdasarkan nip pegawai, kode opd, tahun, dan jenis tahun
+     * @param nipPegawai
+     * @param kodeOpd
+     * @param tahun
+     * @param jenisTahun
+     */
+    @GetMapping("detail/pegawai/{nipPegawai}/kodeopd/{kodeOpd}/tahun/{tahun}/jenisTahun/{jenisTahun}")
+    public ResponseEntity<Map<String, Object>> getByNipPegawaiAndKodeOpdAndTahunAndJenisTahun(
+            @PathVariable("nipPegawai") String nipPegawai,
+            @PathVariable("kodeOpd") String kodeOpd,
+            @PathVariable("tahun") Integer tahun,
+            @PathVariable("jenisTahun") String jenisTahun) {
+        Map<String, Object> response =
+            rencanaKinerjaService.findByNipPegawaiAndKodeOpdAndTahunAndJenisTahun(
+                nipPegawai,
+                kodeOpd,
+                tahun,
+                jenisTahun
+            );
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Ambil detail rencana kinerja berdasarkan id rencana kinerja dan nip pegawai
      * @param idRencanaKinerja
      * @param nipPegawai

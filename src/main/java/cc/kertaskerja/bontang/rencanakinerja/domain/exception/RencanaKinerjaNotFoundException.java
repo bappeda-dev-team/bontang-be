@@ -5,6 +5,11 @@ public class RencanaKinerjaNotFoundException extends RuntimeException {
         super("Rencana kinerja dengan nip " + nipPegawai + " kode opd " + kodeOpd + " tahun " + tahun + " tidak ditemukan.");
     }
 
+    public RencanaKinerjaNotFoundException(String nipPegawai, String kodeOpd, Integer tahun, String jenisTahun) {
+        super("Rencana kinerja dengan nip " + nipPegawai + " kode opd " + kodeOpd + " tahun " + tahun
+            + " jenis tahun " + jenisTahun + " tidak ditemukan.");
+    }
+
     public RencanaKinerjaNotFoundException(Long id) {
         super("Rencana kinerja dengan id " + id + " tidak ditemukan.");
     }

@@ -195,6 +195,26 @@ public class RencanaKinerjaService {
             return buildSimpleRencanaKinerjaResponse(rencanaKinerjas);
         }
 
+    public Map<String, Object> findByNipPegawaiAndKodeOpdAndTahunAndJenisTahun(
+            String nipPegawai,
+            String kodeOpd,
+            Integer tahun,
+            String jenisTahun) {
+        List<RencanaKinerja> rencanaKinerjas =
+            rencanaKinerjaRepository.findByNipPegawaiAndKodeOpdAndTahunAndJenisTahun(
+                nipPegawai,
+                kodeOpd,
+                tahun,
+                jenisTahun
+            );
+
+        if (rencanaKinerjas.isEmpty()) {
+            throw new RencanaKinerjaNotFoundException(nipPegawai, kodeOpd, tahun, jenisTahun);
+        }
+
+        return buildSimpleRencanaKinerjaResponse(rencanaKinerjas);
+    }
+
     public Map<String, Object> findDetailByIdAndNipPegawai(Long idRencanaKinerja, String nipPegawai) {
         RencanaKinerja rencanaKinerja = rencanaKinerjaRepository.findByIdAndNipPegawai(idRencanaKinerja, nipPegawai)
                 .orElseThrow(() -> new RencanaKinerjaNotFoundException("Rencana Kinerja dengan id " + idRencanaKinerja + " dan nip " + nipPegawai + " tidak ditemukan"));
@@ -436,6 +456,7 @@ public class RencanaKinerjaService {
                 request.nipPegawai(),
                 request.createdBy(),
                 request.tahun(),
+                request.jenisTahun(),
                 request.statusRencanaKinerja(),
                 request.namaOpd(),
                 request.namaPegawai(),
@@ -657,6 +678,7 @@ public class RencanaKinerjaService {
                 request.nipPegawai() != null ? request.nipPegawai() : existingRencanaKinerja.nipPegawai(),
                 request.createdBy() != null ? request.createdBy() : existingRencanaKinerja.createdBy(),
                 request.tahun() != null ? request.tahun() : existingRencanaKinerja.tahun(),
+                request.jenisTahun() != null ? request.jenisTahun() : existingRencanaKinerja.jenisTahun(),
                 request.statusRencanaKinerja() != null ? request.statusRencanaKinerja() : existingRencanaKinerja.statusRencanaKinerja(),
                 request.namaOpd() != null ? request.namaOpd() : existingRencanaKinerja.namaOpd(),
                 request.namaPegawai() != null ? request.namaPegawai() : existingRencanaKinerja.namaPegawai(),

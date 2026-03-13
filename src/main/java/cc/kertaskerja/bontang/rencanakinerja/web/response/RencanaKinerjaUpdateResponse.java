@@ -12,6 +12,7 @@ public record RencanaKinerjaUpdateResponse(
     String nipPegawai,
     String createdBy,
     Integer tahun,
+    String jenisTahun,
     String statusRencanaKinerja,
     String namaOpd,
     String namaPegawai,
@@ -33,6 +34,7 @@ public record RencanaKinerjaUpdateResponse(
             rencanaKinerja.nipPegawai(),
             rencanaKinerja.createdBy(),
             rencanaKinerja.tahun(),
+            rencanaKinerja.jenisTahun(),
             rencanaKinerja.statusRencanaKinerja(),
             rencanaKinerja.namaOpd(),
             rencanaKinerja.namaPegawai(),
@@ -51,6 +53,7 @@ public record RencanaKinerjaUpdateResponse(
         map.put("nipPegawai", nipPegawai);
         map.put("createdBy", createdBy);
         map.put("tahun", tahun);
+        map.put("jenisTahun", jenisTahun);
         map.put("statusRencanaKinerja", statusRencanaKinerja);
         map.put("namaOpd", namaOpd);
         map.put("namaPegawai", namaPegawai);

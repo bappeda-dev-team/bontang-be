@@ -9,6 +9,7 @@ public record RencanaKinerjaDetailResponse(
     Long id,
     String namaRencanaKinerja,
     String tahun,
+    String jenisTahun,
     String statusRencanaKinerja,
     List<SumberDanaResponse> sumberDanaList,
     OperasionalDaerahResponse operasionalDaerah,
@@ -44,6 +45,7 @@ public record RencanaKinerjaDetailResponse(
             rencanaKinerja.id(),
             rencanaKinerja.rencanaKinerja(),
             rencanaKinerja.tahun().toString(),
+            rencanaKinerja.jenisTahun(),
             rencanaKinerja.statusRencanaKinerja(),
             sumberDanaList,
             operasionalDaerah,
@@ -66,6 +68,7 @@ public record RencanaKinerjaDetailResponse(
         map.put("id_rencana_kinerja", id);
         map.put("namaRencanaKinerja", namaRencanaKinerja);
         map.put("tahun", tahun);
+        map.put("jenisTahun", jenisTahun);
         map.put("statusRencanaKinerja", statusRencanaKinerja);
         map.put("sumberDanaList", sumberDanaList.stream()
             .map(SumberDanaResponse::toMap)

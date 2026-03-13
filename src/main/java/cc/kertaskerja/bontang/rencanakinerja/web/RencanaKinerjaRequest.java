@@ -25,6 +25,10 @@ public record RencanaKinerjaRequest(
     @Nullable
     Integer tahun,
 
+    @NotNull(message = "Jenis tahun tidak boleh kosong")
+    @NotEmpty(message = "Jenis tahun tidak boleh kosong")
+    String jenisTahun,
+
     @Nullable
     String statusRencanaKinerja,
 

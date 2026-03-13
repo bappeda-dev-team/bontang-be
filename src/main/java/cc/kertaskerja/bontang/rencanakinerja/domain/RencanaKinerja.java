@@ -31,6 +31,9 @@ public record RencanaKinerja(
     @Column("tahun")
     Integer tahun,
 
+    @Column("jenis_tahun")
+    String jenisTahun,
+
     @Column("status_rencana_kinerja")
     String statusRencanaKinerja,
 
@@ -56,6 +59,7 @@ public record RencanaKinerja(
             String nipPegawai,
             String createdBy,
             Integer tahun,
+            String jenisTahun,
             String statusRencanaKinerja,
             String namaOpd,
             String namaPegawai,
@@ -69,6 +73,7 @@ public record RencanaKinerja(
             nipPegawai,
             createdBy,
             tahun,
+            jenisTahun,
             statusRencanaKinerja,
             namaOpd,
             namaPegawai,
@@ -87,6 +92,7 @@ public record RencanaKinerja(
             this.nipPegawai,
             this.createdBy,
             this.tahun,
+            this.jenisTahun,
             this.statusRencanaKinerja,
             this.namaOpd,
             this.namaPegawai,
