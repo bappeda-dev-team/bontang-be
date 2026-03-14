@@ -13,6 +13,8 @@ public record ProgramPrioritasAnggaranRequest(
 
         String nip,
 
-        Integer tahun
+        Integer tahun,
+
+        String jenisTahun
 ) {
 }

@@ -9,6 +9,7 @@ public record ProgramPrioritasAnggaranWithRencanaKinerjaResponse(
         String kodeOpd,
         String nip,
         Integer tahun,
+        String jenisTahun,
         List<RencanaKinerjaItem> rencanaKinerja,
         Instant createdDate,
         Instant lastModifiedDate

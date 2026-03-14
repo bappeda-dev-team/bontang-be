@@ -25,6 +25,9 @@ public record ProgramPrioritasAnggaran(
         @Column("tahun")
         Integer tahun,
 
+        @Column("jenis_tahun")
+        String jenisTahun,
+
         @CreatedDate
         Instant createdDate,
 
@@ -42,6 +45,7 @@ public record ProgramPrioritasAnggaran(
                 null,
                 null,
                 null,
+                null,
                 null
         );
     }
@@ -50,7 +54,8 @@ public record ProgramPrioritasAnggaran(
             Long idProgramPrioritas,
             String kodeOpd,
             String nip,
-            Integer tahun
+            Integer tahun,
+            String jenisTahun
     ) {
         return new ProgramPrioritasAnggaran(
                 null,
@@ -58,6 +63,7 @@ public record ProgramPrioritasAnggaran(
                 kodeOpd,
                 nip,
                 tahun,
+                jenisTahun,
                 null,
                 null
         );

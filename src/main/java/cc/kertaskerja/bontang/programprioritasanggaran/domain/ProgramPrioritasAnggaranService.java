@@ -74,6 +74,48 @@ public class ProgramPrioritasAnggaranService {
                     program.kodeOpd(),
                     program.nip(),
                     program.tahun(),
+                    program.jenisTahun(),
+                    rencanaKinerjaItems,
+                    program.createdDate(),
+                    program.lastModifiedDate()
+            ));
+        }
+
+        return result;
+    }
+
+    public List<ProgramPrioritasAnggaranWithRencanaKinerjaResponse> getByKodeOpdNipTahunJenisTahun(
+            String kodeOpd,
+            String nip,
+            Integer tahun,
+            String jenisTahun
+    ) {
+        Iterable<ProgramPrioritasAnggaran> programs = programPrioritasAnggaranRepository
+                .findByKodeOpdAndNipAndTahunAndJenisTahun(kodeOpd, nip, tahun, jenisTahun);
+        List<ProgramPrioritasAnggaranWithRencanaKinerjaResponse> result = new ArrayList<>();
+
+        for (ProgramPrioritasAnggaran program : programs) {
+            List<ProgramPrioritasAnggaranRencanaKinerja> rencanaKinerjaList =
+                    rencanaKinerjaRepository.findByIdProgramPrioritasAnggaran(program.id());
+
+            List<ProgramPrioritasAnggaranWithRencanaKinerjaResponse.RencanaKinerjaItem> rencanaKinerjaItems = rencanaKinerjaList.stream()
+                    .map(rk -> {
+                        Optional<RencanaKinerja> rencanaKinerja = rencanaKinerjaEntityRepository.findById(rk.idRencanaKinerja());
+                        String namaRencanaKinerja = rencanaKinerja.map(RencanaKinerja::rencanaKinerja).orElse(null);
+                        return new ProgramPrioritasAnggaranWithRencanaKinerjaResponse.RencanaKinerjaItem(
+                                rk.idRencanaKinerja(),
+                                namaRencanaKinerja
+                        );
+                    })
+                    .collect(Collectors.toList());
+
+            result.add(new ProgramPrioritasAnggaranWithRencanaKinerjaResponse(
+                    program.id(),
+                    program.idProgramPrioritas(),
+                    program.kodeOpd(),
+                    program.nip(),
+                    program.tahun(),
+                    program.jenisTahun(),
                     rencanaKinerjaItems,
                     program.createdDate(),
                     program.lastModifiedDate()
@@ -106,7 +148,8 @@ public class ProgramPrioritasAnggaranService {
                 request.idProgramPrioritas(),
                 request.kodeOpd(),
                 request.nip(),
-                request.tahun()
+                request.tahun(),
+                request.jenisTahun()
         );
     }
 
@@ -120,6 +163,7 @@ public class ProgramPrioritasAnggaranService {
                 request.kodeOpd(),
                 request.nip(),
                 request.tahun(),
+                request.jenisTahun(),
                 existing.createdDate(),
                 null
         );

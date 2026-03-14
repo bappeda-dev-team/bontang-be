@@ -48,6 +48,16 @@ public class ProgramPrioritasAnggaranController {
         return programPrioritasAnggaranService.getByKodeOpdNipTahun(kodeOpd, nip, tahun);
     }
 
+    @GetMapping("detail/kode-opd/{kodeOpd}/nip/{nip}/tahun/{tahun}/jenisTahun/{jenisTahun}")
+    public List<ProgramPrioritasAnggaranWithRencanaKinerjaResponse> getByKodeOpdNipTahunJenisTahun(
+            @PathVariable("kodeOpd") String kodeOpd,
+            @PathVariable("nip") String nip,
+            @PathVariable("tahun") Integer tahun,
+            @PathVariable("jenisTahun") String jenisTahun
+    ) {
+        return programPrioritasAnggaranService.getByKodeOpdNipTahunJenisTahun(kodeOpd, nip, tahun, jenisTahun);
+    }
+
     @PostMapping
     public ResponseEntity<List<ProgramPrioritasAnggaran>> create(
             @Valid @RequestBody ProgramPrioritasAnggaranBulkCreateRequest request

@@ -35,6 +35,13 @@ public interface ProgramPrioritasAnggaranRepository extends CrudRepository<Progr
             Integer tahun
     );
 
+    Iterable<ProgramPrioritasAnggaran> findByKodeOpdAndNipAndTahunAndJenisTahun(
+            String kodeOpd,
+            String nip,
+            Integer tahun,
+            String jenisTahun
+    );
+
     Iterable<ProgramPrioritasAnggaran> findByTahun(Integer tahun);
 
     boolean existsByIdProgramPrioritas(Long idProgramPrioritas);
