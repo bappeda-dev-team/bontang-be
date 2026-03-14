@@ -35,6 +35,7 @@ jobs:
           GRYPE_DB_MAX_AGE: 90d
         with:
           path: "${{ github.workspace }}"
+          grype-args: "--db-max-age 90d"
           fail-build: false
           severity-cutoff: high
       - name: Upload vulnerability report
@@ -82,6 +83,7 @@ jobs:
           GRYPE_DB_MAX_AGE: 90d
         with:
           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+          grype-args: "--db-max-age 90d"
           fail-build: false
           severity-cutoff: high
       - name: Upload vulnerability report
