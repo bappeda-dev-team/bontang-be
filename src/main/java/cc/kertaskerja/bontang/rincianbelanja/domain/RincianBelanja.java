@@ -32,6 +32,9 @@ public record RincianBelanja(
     String namaOpd,
     
     Integer tahun,
+
+    @Column("jenis_tahun")
+    String jenisTahun,
     
     @Column("kode_subkegiatan")
     String kodeSubkegiatan,
@@ -79,6 +82,7 @@ public record RincianBelanja(
         String kodeOpd,
         String namaOpd,
         Integer tahun,
+        String jenisTahun,
         String kodeSubkegiatan,
         String namaSubkegiatan,
         String indikator,
@@ -100,6 +104,7 @@ public record RincianBelanja(
             kodeOpd, 
             namaOpd, 
             tahun, 
+            jenisTahun,
             kodeSubkegiatan, 
             namaSubkegiatan, 
             indikator, 

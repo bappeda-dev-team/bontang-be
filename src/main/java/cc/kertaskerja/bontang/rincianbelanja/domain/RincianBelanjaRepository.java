@@ -20,6 +20,12 @@ public interface RincianBelanjaRepository extends CrudRepository<RincianBelanja,
 
     List<RincianBelanja> findByNipPegawaiAndKodeOpdAndTahun(@NonNull String nipPegawai, String kodeOpd, @NonNull Integer tahun);
 
+    List<RincianBelanja> findByNipPegawaiAndKodeOpdAndTahunAndJenisTahun(
+            @NonNull String nipPegawai,
+            String kodeOpd,
+            @NonNull Integer tahun,
+            @NonNull String jenisTahun);
+
     List<RincianBelanja> findByKodeOpdAndTahun(String kodeOpd, @NonNull Integer tahun);
 
     @Modifying

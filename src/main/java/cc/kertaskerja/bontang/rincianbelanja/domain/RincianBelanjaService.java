@@ -95,8 +95,8 @@ public class RincianBelanjaService {
         }
 
         List<RincianBelanja> rincianBelanjaRecords = 
-            rincianBelanjaRepository.findByNipPegawaiAndKodeOpdAndTahun(
-                nipPegawai, kodeOpd, tahun
+            rincianBelanjaRepository.findByNipPegawaiAndKodeOpdAndTahunAndJenisTahun(
+                nipPegawai, kodeOpd, tahun, jenisTahun
             );
 
         return buildResponsesForRencanaKinerjaList(
@@ -371,6 +371,7 @@ public class RincianBelanjaService {
             String indikator = existing.indikator();
             String target = existing.target();
             String satuan = existing.satuan();
+            String jenisTahun = existing.jenisTahun();
             
             if (existing.nipPegawai() != null) {
                 try {
@@ -395,6 +396,13 @@ public class RincianBelanjaService {
                                 kodeSubkegiatan = subkegiatan.kodeSubKegiatan();
                                 namaSubkegiatan = subkegiatan.namaSubKegiatan();
                             }
+                        }
+
+                        RencanaKinerja rencanaKinerja = rencanaKinerjaRepository.findById(
+                            rencanaAksi.idRekin().longValue()
+                        ).orElse(null);
+                        if (rencanaKinerja != null && rencanaKinerja.jenisTahun() != null) {
+                            jenisTahun = rencanaKinerja.jenisTahun();
                         }
                         
                         // Fetch RencanaKinerja detail untuk ambil data indikator
@@ -444,6 +452,7 @@ public class RincianBelanjaService {
                 existing.kodeOpd(),
                 existing.namaOpd(),
                 existing.tahun(),
+                jenisTahun,
                 kodeSubkegiatan,
                 namaSubkegiatan,
                 indikator,
@@ -483,6 +492,7 @@ public class RincianBelanjaService {
                         record.kodeOpd(),
                         record.namaOpd(),
                         record.tahun(),
+                        record.jenisTahun(),
                         record.kodeSubkegiatan(),
                         record.namaSubkegiatan(),
                         record.indikator(),
@@ -581,6 +591,7 @@ public class RincianBelanjaService {
                     rencanaKinerja.kodeOpd(),
                     rencanaKinerja.namaOpd(),
                     rencanaKinerja.tahun(),
+                    rencanaKinerja.jenisTahun(),
                     kodeSubkegiatan,
                     namaSubkegiatan,
                     indikator,
