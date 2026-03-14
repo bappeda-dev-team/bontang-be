@@ -25,10 +25,9 @@ jobs:
         uses: anchore/scan-action@v3
         id: scan
         env:
-          GRYPE_DB_MAX_AGE: 90d
+          GRYPE_DB_MAX_ALLOWED_BUILT_AGE: 2160h0m0s
         with:
           path: "${{ github.workspace }}"
-          grype-args: "--db-max-age 90d"
           fail-build: false
           severity-cutoff: high
       - name: Upload vulnerability report
