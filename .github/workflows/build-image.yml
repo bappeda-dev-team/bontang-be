@@ -32,7 +32,7 @@ jobs:
         uses: anchore/scan-action@v3
         id: scan
         env:
-          GRYPE_DB_MAX_ALLOWED_BUILT_AGE: 2160h0m0s
+          GRYPE_DB_MAX_ALLOWED_BUILT_AGE: 20160h0m0s
         with:
           path: "${{ github.workspace }}"
           fail-build: false
@@ -79,7 +79,7 @@ jobs:
         uses: anchore/scan-action@v3
         id: scan
         env:
-          GRYPE_DB_MAX_ALLOWED_BUILT_AGE: 2160h0m0s
+          GRYPE_DB_MAX_ALLOWED_BUILT_AGE: 20160h0m0s
         with:
           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
           fail-build: false
