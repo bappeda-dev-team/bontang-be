@@ -35,7 +35,7 @@ public class PelaksanaanService {
                 request.bobot()
         );
 
-        Integer bobotTersediaSaatIni = pelaksanaanRepository.findMinBobotTersediaByIdRencanaAksi(idRencanaAksi, TOTAL_BOBOT);
+        Integer bobotTersediaSaatIni = getBobotTersediaSaatIni(idRencanaAksi, null);
         if (pelaksanaan.bobot() != null && pelaksanaan.bobot() > bobotTersediaSaatIni) {
             throw new BobotExceededException(idRencanaAksi, pelaksanaan.bobot(), bobotTersediaSaatIni);
         }
@@ -60,7 +60,7 @@ public class PelaksanaanService {
                 null
         );
 
-        Integer bobotTersediaSaatIni = pelaksanaanRepository.findBobotTersediaById(idRencanaAksi, existingPelaksanaan.id(), TOTAL_BOBOT);
+        Integer bobotTersediaSaatIni = getBobotTersediaSaatIni(idRencanaAksi, existingPelaksanaan.id());
         if (pelaksanaan.bobot() != null && pelaksanaan.bobot() > bobotTersediaSaatIni) {
             throw new BobotExceededException(idRencanaAksi, pelaksanaan.bobot(), bobotTersediaSaatIni);
         }
@@ -85,11 +85,7 @@ public class PelaksanaanService {
                 null
         );
 
-        Integer bobotTersediaSaatIni = pelaksanaanRepository.findBobotTersediaById(
-                existingPelaksanaan.idRencanaAksi(),
-                existingPelaksanaan.id(),
-                TOTAL_BOBOT
-        );
+        Integer bobotTersediaSaatIni = getBobotTersediaSaatIni(existingPelaksanaan.idRencanaAksi(), existingPelaksanaan.id());
         if (pelaksanaan.bobot() != null && pelaksanaan.bobot() > bobotTersediaSaatIni) {
             throw new BobotExceededException(existingPelaksanaan.idRencanaAksi(), pelaksanaan.bobot(), bobotTersediaSaatIni);
         }
@@ -112,12 +108,15 @@ public class PelaksanaanService {
         pelaksanaanRepository.deleteByIdRencanaAksi(idRencanaAksi);
     }
 
+    private Integer getBobotTersediaSaatIni(Integer idRencanaAksi, Long excludeId) {
+        Integer sumBobot = (excludeId == null)
+                ? pelaksanaanRepository.sumBobotByIdRencanaAksi(idRencanaAksi)
+                : pelaksanaanRepository.sumBobotByIdRencanaAksiExcluding(idRencanaAksi, excludeId);
+        return TOTAL_BOBOT - (sumBobot == null ? 0 : sumBobot);
+    }
+
     private Integer hitungBobotTersedia(Integer idRencanaAksi, Integer bobot, Long excludeId) {
-        // Hitung bobot_tersedia dari entitas yang sudah ada
-        // Logic: ambil entitas dengan bobot_tersedia terkecil, kemudian kurangi dengan bobot baru
-        Integer bobotTersediaSaatIni = (excludeId == null)
-                ? pelaksanaanRepository.findMinBobotTersediaByIdRencanaAksi(idRencanaAksi, TOTAL_BOBOT)
-                : pelaksanaanRepository.findBobotTersediaById(idRencanaAksi, excludeId, TOTAL_BOBOT);
+        Integer bobotTersediaSaatIni = getBobotTersediaSaatIni(idRencanaAksi, excludeId);
 
         // Kurangi bobot_tersedia dengan bobot yang baru
         int sisa = bobotTersediaSaatIni - (bobot == null ? 0 : bobot);
