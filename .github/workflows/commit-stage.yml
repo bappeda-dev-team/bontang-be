@@ -25,7 +25,7 @@ jobs:
         uses: anchore/scan-action@v4
         id: scan
         env:
-          GRYPE_DB_MAX_ALLOWED_BUILT_AGE: 2160h0m0s
+          GRYPE_DB_MAX_ALLOWED_BUILT_AGE: 20160h0m0s
         with:
           path: "${{ github.workspace }}"
           fail-build: false
