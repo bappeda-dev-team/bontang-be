@@ -29,7 +29,7 @@ jobs:
           chmod +x gradlew
           ./gradlew build
       - name: Code vulnerability scanning
-        uses: anchore/scan-action@v3
+        uses: anchore/scan-action@v4
         id: scan
         env:
           GRYPE_DB_MAX_ALLOWED_BUILT_AGE: 20160h0m0s
@@ -77,7 +77,7 @@ jobs:
           ./gradlew bootBuildImage \
           --imageName ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
       - name: OCI image vulnerability scanning
-        uses: anchore/scan-action@v3
+        uses: anchore/scan-action@v4
         id: scan
         env:
           GRYPE_DB_MAX_ALLOWED_BUILT_AGE: 20160h0m0s
